@@ -1,0 +1,266 @@
+[2026-04-13T17:04:21.508Z] 1:04:21 PM [tsx] unlink in ./drizzle/schema.ts Rerunning...
+[2026-04-13T17:04:21.537Z] cnode:internal/modules/cjs/loader:1247
+[2026-04-13T17:04:21.537Z] throw err;
+[2026-04-13T17:04:21.538Z] ^
+[2026-04-13T17:04:21.538Z] 
+[2026-04-13T17:04:21.538Z] Error: Cannot find module '/home/ubuntu/better-daze-dashboard/node_modules/.pnpm/tsx@4.20.6/node_modules/tsx/dist/preflight.cjs'
+[2026-04-13T17:04:21.539Z] Require stack:
+[2026-04-13T17:04:21.539Z] - internal/preload
+[2026-04-13T17:04:21.539Z] at Function._resolveFilename (node:internal/modules/cjs/loader:1244:15)
+[2026-04-13T17:04:21.539Z] at Function._load (node:internal/modules/cjs/loader:1070:27)
+[2026-04-13T17:04:21.540Z] at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+[2026-04-13T17:04:21.540Z] at wrapModuleLoad (node:internal/modules/cjs/loader:217:24)
+[2026-04-13T17:04:21.540Z] at Module.require (node:internal/modules/cjs/loader:1335:12)
+[2026-04-13T17:04:21.541Z] at node:internal/modules/cjs/loader:1834:12
+[2026-04-13T17:04:21.541Z] at loadPreloadModules (node:internal/process/pre_execution:726:5)
+[2026-04-13T17:04:21.541Z] at setupUserModules (node:internal/process/pre_execution:206:5)
+[2026-04-13T17:04:21.542Z] at prepareExecution (node:internal/process/pre_execution:159:5)
+[2026-04-13T17:04:21.542Z] at prepareMainThreadExecution (node:internal/process/pre_execution:54:10) {
+[2026-04-13T17:04:21.542Z] code: 'MODULE_NOT_FOUND',
+[2026-04-13T17:04:21.542Z] requireStack: [ 'internal/preload' ]
+[2026-04-13T17:04:21.543Z] }
+[2026-04-13T17:04:21.543Z] 
+[2026-04-13T17:04:21.543Z] Node.js v22.13.0
+[2026-04-13T19:30:10.874Z] Dev server process group stopped
+[2026-04-13T19:30:10.880Z] Dev server exited with code -15
+[2026-04-13T19:30:13.887Z] Starting dev server with command: NODE_ENV=development tsx watch server/_core/index.ts
+[2026-04-13T19:30:14.288Z] 
+[2026-04-13T19:30:14.289Z] node:internal/modules/run_main:122
+[2026-04-13T19:30:14.289Z] triggerUncaughtException(
+[2026-04-13T19:30:14.290Z] ^
+[2026-04-13T19:30:14.290Z] Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/home/ubuntu/better-daze-dashboard/server/_core/index.ts' imported from /home/ubuntu/better-daze-dashboard/
+[2026-04-13T19:30:14.290Z] at finalizeResolution (node:internal/modules/esm/resolve:275:11)
+[2026-04-13T19:30:14.291Z] at moduleResolve (node:internal/modules/esm/resolve:932:10)
+[2026-04-13T19:30:14.291Z] at defaultResolve (node:internal/modules/esm/resolve:1056:11)
+[2026-04-13T19:30:14.291Z] at nextResolve (node:internal/modules/esm/hooks:748:28)
+[2026-04-13T19:30:14.292Z] at resolveBase (file:///home/ubuntu/better-daze-dashboard/node_modules/.pnpm/tsx@4.21.0/node_modules/tsx/dist/esm/index.mjs?1776108614187:2:3744)
+[2026-04-13T19:30:14.292Z] at resolveDirectory (file:///home/ubuntu/better-daze-dashboard/node_modules/.pnpm/tsx@4.21.0/node_modules/tsx/dist/esm/index.mjs?1776108614187:2:4243)
+[2026-04-13T19:30:14.292Z] at resolveTsPaths (file:///home/ubuntu/better-daze-dashboard/node_modules/.pnpm/tsx@4.21.0/node_modules/tsx/dist/esm/index.mjs?1776108614187:2:4984)
+[2026-04-13T19:30:14.293Z] at resolve (file:///home/ubuntu/better-daze-dashboard/node_modules/.pnpm/tsx@4.21.0/node_modules/tsx/dist/esm/index.mjs?1776108614187:2:5361)
+[2026-04-13T19:30:14.293Z] at nextResolve (node:internal/modules/esm/hooks:748:28)
+[2026-04-13T19:30:14.293Z] at Hooks.resolve (node:internal/modules/esm/hooks:240:30) {
+[2026-04-13T19:30:14.294Z] code: 'ERR_MODULE_NOT_FOUND',
+[2026-04-13T19:30:14.294Z] url: 'file:///home/ubuntu/better-daze-dashboard/server/_core/index.ts'
+[2026-04-13T19:30:14.294Z] }
+[2026-04-13T19:30:14.294Z] 
+[2026-04-13T19:30:14.295Z] Node.js v22.13.0
+[2026-04-13T19:31:11.813Z] 3:31:11 PM [tsx] add in ./server/_core/index.ts Rerunning...
+[2026-04-13T19:31:12.024Z] c
+[2026-04-13T19:31:12.024Z] node:internal/modules/run_main:122
+[2026-04-13T19:31:12.025Z] triggerUncaughtException(
+[2026-04-13T19:31:12.025Z] ^
+[2026-04-13T19:31:12.025Z] Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'cookie-parser' imported from /home/ubuntu/better-daze-dashboard/server/_core/index.ts
+[2026-04-13T19:31:12.026Z] at packageResolve (node:internal/modules/esm/resolve:857:9)
+[2026-04-13T19:31:12.026Z] at moduleResolve (node:internal/modules/esm/resolve:926:18)
+[2026-04-13T19:31:12.026Z] at defaultResolve (node:internal/modules/esm/resolve:1056:11)
+[2026-04-13T19:31:12.027Z] at nextResolve (node:internal/modules/esm/hooks:748:28)
+[2026-04-13T19:31:12.027Z] at resolveBase (file:///home/ubuntu/better-daze-dashboard/node_modules/.pnpm/tsx@4.21.0/node_modules/tsx/dist/esm/index.mjs?1776108671904:2:3744)
+[2026-04-13T19:31:12.027Z] at resolveDirectory (file:///home/ubuntu/better-daze-dashboard/node_modules/.pnpm/tsx@4.21.0/node_modules/tsx/dist/esm/index.mjs?1776108671904:2:4243)
+[2026-04-13T19:31:12.027Z] at resolveTsPaths (file:///home/ubuntu/better-daze-dashboard/node_modules/.pnpm/tsx@4.21.0/node_modules/tsx/dist/esm/index.mjs?1776108671904:2:4984)
+[2026-04-13T19:31:12.028Z] at async resolve (file:///home/ubuntu/better-daze-dashboard/node_modules/.pnpm/tsx@4.21.0/node_modules/tsx/dist/esm/index.mjs?1776108671904:2:5355)
+[2026-04-13T19:31:12.028Z] at async nextResolve (node:internal/modules/esm/hooks:748:22)
+[2026-04-13T19:31:12.028Z] at async Hooks.resolve (node:internal/modules/esm/hooks:240:24) {
+[2026-04-13T19:31:12.029Z] code: 'ERR_MODULE_NOT_FOUND'
+[2026-04-13T19:31:12.029Z] }
+[2026-04-13T19:31:12.029Z] 
+[2026-04-13T19:31:12.030Z] Node.js v22.13.0
+[2026-04-13T19:31:14.388Z] Dev server process group stopped
+[2026-04-13T19:31:14.392Z] Dev server exited with code -15
+[2026-04-13T19:31:17.400Z] Starting dev server with command: NODE_ENV=development tsx watch server/_core/index.ts
+[2026-04-13T19:31:17.806Z] 
+[2026-04-13T19:31:17.807Z] node:internal/modules/run_main:122
+[2026-04-13T19:31:17.807Z] triggerUncaughtException(
+[2026-04-13T19:31:17.808Z] ^
+[2026-04-13T19:31:17.808Z] Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'cookie-parser' imported from /home/ubuntu/better-daze-dashboard/server/_core/index.ts
+[2026-04-13T19:31:17.808Z] at packageResolve (node:internal/modules/esm/resolve:857:9)
+[2026-04-13T19:31:17.809Z] at moduleResolve (node:internal/modules/esm/resolve:926:18)
+[2026-04-13T19:31:17.809Z] at defaultResolve (node:internal/modules/esm/resolve:1056:11)
+[2026-04-13T19:31:17.809Z] at nextResolve (node:internal/modules/esm/hooks:748:28)
+[2026-04-13T19:31:17.809Z] at resolveBase (file:///home/ubuntu/better-daze-dashboard/node_modules/.pnpm/tsx@4.21.0/node_modules/tsx/dist/esm/index.mjs?1776108677699:2:3744)
+[2026-04-13T19:31:17.810Z] at resolveDirectory (file:///home/ubuntu/better-daze-dashboard/node_modules/.pnpm/tsx@4.21.0/node_modules/tsx/dist/esm/index.mjs?1776108677699:2:4243)
+[2026-04-13T19:31:17.810Z] at resolveTsPaths (file:///home/ubuntu/better-daze-dashboard/node_modules/.pnpm/tsx@4.21.0/node_modules/tsx/dist/esm/index.mjs?1776108677699:2:4984)
+[2026-04-13T19:31:17.810Z] at async resolve (file:///home/ubuntu/better-daze-dashboard/node_modules/.pnpm/tsx@4.21.0/node_modules/tsx/dist/esm/index.mjs?1776108677699:2:5355)
+[2026-04-13T19:31:17.811Z] at async nextResolve (node:internal/modules/esm/hooks:748:22)
+[2026-04-13T19:31:17.811Z] at async Hooks.resolve (node:internal/modules/esm/hooks:240:24) {
+[2026-04-13T19:31:17.811Z] code: 'ERR_MODULE_NOT_FOUND'
+[2026-04-13T19:31:17.812Z] }
+[2026-04-13T19:31:17.812Z] 
+[2026-04-13T19:31:17.812Z] Node.js v22.13.0
+[2026-04-13T19:32:03.349Z] Dev server process group stopped
+[2026-04-13T19:32:03.354Z] Dev server exited with code -15
+[2026-04-13T19:32:06.363Z] Starting dev server with command: NODE_ENV=development tsx watch server/_core/index.ts
+[2026-04-13T19:32:06.892Z] 
+[2026-04-13T19:32:06.893Z] node:internal/modules/run_main:122
+[2026-04-13T19:32:06.893Z] triggerUncaughtException(
+[2026-04-13T19:32:06.894Z] ^
+[2026-04-13T19:32:06.894Z] Error [TransformError]: Transform failed with 1 error:
+[2026-04-13T19:32:06.894Z] /home/ubuntu/better-daze-dashboard/server/_core/db.ts:50:13: ERROR: The symbol "db" has already been declared
+[2026-04-13T19:32:06.895Z] at failureErrorWithLog (/home/ubuntu/better-daze-dashboard/node_modules/.pnpm/esbuild@0.27.7/node_modules/esbuild/lib/main.js:1748:15)
+[2026-04-13T19:32:06.895Z] at /home/ubuntu/better-daze-dashboard/node_modules/.pnpm/esbuild@0.27.7/node_modules/esbuild/lib/main.js:1017:50
+[2026-04-13T19:32:06.896Z] at responseCallbacks.<computed> (/home/ubuntu/better-daze-dashboard/node_modules/.pnpm/esbuild@0.27.7/node_modules/esbuild/lib/main.js:884:9)
+[2026-04-13T19:32:06.896Z] at handleIncomingPacket (/home/ubuntu/better-daze-dashboard/node_modules/.pnpm/esbuild@0.27.7/node_modules/esbuild/lib/main.js:939:12)
+[2026-04-13T19:32:06.896Z] at Socket.readFromStdout (/home/ubuntu/better-daze-dashboard/node_modules/.pnpm/esbuild@0.27.7/node_modules/esbuild/lib/main.js:862:7)
+[2026-04-13T19:32:06.897Z] at Socket.emit (node:events:524:28)
+[2026-04-13T19:32:06.897Z] at addChunk (node:internal/streams/readable:561:12)
+[2026-04-13T19:32:06.897Z] at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+[2026-04-13T19:32:06.898Z] at Readable.push (node:internal/streams/readable:392:5)
+[2026-04-13T19:32:06.898Z] at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+[2026-04-13T19:32:06.898Z] 
+[2026-04-13T19:32:06.898Z] Node.js v22.13.0
+[2026-04-13T19:32:40.287Z] 3:32:40 PM [tsx] change in ./server/_core/db.ts Rerunning...
+[2026-04-13T19:32:40.816Z] c/home/ubuntu/better-daze-dashboard/drizzle/schema.ts:1
+[2026-04-13T19:32:40.817Z] import { mysqlTable, int, varchar, text, timestamp, decimal, enum as sqlEnum, boolean, json, index } from 'drizzle-orm/mysql-core';
+[2026-04-13T19:32:40.817Z] ^
+[2026-04-13T19:32:40.817Z] 
+[2026-04-13T19:32:40.818Z] SyntaxError: The requested module 'drizzle-orm/mysql-core' does not provide an export named 'enum'
+[2026-04-13T19:32:40.818Z] at ModuleJob._instantiate (node:internal/modules/esm/module_job:180:21)
+[2026-04-13T19:32:40.818Z] at async ModuleJob.run (node:internal/modules/esm/module_job:263:5)
+[2026-04-13T19:32:40.819Z] at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:547:26)
+[2026-04-13T19:32:40.819Z] at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:116:5)
+[2026-04-13T19:32:40.819Z] 
+[2026-04-13T19:32:40.820Z] Node.js v22.13.0
+[2026-04-13T19:32:43.299Z] Dev server process group stopped
+[2026-04-13T19:32:43.324Z] Dev server exited with code -15
+[2026-04-13T19:32:46.311Z] Starting dev server with command: NODE_ENV=development tsx watch server/_core/index.ts
+[2026-04-13T19:32:47.050Z] /home/ubuntu/better-daze-dashboard/drizzle/schema.ts:1
+[2026-04-13T19:32:47.051Z] import { mysqlTable, int, varchar, text, timestamp, decimal, enum as sqlEnum, boolean, json, index } from 'drizzle-orm/mysql-core';
+[2026-04-13T19:32:47.051Z] ^
+[2026-04-13T19:32:47.052Z] 
+[2026-04-13T19:32:47.052Z] SyntaxError: The requested module 'drizzle-orm/mysql-core' does not provide an export named 'enum'
+[2026-04-13T19:32:47.052Z] at ModuleJob._instantiate (node:internal/modules/esm/module_job:180:21)
+[2026-04-13T19:32:47.052Z] at async ModuleJob.run (node:internal/modules/esm/module_job:263:5)
+[2026-04-13T19:32:47.053Z] at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:547:26)
+[2026-04-13T19:32:47.053Z] at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:116:5)
+[2026-04-13T19:32:47.053Z] 
+[2026-04-13T19:32:47.054Z] Node.js v22.13.0
+[2026-04-14T11:50:51.193Z] Starting dev server with command: NODE_ENV=development tsx watch server/_core/index.ts
+[2026-04-14T11:50:51.927Z] /home/ubuntu/better-daze-dashboard/drizzle/schema.ts:1
+[2026-04-14T11:50:51.928Z] import { mysqlTable, int, varchar, text, timestamp, decimal, enum as sqlEnum, boolean, json, index } from 'drizzle-orm/mysql-core';
+[2026-04-14T11:50:51.928Z] ^
+[2026-04-14T11:50:51.929Z] 
+[2026-04-14T11:50:51.929Z] SyntaxError: The requested module 'drizzle-orm/mysql-core' does not provide an export named 'enum'
+[2026-04-14T11:50:51.929Z] at ModuleJob._instantiate (node:internal/modules/esm/module_job:180:21)
+[2026-04-14T11:50:51.929Z] at async ModuleJob.run (node:internal/modules/esm/module_job:263:5)
+[2026-04-14T11:50:51.929Z] at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:547:26)
+[2026-04-14T11:50:51.930Z] at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:116:5)
+[2026-04-14T11:50:51.930Z] 
+[2026-04-14T11:50:51.930Z] Node.js v22.13.0
+[2026-04-14T11:51:17.319Z] 7:51:17 AM [tsx] change in ./server/_core/index.ts Rerunning...
+[2026-04-14T11:51:17.934Z] c/home/ubuntu/better-daze-dashboard/drizzle/schema.ts:1
+[2026-04-14T11:51:17.935Z] import { mysqlTable, int, varchar, text, timestamp, decimal, enum as sqlEnum, boolean, json, index } from 'drizzle-orm/mysql-core';
+[2026-04-14T11:51:17.935Z] ^
+[2026-04-14T11:51:17.936Z] 
+[2026-04-14T11:51:17.936Z] SyntaxError: The requested module 'drizzle-orm/mysql-core' does not provide an export named 'enum'
+[2026-04-14T11:51:17.936Z] at ModuleJob._instantiate (node:internal/modules/esm/module_job:180:21)
+[2026-04-14T11:51:17.936Z] at async ModuleJob.run (node:internal/modules/esm/module_job:263:5)
+[2026-04-14T11:51:17.937Z] at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:547:26)
+[2026-04-14T11:51:17.937Z] at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:116:5)
+[2026-04-14T11:51:17.937Z] 
+[2026-04-14T11:51:17.937Z] Node.js v22.13.0
+[2026-04-14T11:51:26.684Z] 7:51:26 AM [tsx] change in ./drizzle/schema.ts Rerunning...
+[2026-04-14T11:51:26.955Z] c
+[2026-04-14T11:51:26.956Z] node:internal/modules/run_main:122
+[2026-04-14T11:51:26.956Z] triggerUncaughtException(
+[2026-04-14T11:51:26.956Z] ^
+[2026-04-14T11:51:26.956Z] Error [TransformError]: Transform failed with 1 error:
+[2026-04-14T11:51:26.957Z] /home/ubuntu/better-daze-dashboard/drizzle/schema.ts:2:44: ERROR: Unterminated string literal
+[2026-04-14T11:51:26.957Z] at failureErrorWithLog (/home/ubuntu/better-daze-dashboard/node_modules/.pnpm/esbuild@0.27.7/node_modules/esbuild/lib/main.js:1748:15)
+[2026-04-14T11:51:26.957Z] at /home/ubuntu/better-daze-dashboard/node_modules/.pnpm/esbuild@0.27.7/node_modules/esbuild/lib/main.js:1017:50
+[2026-04-14T11:51:26.958Z] at responseCallbacks.<computed> (/home/ubuntu/better-daze-dashboard/node_modules/.pnpm/esbuild@0.27.7/node_modules/esbuild/lib/main.js:884:9)
+[2026-04-14T11:51:26.958Z] at handleIncomingPacket (/home/ubuntu/better-daze-dashboard/node_modules/.pnpm/esbuild@0.27.7/node_modules/esbuild/lib/main.js:939:12)
+[2026-04-14T11:51:26.958Z] at Socket.readFromStdout (/home/ubuntu/better-daze-dashboard/node_modules/.pnpm/esbuild@0.27.7/node_modules/esbuild/lib/main.js:862:7)
+[2026-04-14T11:51:26.958Z] at Socket.emit (node:events:524:28)
+[2026-04-14T11:51:26.959Z] at addChunk (node:internal/streams/readable:561:12)
+[2026-04-14T11:51:26.959Z] at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+[2026-04-14T11:51:26.959Z] at Readable.push (node:internal/streams/readable:392:5)
+[2026-04-14T11:51:26.960Z] at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+[2026-04-14T11:51:26.960Z] 
+[2026-04-14T11:51:26.960Z] Node.js v22.13.0
+[2026-04-14T11:51:37.748Z] 7:51:37 AM [tsx] change in ./drizzle/schema.ts Rerunning...
+[2026-04-14T11:51:38.302Z] c/home/ubuntu/better-daze-dashboard/drizzle/schema.ts:1
+[2026-04-14T11:51:38.303Z] import { mysqlTable, int, varchar, timestamp, text, float, boolean, index, sqlEnum, json } from 'drizzle-orm/mysql-core';
+[2026-04-14T11:51:38.303Z] ^
+[2026-04-14T11:51:38.303Z] 
+[2026-04-14T11:51:38.304Z] SyntaxError: The requested module 'drizzle-orm/mysql-core' does not provide an export named 'sqlEnum'
+[2026-04-14T11:51:38.304Z] at ModuleJob._instantiate (node:internal/modules/esm/module_job:180:21)
+[2026-04-14T11:51:38.304Z] at async ModuleJob.run (node:internal/modules/esm/module_job:263:5)
+[2026-04-14T11:51:38.304Z] at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:547:26)
+[2026-04-14T11:51:38.305Z] at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:116:5)
+[2026-04-14T11:51:38.305Z] 
+[2026-04-14T11:51:38.305Z] Node.js v22.13.0
+[2026-04-14T11:51:44.947Z] Dev server process group stopped
+[2026-04-14T11:51:44.952Z] Dev server exited with code -15
+[2026-04-14T11:51:47.960Z] Starting dev server with command: NODE_ENV=development tsx watch server/_core/index.ts
+[2026-04-14T11:51:48.728Z] /home/ubuntu/better-daze-dashboard/drizzle/schema.ts:1
+[2026-04-14T11:51:48.729Z] import { mysqlTable, int, varchar, timestamp, text, float, boolean, index, sqlEnum, json } from 'drizzle-orm/mysql-core';
+[2026-04-14T11:51:48.729Z] ^
+[2026-04-14T11:51:48.730Z] 
+[2026-04-14T11:51:48.730Z] SyntaxError: The requested module 'drizzle-orm/mysql-core' does not provide an export named 'sqlEnum'
+[2026-04-14T11:51:48.730Z] at ModuleJob._instantiate (node:internal/modules/esm/module_job:180:21)
+[2026-04-14T11:51:48.731Z] at async ModuleJob.run (node:internal/modules/esm/module_job:263:5)
+[2026-04-14T11:51:48.731Z] at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:547:26)
+[2026-04-14T11:51:48.731Z] at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:116:5)
+[2026-04-14T11:51:48.732Z] 
+[2026-04-14T11:51:48.732Z] Node.js v22.13.0
+[2026-04-14T20:38:37.008Z] Starting dev server with command: NODE_ENV=development tsx watch server/_core/index.ts
+[2026-04-14T20:38:37.815Z] /home/ubuntu/better-daze-dashboard/drizzle/schema.ts:1
+[2026-04-14T20:38:37.816Z] import { mysqlTable, int, varchar, timestamp, text, float, boolean, index, sqlEnum, json } from 'drizzle-orm/mysql-core';
+[2026-04-14T20:38:37.816Z] ^
+[2026-04-14T20:38:37.816Z] 
+[2026-04-14T20:38:37.816Z] SyntaxError: The requested module 'drizzle-orm/mysql-core' does not provide an export named 'sqlEnum'
+[2026-04-14T20:38:37.817Z] at ModuleJob._instantiate (node:internal/modules/esm/module_job:180:21)
+[2026-04-14T20:38:37.817Z] at async ModuleJob.run (node:internal/modules/esm/module_job:263:5)
+[2026-04-14T20:38:37.817Z] at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:547:26)
+[2026-04-14T20:38:37.817Z] at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:116:5)
+[2026-04-14T20:38:37.818Z] 
+[2026-04-14T20:38:37.818Z] Node.js v22.13.0
+[2026-04-14T20:38:45.177Z] Dev server process group stopped
+[2026-04-14T20:38:45.183Z] Dev server exited with code -15
+[2026-04-14T20:38:48.194Z] Starting dev server with command: NODE_ENV=development tsx watch server/_core/index.ts
+[2026-04-14T20:38:49.098Z] /home/ubuntu/better-daze-dashboard/drizzle/schema.ts:1
+[2026-04-14T20:38:49.099Z] import { mysqlTable, int, varchar, timestamp, text, float, boolean, index, sqlEnum, json } from 'drizzle-orm/mysql-core';
+[2026-04-14T20:38:49.099Z] ^
+[2026-04-14T20:38:49.100Z] 
+[2026-04-14T20:38:49.100Z] SyntaxError: The requested module 'drizzle-orm/mysql-core' does not provide an export named 'sqlEnum'
+[2026-04-14T20:38:49.100Z] at ModuleJob._instantiate (node:internal/modules/esm/module_job:180:21)
+[2026-04-14T20:38:49.101Z] at async ModuleJob.run (node:internal/modules/esm/module_job:263:5)
+[2026-04-14T20:38:49.101Z] at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:547:26)
+[2026-04-14T20:38:49.101Z] at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:116:5)
+[2026-04-14T20:38:49.102Z] 
+[2026-04-14T20:38:49.102Z] Node.js v22.13.0
+[2026-04-15T00:32:19.259Z] Starting dev server with command: NODE_ENV=development tsx watch server/_core/index.ts
+[2026-04-15T00:32:20.117Z] /home/ubuntu/better-daze-dashboard/drizzle/schema.ts:1
+[2026-04-15T00:32:20.118Z] import { mysqlTable, int, varchar, timestamp, text, float, boolean, index, sqlEnum, json } from 'drizzle-orm/mysql-core';
+[2026-04-15T00:32:20.119Z] ^
+[2026-04-15T00:32:20.119Z] 
+[2026-04-15T00:32:20.120Z] SyntaxError: The requested module 'drizzle-orm/mysql-core' does not provide an export named 'sqlEnum'
+[2026-04-15T00:32:20.120Z] at ModuleJob._instantiate (node:internal/modules/esm/module_job:180:21)
+[2026-04-15T00:32:20.120Z] at async ModuleJob.run (node:internal/modules/esm/module_job:263:5)
+[2026-04-15T00:32:20.121Z] at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:547:26)
+[2026-04-15T00:32:20.121Z] at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:116:5)
+[2026-04-15T00:32:20.121Z] 
+[2026-04-15T00:32:20.121Z] Node.js v22.13.0
+[2026-04-15T01:57:48.733Z] Starting dev server with command: NODE_ENV=development tsx watch server/_core/index.ts
+[2026-04-15T01:57:49.561Z] /home/ubuntu/better-daze-dashboard/drizzle/schema.ts:1
+[2026-04-15T01:57:49.562Z] import { mysqlTable, int, varchar, timestamp, text, float, boolean, index, sqlEnum, json } from 'drizzle-orm/mysql-core';
+[2026-04-15T01:57:49.563Z] ^
+[2026-04-15T01:57:49.563Z] 
+[2026-04-15T01:57:49.563Z] SyntaxError: The requested module 'drizzle-orm/mysql-core' does not provide an export named 'sqlEnum'
+[2026-04-15T01:57:49.563Z] at ModuleJob._instantiate (node:internal/modules/esm/module_job:180:21)
+[2026-04-15T01:57:49.564Z] at async ModuleJob.run (node:internal/modules/esm/module_job:263:5)
+[2026-04-15T01:57:49.564Z] at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:547:26)
+[2026-04-15T01:57:49.564Z] at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:116:5)
+[2026-04-15T01:57:49.564Z] 
+[2026-04-15T01:57:49.564Z] Node.js v22.13.0
+[2026-04-18T07:54:11.580Z] 3:54:11 AM [tsx] change in ./server/_core/index.ts Rerunning...
+[2026-04-18T07:54:12.575Z] c/home/ubuntu/better-daze-dashboard/drizzle/schema.ts:1
+[2026-04-18T07:54:12.577Z] import { mysqlTable, int, varchar, timestamp, text, float, boolean, index, sqlEnum, json } from 'drizzle-orm/mysql-core';
+[2026-04-18T07:54:12.578Z] ^
+[2026-04-18T07:54:12.578Z] 
+[2026-04-18T07:54:12.579Z] SyntaxError: The requested module 'drizzle-orm/mysql-core' does not provide an export named 'sqlEnum'
+[2026-04-18T07:54:12.579Z] at ModuleJob._instantiate (node:internal/modules/esm/module_job:180:21)
+[2026-04-18T07:54:12.580Z] at async ModuleJob.run (node:internal/modules/esm/module_job:263:5)
+[2026-04-18T07:54:12.580Z] at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:547:26)
+[2026-04-18T07:54:12.581Z] at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:116:5)
+[2026-04-18T07:54:12.581Z] 
+[2026-04-18T07:54:12.582Z] Node.js v22.13.0

@@ -1,0 +1,389 @@
+================================================================================
+COPY THIS ENTIRE TEXT AND PASTE INTO CLAUDE
+================================================================================
+
+You are Claude, part of a 2-agent parallel build for Better Daze Dashboard.
+
+PROJECT SETUP:
+- Location: /home/ubuntu/better-daze-dashboard
+- Your role: Build Frontend UI + Testing Suite
+- Partner: Manus (building Backend + Social APIs)
+- Coordination: Git commits
+
+YOUR TASKS:
+1. Build modern React UI (Frontend Agent)
+2. Write 100+ tests (Testing Agent)
+
+READ THESE FILES FIRST:
+1. /home/ubuntu/better-daze-dashboard/CLAUDE_INSTRUCTIONS.md (FULL INSTRUCTIONS)
+2. /home/ubuntu/better-daze-dashboard/PRODUCT_ARCHITECTURE.md (ARCHITECTURE)
+3. /home/ubuntu/better-daze-dashboard/drizzle/schema.ts (DATABASE SCHEMA)
+
+QUICK START:
+
+PART 1: FRONTEND AGENT (Do this first)
+================================================================================
+
+Your mission: Build a production-grade React dashboard UI
+
+Create these files in this order:
+
+1. client/src/index.css
+   - Global styles with design tokens
+   - Tailwind configuration
+   - Custom CSS variables
+   - Color palette (blues, grays, accents)
+
+2. client/src/App.tsx
+   - Main app component with routing
+   - Use wouter for routing
+   - Import all pages
+   - Set up providers (tRPC, QueryClient, Theme)
+
+3. client/src/main.tsx
+   - React entry point
+   - Mount App to DOM
+   - Set up providers
+
+4. client/src/lib/trpc.ts
+   - tRPC client configuration
+   - HTTP batch link to /api/trpc
+   - Superjson transformer
+   - Include credentials
+
+5. client/src/hooks/useAuth.ts
+   - Authentication hook
+   - Get current user from tRPC
+   - Provide logout function
+   - Handle loading/error states
+
+6. client/src/components/DashboardLayout.tsx
+   - Main layout wrapper
+   - Sidebar navigation
+   - Top header
+   - User menu
+   - Responsive design
+
+7. client/src/components/MetricsCard.tsx
+   - Reusable metric card component
+   - Props: label, value, delta, positive, loading
+   - Animated transitions
+   - Color-coded delta
+
+8. client/src/components/CycleMonitor.tsx
+   - Shows cycle status and phase progress
+   - Visual timeline
+   - Progress percentage
+   - Current phase description
+
+9. client/src/pages/Dashboard.tsx
+   - Main dashboard page
+   - Metrics grid (6 cards)
+   - Cycle status
+   - Recent orders ticker
+   - Activity feed
+   - "Run Cycle Now" button
+   - Real-time polling (10 second interval)
+
+10. client/src/pages/Social.tsx
+    - Social media hub
+    - Platform cards (TikTok, Instagram, YouTube)
+    - Connect/Disconnect buttons
+    - Platform stats
+    - Recent posts grid
+    - Trending content
+
+11. client/src/pages/Analytics.tsx
+    - Analytics dashboard
+    - Revenue chart (line)
+    - Engagement by platform (bar)
+    - Top posts table
+    - ROI calculator
+    - Date range selector
+
+12. client/src/pages/Settings.tsx
+    - Configuration page
+    - API key inputs (with masking)
+    - Scheduler toggle + interval
+    - Platform connection status
+    - Test buttons for each API
+    - Webhook configuration
+
+13. client/src/pages/NotFound.tsx
+    - 404 page
+    - Link back to dashboard
+
+14. client/src/const.ts
+    - Constants and configuration
+    - API endpoints
+    - Color values
+    - UI constants
+
+DESIGN REQUIREMENTS:
+- Color: Blue (#2563EB), Gray (#6B7280), Green (#10B981), Red (#EF4444)
+- Font: Inter for text, JetBrains Mono for data
+- Spacing: Tailwind scale (4px base unit)
+- Animations: 200-300ms smooth transitions
+- Responsive: Mobile-first design
+
+TECHNICAL REQUIREMENTS:
+- Use React 19 + TypeScript
+- Use Tailwind CSS 4 + shadcn/ui
+- Use tRPC for data fetching
+- Use React Query for caching
+- Use wouter for routing
+- Support dark mode (optional)
+- WCAG AA accessibility
+
+DATA SOURCES (from tRPC):
+- trpc.dashboard.metrics.useQuery() → metrics data
+- trpc.cycle.status.useQuery() → current cycle
+- trpc.orders.recent.useQuery() → recent orders
+- trpc.social.accounts.useQuery() → social accounts
+- trpc.social.posts.useQuery() → recent posts
+- trpc.analytics.get.useQuery() → analytics data
+
+PART 2: TESTING AGENT (Do this after Frontend)
+================================================================================
+
+Your mission: Write 100+ comprehensive tests
+
+Create these files:
+
+1. vitest.config.ts
+   - Vitest configuration
+   - jsdom environment
+   - Path aliases (@, @shared)
+   - Coverage settings
+
+2. shared/test-utils.ts
+   - Mock data factories (user, cycle, product, order)
+   - Mock API responses
+   - Helper functions (renderWithProviders, etc.)
+   - Test fixtures
+
+3. server/db.test.ts (10+ tests)
+   - Test upsertUser
+   - Test getUser
+   - Test createCycle
+   - Test updateCycle
+   - Test createProduct
+   - Test getOrders
+   - Test syncOrders
+   - Test getAnalytics
+   - Test createLog
+
+4. server/routers.test.ts (30+ tests)
+   - cycle router tests (10+)
+   - product router tests (8+)
+   - order router tests (6+)
+   - analytics router tests (4+)
+   - auth tests (2+)
+
+5. server/integrations/tiktok.test.ts (10+ tests)
+   - OAuth token exchange
+   - Token refresh
+   - Video posting
+   - Stats retrieval
+   - Error handling
+   - Rate limiting
+
+6. server/integrations/instagram.test.ts (10+ tests)
+   - OAuth token exchange
+   - Reel posting
+   - Stats retrieval
+   - Hashtag trending
+   - Error handling
+
+7. server/integrations/youtube.test.ts (10+ tests)
+   - OAuth token exchange
+   - Video upload
+   - Stats retrieval
+   - Error handling
+
+8. client/src/pages/Dashboard.test.tsx (8+ tests)
+   - Renders metrics cards
+   - Displays cycle status
+   - Shows recent orders
+   - Run cycle button works
+   - Loading state
+   - Error state
+   - Real-time polling
+   - Mobile responsive
+
+9. client/src/pages/Social.test.tsx (8+ tests)
+   - Renders platform cards
+   - Connect button works
+   - Displays stats
+   - Shows recent posts
+   - Trending section
+
+10. client/src/pages/Analytics.test.tsx (8+ tests)
+    - Renders charts
+    - Date range selector works
+    - Export button works
+    - Responsive layout
+
+11. client/src/pages/Settings.test.tsx (8+ tests)
+    - Renders form fields
+    - Saves API keys
+    - Tests API endpoints
+    - Scheduler toggle works
+
+12. client/src/components/MetricsCard.test.tsx (5+ tests)
+    - Renders label and value
+    - Displays delta
+    - Shows loading skeleton
+    - Animates numbers
+    - Shows tooltip
+
+13. client/src/components/DashboardLayout.test.tsx (5+ tests)
+    - Renders sidebar
+    - Renders header
+    - Navigation works
+    - Responsive on mobile
+
+14. client/src/hooks/useAuth.test.ts (5+ tests)
+    - Returns user data
+    - Handles loading state
+    - Handles error state
+    - Logout function works
+
+TEST COVERAGE TARGETS:
+- Backend: 80%+
+- Frontend: 70%+
+- Total: 100+ tests
+
+RUNNING TESTS:
+pnpm test                    # Run all tests
+pnpm test -- --coverage     # With coverage report
+pnpm test -- --watch       # Watch mode
+
+IMPLEMENTATION CHECKLIST:
+================================================================================
+
+FRONTEND:
+- [ ] client/src/index.css
+- [ ] client/src/App.tsx
+- [ ] client/src/main.tsx
+- [ ] client/src/lib/trpc.ts
+- [ ] client/src/hooks/useAuth.ts
+- [ ] client/src/components/DashboardLayout.tsx
+- [ ] client/src/components/MetricsCard.tsx
+- [ ] client/src/components/CycleMonitor.tsx
+- [ ] client/src/pages/Dashboard.tsx
+- [ ] client/src/pages/Social.tsx
+- [ ] client/src/pages/Analytics.tsx
+- [ ] client/src/pages/Settings.tsx
+- [ ] client/src/pages/NotFound.tsx
+- [ ] client/src/const.ts
+
+TESTING:
+- [ ] vitest.config.ts
+- [ ] shared/test-utils.ts
+- [ ] server/db.test.ts
+- [ ] server/routers.test.ts
+- [ ] server/integrations/tiktok.test.ts
+- [ ] server/integrations/instagram.test.ts
+- [ ] server/integrations/youtube.test.ts
+- [ ] client/src/pages/Dashboard.test.tsx
+- [ ] client/src/pages/Social.test.tsx
+- [ ] client/src/pages/Analytics.test.tsx
+- [ ] client/src/pages/Settings.test.tsx
+- [ ] client/src/components/MetricsCard.test.tsx
+- [ ] client/src/components/DashboardLayout.test.tsx
+- [ ] client/src/hooks/useAuth.test.ts
+
+GIT WORKFLOW:
+================================================================================
+
+1. Clone repo:
+   cd /home/ubuntu/better-daze-dashboard
+   git status
+
+2. Create feature branches:
+   git checkout -b feature/frontend
+   git checkout -b feature/testing
+
+3. Commit frequently:
+   git add .
+   git commit -m "feat: add Dashboard page"
+   git push origin feature/frontend
+
+4. Pull latest:
+   git pull origin main
+
+KEY DEPENDENCIES:
+================================================================================
+
+Frontend depends on:
+- server/routers.ts (Manus building this)
+- drizzle/schema.ts (Already complete ✅)
+
+Testing depends on:
+- All Frontend code (you build this)
+- All Backend code (Manus building this)
+
+COORDINATION WITH MANUS:
+================================================================================
+
+Manus is building:
+- server/routers.ts (tRPC routes)
+- server/db.ts (database helpers)
+- server/integrations/ (TikTok, Instagram, YouTube)
+
+You are building:
+- client/src/ (React UI)
+- Tests for everything
+
+Integration happens automatically when both complete.
+
+IMPORTANT NOTES:
+================================================================================
+
+1. Use TypeScript strict mode
+2. Use React hooks (no class components)
+3. Add JSDoc comments for complex functions
+4. Use Prettier for formatting
+5. Use ESLint for linting
+6. All code must be production-ready
+7. No TODOs or FIXMEs
+8. Commit frequently to Git
+9. Test as you build
+
+ESTIMATED TIMELINE:
+================================================================================
+
+Frontend: 3-4 hours
+Testing: 2-3 hours
+Total: 5-7 hours (parallel with Manus)
+
+SUCCESS CRITERIA:
+================================================================================
+
+✅ All pages render correctly
+✅ tRPC integration works
+✅ Responsive design on mobile
+✅ No TypeScript errors
+✅ 100+ tests written
+✅ 75%+ code coverage
+✅ All tests passing
+✅ Smooth animations
+✅ Professional design
+
+READY TO START?
+================================================================================
+
+1. Read CLAUDE_INSTRUCTIONS.md (full details)
+2. Read PRODUCT_ARCHITECTURE.md (understand the system)
+3. Review drizzle/schema.ts (understand the database)
+4. Start with Frontend Agent
+5. Move to Testing Agent
+6. Commit frequently to Git
+7. Coordinate with Manus via Git
+
+LET'S BUILD THIS! 🚀
+
+================================================================================
+END OF CLAUDE PROMPT
+================================================================================
