@@ -1,23 +1,31 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { trpc } from './lib/trpc';
 import './App.css';
 
 export default function App() {
-  const [status, setStatus] = useState<'loading' | 'connected' | 'error'>('loading');
-  const [data, setData] = useState<any>(null);
+  const [cycleTriggered, setCycleTriggered] = useState(false);
 
-  useEffect(() => {
-    // Test API connection
-    fetch('/api/trpc/system.health?batch=1')
-      .then(res => res.json())
-      .then(data => {
-        setData(data);
-        setStatus('connected');
-      })
-      .catch(err => {
-        console.error('API Error:', err);
-        setStatus('error');
-      });
-  }, []);
+  // Test health check
+  const healthQuery = trpc.system.health.useQuery();
+
+  // Trigger cycle mutation
+  const triggerCycleMutation = trpc.cycle.trigger.useMutation({
+    onSuccess: (data) => {
+      console.log('Cycle triggered:', data);
+      setCycleTriggered(true);
+    },
+    onError: (error) => {
+      console.error('Error triggering cycle:', error);
+    },
+  });
+
+  const handleTriggerCycle = () => {
+    triggerCycleMutation.mutate({
+      trendKeyword: 'AI automation',
+      designPrompt: 'Modern tech aesthetic',
+      productType: 'shirt',
+    });
+  };
 
   return (
     <div className="app">
@@ -29,9 +37,9 @@ export default function App() {
       <main className="main">
         <div className="status-card">
           <h2>System Status</h2>
-          {status === 'loading' && <p className="status-loading">Connecting to backend...</p>}
-          {status === 'connected' && <p className="status-ok">✓ Backend connected</p>}
-          {status === 'error' && <p className="status-error">✗ Backend connection failed</p>}
+          {healthQuery.isLoading && <p className="status-loading">Connecting to backend...</p>}
+          {healthQuery.isSuccess && <p className="status-ok">✓ Backend connected</p>}
+          {healthQuery.isError && <p className="status-error">✗ Backend connection failed</p>}
         </div>
 
         <div className="features-grid">
@@ -54,8 +62,18 @@ export default function App() {
         </div>
 
         <div className="cta-section">
-          <h2>Get Started</h2>
-          <button className="cta-button">Launch Dashboard</button>
+          <h2>Start Cycle</h2>
+          <button 
+            className="cta-button"
+            onClick={handleTriggerCycle}
+            disabled={triggerCycleMutation.isPending}
+          >
+            {triggerCycleMutation.isPending ? 'Starting...' : 'Launch Cycle'}
+          </button>
+          {cycleTriggered && <p className="success-message">✓ Cycle started successfully!</p>}
+          {triggerCycleMutation.isError && (
+            <p className="error-message">✗ Error: {triggerCycleMutation.error?.message}</p>
+          )}
         </div>
       </main>
 

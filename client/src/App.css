@@ -150,6 +150,23 @@
   margin: 0;
 }
 
+.success-message {
+  color: #4ade80;
+  margin-top: 1rem;
+  font-weight: 600;
+}
+
+.error-message {
+  color: #f87171;
+  margin-top: 1rem;
+  font-weight: 600;
+}
+
+.cta-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 @media (max-width: 768px) {
   .header h1 {
     font-size: 2rem;
