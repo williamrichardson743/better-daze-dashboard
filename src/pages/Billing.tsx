@@ -1,8 +1,8 @@
+import { trpc } from "@/providers/trpc";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
@@ -11,6 +11,8 @@ import {
   Crown,
   CheckCircle2,
   ArrowUpRight,
+  Loader2,
+  ExternalLink,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -28,7 +30,6 @@ const plans = [
       "Email support",
     ],
     limits: { cycles: 3, products: 20, social: 2 },
-    current: false,
   },
   {
     id: "growth",
@@ -45,8 +46,6 @@ const plans = [
       "API access",
     ],
     limits: { cycles: 10, products: Infinity, social: 10 },
-    current: true,
-    popular: true,
   },
   {
     id: "enterprise",
@@ -64,14 +63,23 @@ const plans = [
       "White-label options",
     ],
     limits: { cycles: Infinity, products: Infinity, social: Infinity },
-    current: false,
   },
 ];
 
-function BillingCard({ plan }: { plan: (typeof plans)[0] }) {
+function BillingCard({
+  plan,
+  current,
+  onUpgrade,
+  loading,
+}: {
+  plan: (typeof plans)[0];
+  current: boolean;
+  onUpgrade: () => void;
+  loading: boolean;
+}) {
   return (
-    <Card className={`relative overflow-hidden ${plan.popular ? "border-primary shadow-lg" : ""}`}>
-      {plan.popular && (
+    <Card className={`relative overflow-hidden ${plan.id === "growth" ? "border-primary shadow-lg" : ""}`}>
+      {plan.id === "growth" && (
         <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-[10px] font-bold px-3 py-1 rounded-bl-lg uppercase tracking-wider">
           Most Popular
         </div>
@@ -96,11 +104,11 @@ function BillingCard({ plan }: { plan: (typeof plans)[0] }) {
         </ul>
         <Button
           className="w-full"
-          variant={plan.current ? "secondary" : plan.popular ? "default" : "outline"}
-          disabled={plan.current}
-          onClick={() => toast.success(`Upgraded to ${plan.name} plan!`)}
+          variant={current ? "secondary" : plan.id === "growth" ? "default" : "outline"}
+          disabled={current || loading}
+          onClick={onUpgrade}
         >
-          {plan.current ? "Current Plan" : "Upgrade"}
+          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : current ? "Current Plan" : "Upgrade"}
         </Button>
       </CardContent>
     </Card>
@@ -108,8 +116,31 @@ function BillingCard({ plan }: { plan: (typeof plans)[0] }) {
 }
 
 export default function Billing() {
+  const utils = trpc.useUtils();
+  const { data: subscription } = trpc.billing.getSubscription.useQuery();
+  const createCheckout = trpc.billing.createCheckoutSession.useMutation({
+    onSuccess: (data) => {
+      if (data.url) window.location.href = data.url;
+    },
+    onError: (err) => toast.error(err.message),
+  });
+  const cancelSub = trpc.billing.cancelSubscription.useMutation({
+    onSuccess: () => {
+      utils.billing.getSubscription.invalidate();
+      toast.success("Subscription cancelled");
+    },
+  });
+  const portalSession = trpc.billing.createPortalSession.useMutation({
+    onSuccess: (data) => {
+      if (data.url) window.location.href = data.url;
+    },
+  });
+
   const [annual, setAnnual] = useState(false);
   const discount = 0.2;
+
+  const currentPlan = subscription?.plan || "starter";
+  const isActive = subscription?.status === "active" || subscription?.status === "trialing";
 
   return (
     <DashboardLayout>
@@ -131,20 +162,45 @@ export default function Billing() {
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h2 className="text-lg font-semibold">Growth Plan</h2>
-                    <Badge variant="default" className="text-[10px]">Active</Badge>
+                    <h2 className="text-lg font-semibold capitalize">{currentPlan} Plan</h2>
+                    <Badge variant={isActive ? "default" : "secondary"} className="text-[10px]">
+                      {subscription?.status || "active"}
+                    </Badge>
+                    {subscription?.cancelAtPeriodEnd && (
+                      <Badge variant="destructive" className="text-[10px]">
+                        Cancels soon
+                      </Badge>
+                    )}
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    $79/month · Renews on May 15, 2026
+                    {subscription?.currentPeriodEnd
+                      ? `Renews on ${new Date(subscription.currentPeriodEnd).toLocaleDateString()}`
+                      : "Free trial active"}
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-4">
-                <div className="text-right">
-                  <p className="text-sm font-medium">Monthly Usage</p>
-                  <p className="text-xs text-muted-foreground">7/10 cycles · 45 products</p>
-                </div>
-                <Progress value={70} className="w-24 h-2" />
+              <div className="flex items-center gap-2">
+                {isActive && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => portalSession.mutate()}
+                    disabled={portalSession.isPending}
+                  >
+                    <ExternalLink className="mr-2 h-3 w-3" />
+                    Manage
+                  </Button>
+                )}
+                {isActive && !subscription?.cancelAtPeriodEnd && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => cancelSub.mutate()}
+                    disabled={cancelSub.isPending}
+                  >
+                    Cancel
+                  </Button>
+                )}
               </div>
             </div>
           </CardContent>
@@ -174,6 +230,9 @@ export default function Billing() {
                 ...plan,
                 price: annual ? Math.round(plan.price * 12 * (1 - discount) / 12) : plan.price,
               }}
+              current={currentPlan === plan.id}
+              onUpgrade={() => createCheckout.mutate({ plan: plan.id as any })}
+              loading={createCheckout.isPending}
             />
           ))}
         </div>
@@ -196,7 +255,7 @@ export default function Billing() {
               </div>
               <Badge variant="secondary" className="text-[10px]">Default</Badge>
             </div>
-            <Button variant="outline" size="sm" onClick={() => toast.success("Payment method updated!")}>
+            <Button variant="outline" size="sm" onClick={() => portalSession.mutate()}>
               Update Payment Method
             </Button>
           </CardContent>

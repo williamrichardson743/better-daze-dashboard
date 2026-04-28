@@ -16,4 +16,10 @@ export const env = {
   kimiAuthUrl: required("KIMI_AUTH_URL"),
   kimiOpenUrl: required("KIMI_OPEN_URL"),
   ownerUnionId: process.env.OWNER_UNION_ID ?? "",
+  stripeSecretKey: process.env.STRIPE_SECRET_KEY ?? "",
+  stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET ?? "",
+  stripePriceStarter: process.env.STRIPE_PRICE_STARTER ?? "",
+  stripePriceGrowth: process.env.STRIPE_PRICE_GROWTH ?? "",
+  stripePriceEnterprise: process.env.STRIPE_PRICE_ENTERPRISE ?? "",
+  appUrl: process.env.APP_URL ?? "http://localhost:3000",
 };

@@ -22,17 +22,17 @@ import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
 const navigation = [
-  { name: "Dashboard", href: "/", icon: LayoutDashboard },
-  { name: "Cycles", href: "/cycles", icon: RotateCcw },
-  { name: "Products", href: "/products", icon: ShoppingBag },
-  { name: "Marketing", href: "/marketing", icon: Megaphone },
-  { name: "Analytics", href: "/analytics", icon: BarChart3 },
-  { name: "Team", href: "/team", icon: Users },
-  { name: "Billing", href: "/billing", icon: CreditCard },
+  { name: "Dashboard", href: "/app", icon: LayoutDashboard },
+  { name: "Cycles", href: "/app/cycles", icon: RotateCcw },
+  { name: "Products", href: "/app/products", icon: ShoppingBag },
+  { name: "Marketing", href: "/app/marketing", icon: Megaphone },
+  { name: "Analytics", href: "/app/analytics", icon: BarChart3 },
+  { name: "Team", href: "/app/team", icon: Users },
+  { name: "Billing", href: "/app/billing", icon: CreditCard },
 ];
 
 const adminNavigation = [
-  { name: "Admin Settings", href: "/admin", icon: Settings },
+  { name: "Admin Settings", href: "/app/admin", icon: Settings },
 ];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {

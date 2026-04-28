@@ -26,7 +26,7 @@ export default function NotFound() {
               Go Back
             </Button>
             <Button asChild>
-              <Link to="/">
+              <Link to="/app">
                 <Home className="mr-2 h-4 w-4" />
                 Dashboard
               </Link>

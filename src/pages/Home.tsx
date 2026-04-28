@@ -184,7 +184,7 @@ export default function Home() {
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base font-semibold">Active Cycles</CardTitle>
                 <Link
-                  to="/cycles"
+                  to="/app/cycles"
                   className="text-xs font-medium text-primary hover:underline"
                 >
                   View all
