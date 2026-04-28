@@ -265,3 +265,108 @@ export const subscriptions = mysqlTable("subscriptions", {
 
 export type Subscription = typeof subscriptions.$inferSelect;
 export type InsertSubscription = typeof subscriptions.$inferInsert;
+
+// ─── E-COMMERCE TABLES ───
+
+// Product variants (sizes, colors)
+export const productVariants = mysqlTable("productVariants", {
+  id: serial("id").primaryKey(),
+  productId: bigint("productId", { mode: "number", unsigned: true }).notNull(),
+  sku: varchar("sku", { length: 100 }),
+  size: varchar("size", { length: 20 }),
+  color: varchar("color", { length: 50 }),
+  colorHex: varchar("colorHex", { length: 7 }),
+  price: decimal("price", { precision: 10, scale: 2 }).notNull(),
+  inventory: int("inventory").default(0),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type ProductVariant = typeof productVariants.$inferSelect;
+export type InsertProductVariant = typeof productVariants.$inferInsert;
+
+// Product images (mockups)
+export const productImages = mysqlTable("productImages", {
+  id: serial("id").primaryKey(),
+  productId: bigint("productId", { mode: "number", unsigned: true }).notNull(),
+  variantId: bigint("variantId", { mode: "number", unsigned: true }),
+  url: varchar("url", { length: 500 }).notNull(),
+  alt: varchar("alt", { length: 255 }),
+  isPrimary: boolean("isPrimary").default(false),
+  sortOrder: int("sortOrder").default(0),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type ProductImage = typeof productImages.$inferSelect;
+export type InsertProductImage = typeof productImages.$inferInsert;
+
+// Collections / Categories
+export const collections = mysqlTable("collections", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 100 }).notNull(),
+  slug: varchar("slug", { length: 100 }).notNull().unique(),
+  description: text("description"),
+  imageUrl: varchar("imageUrl", { length: 500 }),
+  isActive: boolean("isActive").default(true),
+  sortOrder: int("sortOrder").default(0),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type Collection = typeof collections.$inferSelect;
+export type InsertCollection = typeof collections.$inferInsert;
+
+// Product to Collection junction
+export const productCollections = mysqlTable("productCollections", {
+  id: serial("id").primaryKey(),
+  productId: bigint("productId", { mode: "number", unsigned: true }).notNull(),
+  collectionId: bigint("collectionId", { mode: "number", unsigned: true }).notNull(),
+});
+
+export type ProductCollection = typeof productCollections.$inferSelect;
+export type InsertProductCollection = typeof productCollections.$inferInsert;
+
+// Customer orders (public store orders)
+export const customerOrders = mysqlTable("customerOrders", {
+  id: serial("id").primaryKey(),
+  orderNumber: varchar("orderNumber", { length: 50 }).notNull().unique(),
+  email: varchar("email", { length: 320 }).notNull(),
+  customerName: varchar("customerName", { length: 255 }),
+  phone: varchar("phone", { length: 30 }),
+  status: mysqlEnum("status", ["pending", "paid", "processing", "shipped", "delivered", "cancelled", "refunded"]).default("pending").notNull(),
+  fulfillmentStatus: mysqlEnum("fulfillmentStatus", ["unfulfilled", "pending", "fulfilled", "partial", "returned"]).default("unfulfilled").notNull(),
+  paymentStatus: mysqlEnum("paymentStatus", ["pending", "paid", "failed", "refunded"]).default("pending").notNull(),
+  subtotal: decimal("subtotal", { precision: 10, scale: 2 }).notNull(),
+  shipping: decimal("shipping", { precision: 10, scale: 2 }).default("0.00"),
+  tax: decimal("tax", { precision: 10, scale: 2 }).default("0.00"),
+  total: decimal("total", { precision: 10, scale: 2 }).notNull(),
+  currency: varchar("currency", { length: 3 }).default("USD"),
+  shippingAddress: json("shippingAddress"),
+  billingAddress: json("billingAddress"),
+  stripePaymentIntentId: varchar("stripePaymentIntentId", { length: 255 }),
+  trackingNumber: varchar("trackingNumber", { length: 100 }),
+  trackingUrl: varchar("trackingUrl", { length: 500 }),
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().notNull().$onUpdate(() => new Date()),
+});
+
+export type CustomerOrder = typeof customerOrders.$inferSelect;
+export type InsertCustomerOrder = typeof customerOrders.$inferInsert;
+
+// Order items (line items)
+export const orderItems = mysqlTable("orderItems", {
+  id: serial("id").primaryKey(),
+  orderId: bigint("orderId", { mode: "number", unsigned: true }).notNull(),
+  productId: bigint("productId", { mode: "number", unsigned: true }).notNull(),
+  variantId: bigint("variantId", { mode: "number", unsigned: true }),
+  productName: varchar("productName", { length: 255 }).notNull(),
+  variantName: varchar("variantName", { length: 100 }),
+  sku: varchar("sku", { length: 100 }),
+  quantity: int("quantity").default(1).notNull(),
+  unitPrice: decimal("unitPrice", { precision: 10, scale: 2 }).notNull(),
+  totalPrice: decimal("totalPrice", { precision: 10, scale: 2 }).notNull(),
+  imageUrl: varchar("imageUrl", { length: 500 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type OrderItem = typeof orderItems.$inferSelect;
+export type InsertOrderItem = typeof orderItems.$inferInsert;

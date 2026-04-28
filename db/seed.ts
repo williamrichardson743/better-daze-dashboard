@@ -235,6 +235,98 @@ async function seed() {
     await db.insert(schema.transmissionLogs).values(log);
   }
 
+  // ─── E-COMMERCE SEED DATA ───
+
+  // Seed collections
+  const sampleCollections = [
+    { name: "Summer Vibes", slug: "summer-vibes", description: "Warm, beach-inspired designs for sunny days", sortOrder: 1 },
+    { name: "Urban Nightlife", slug: "urban-nightlife", description: "Dark, neon-infused city aesthetics", sortOrder: 2 },
+    { name: "Nature's Echo", slug: "natures-echo", description: "Earthy, organic designs for nature lovers", sortOrder: 3 },
+  ];
+  for (const col of sampleCollections) {
+    const existing = await db.select().from(schema.collections).where(eq(schema.collections.slug, col.slug)).limit(1);
+    if (existing.length === 0) {
+      await db.insert(schema.collections).values(col);
+    }
+  }
+
+  // Seed product variants
+  const sampleVariants = [
+    { productId: 1, sku: "BD-SV-001-S-BLK", size: "S", color: "Black", colorHex: "#000000", price: "34.99", inventory: 15 },
+    { productId: 1, sku: "BD-SV-001-M-BLK", size: "M", color: "Black", colorHex: "#000000", price: "34.99", inventory: 20 },
+    { productId: 1, sku: "BD-SV-001-L-BLK", size: "L", color: "Black", colorHex: "#000000", price: "34.99", inventory: 10 },
+    { productId: 1, sku: "BD-SV-001-XL-WHT", size: "XL", color: "White", colorHex: "#ffffff", price: "34.99", inventory: 8 },
+    { productId: 2, sku: "BD-SV-002-S-NVY", size: "S", color: "Navy", colorHex: "#1e3a5f", price: "64.99", inventory: 12 },
+    { productId: 2, sku: "BD-SV-002-M-NVY", size: "M", color: "Navy", colorHex: "#1e3a5f", price: "64.99", inventory: 8 },
+    { productId: 2, sku: "BD-SV-002-L-GRY", size: "L", color: "Gray", colorHex: "#6b7280", price: "64.99", inventory: 3 },
+    { productId: 3, sku: "BD-UN-001-S-BLK", size: "S", color: "Black", colorHex: "#000000", price: "39.99", inventory: 25 },
+    { productId: 3, sku: "BD-UN-001-M-BLK", size: "M", color: "Black", colorHex: "#000000", price: "39.99", inventory: 18 },
+    { productId: 3, sku: "BD-UN-001-L-BLK", size: "L", color: "Black", colorHex: "#000000", price: "39.99", inventory: 13 },
+    { productId: 4, sku: "BD-UN-002-OS-WHT", size: "One Size", color: "White", colorHex: "#ffffff", price: "19.99", inventory: 50 },
+  ];
+  for (const variant of sampleVariants) {
+    const existing = await db.select().from(schema.productVariants).where(eq(schema.productVariants.sku, variant.sku)).limit(1);
+    if (existing.length === 0) {
+      await db.insert(schema.productVariants).values(variant);
+    }
+  }
+
+  // Seed product images
+  const sampleImages = [
+    { productId: 1, url: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&h=600&fit=crop", alt: "Sunset Dreams Tee - Black", isPrimary: true, sortOrder: 1 },
+    { productId: 1, url: "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=600&h=600&fit=crop", alt: "Sunset Dreams Tee - Detail", isPrimary: false, sortOrder: 2 },
+    { productId: 2, url: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=600&h=600&fit=crop", alt: "Wave Rider Hoodie - Navy", isPrimary: true, sortOrder: 1 },
+    { productId: 3, url: "https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=600&h=600&fit=crop", alt: "Neon City Tee - Black", isPrimary: true, sortOrder: 1 },
+    { productId: 4, url: "https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?w=600&h=600&fit=crop", alt: "Midnight Mug - White", isPrimary: true, sortOrder: 1 },
+  ];
+  for (const img of sampleImages) {
+    await db.insert(schema.productImages).values(img);
+  }
+
+  // Seed customer orders
+  const sampleCustomerOrders = [
+    {
+      orderNumber: "BD-A1B2C3",
+      email: "customer@example.com",
+      customerName: "Jordan Smith",
+      status: "paid" as const,
+      paymentStatus: "paid" as const,
+      subtotal: "74.98",
+      shipping: "5.00",
+      tax: "6.40",
+      total: "86.38",
+      shippingAddress: { line1: "123 Main St", city: "Austin", state: "TX", postalCode: "78701", country: "US" } as any,
+    },
+    {
+      orderNumber: "BD-D4E5F6",
+      email: "shopper@example.com",
+      customerName: "Alex Kim",
+      status: "shipped" as const,
+      paymentStatus: "paid" as const,
+      subtotal: "39.99",
+      shipping: "5.00",
+      tax: "3.60",
+      total: "48.59",
+      shippingAddress: { line1: "456 Oak Ave", city: "Portland", state: "OR", postalCode: "97201", country: "US" } as any,
+      trackingNumber: "1Z999AA10123456784",
+    },
+  ];
+  for (const order of sampleCustomerOrders) {
+    const existing = await db.select().from(schema.customerOrders).where(eq(schema.customerOrders.orderNumber, order.orderNumber)).limit(1);
+    if (existing.length === 0) {
+      await db.insert(schema.customerOrders).values(order);
+    }
+  }
+
+  // Seed order items
+  const sampleOrderItems = [
+    { orderId: 1, productId: 1, variantId: 2, productName: "Sunset Dreams Tee", variantName: "M / Black", sku: "BD-SV-001-M-BLK", quantity: 2, unitPrice: "34.99", totalPrice: "69.98", imageUrl: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=200" },
+    { orderId: 2, productId: 3, variantId: 8, productName: "Neon City Tee", variantName: "S / Black", sku: "BD-UN-001-S-BLK", quantity: 1, unitPrice: "39.99", totalPrice: "39.99", imageUrl: "https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=200" },
+  ];
+  for (const item of sampleOrderItems) {
+    await db.insert(schema.orderItems).values(item);
+  }
+
   console.log("Seed completed successfully!");
 }
 
