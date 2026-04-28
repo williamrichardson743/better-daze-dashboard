@@ -368,5 +368,39 @@ export const orderItems = mysqlTable("orderItems", {
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 
-export type OrderItem = typeof orderItems.$inferSelect;
-export type InsertOrderItem = typeof orderItems.$inferInsert;
+// Campaigns table (automated marketing)
+export const campaigns = mysqlTable("campaigns", {
+  id: serial("id").primaryKey(),
+  userId: bigint("userId", { mode: "number", unsigned: true }).notNull(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  cycleId: bigint("cycleId", { mode: "number", unsigned: true }),
+  status: mysqlEnum("status", ["draft", "scheduled", "active", "paused", "completed"]).default("draft").notNull(),
+  startDate: timestamp("startDate"),
+  endDate: timestamp("endDate"),
+  platforms: json("platforms"), // ["instagram", "tiktok", "twitter"]
+  autoPublishProducts: boolean("autoPublishProducts").default(false),
+  autoGenerateSocial: boolean("autoGenerateSocial").default(false),
+  postFrequency: mysqlEnum("postFrequency", ["hourly", "daily", "weekly"]).default("daily"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().notNull().$onUpdate(() => new Date()),
+});
+
+export type Campaign = typeof campaigns.$inferSelect;
+export type InsertCampaign = typeof campaigns.$inferInsert;
+
+// Social post templates
+export const socialTemplates = mysqlTable("socialTemplates", {
+  id: serial("id").primaryKey(),
+  userId: bigint("userId", { mode: "number", unsigned: true }).notNull(),
+  name: varchar("name", { length: 255 }).notNull(),
+  platform: mysqlEnum("platform", ["instagram", "tiktok", "twitter", "facebook", "pinterest"]).notNull(),
+  captionTemplate: text("captionTemplate"),
+  hashtagSet: json("hashtagSet"),
+  imagePrompt: text("imagePrompt"),
+  isDefault: boolean("isDefault").default(false),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type SocialTemplate = typeof socialTemplates.$inferSelect;
+export type InsertSocialTemplate = typeof socialTemplates.$inferInsert;

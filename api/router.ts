@@ -3,6 +3,7 @@ import { dashboardRouter } from "./dashboard-router";
 import { adminRouter } from "./admin-router";
 import { billingRouter } from "./billing-router";
 import { shopRouter } from "./shop-router";
+import { campaignRouter } from "./campaign-router";
 import { createRouter, publicQuery } from "./middleware";
 
 export const appRouter = createRouter({
@@ -12,6 +13,7 @@ export const appRouter = createRouter({
   admin: adminRouter,
   billing: billingRouter,
   shop: shopRouter,
+  campaign: campaignRouter,
 });
 
 export type AppRouter = typeof appRouter;

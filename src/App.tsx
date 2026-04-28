@@ -3,7 +3,7 @@ import LandingPage from './pages/LandingPage'
 import Home from './pages/Home'
 import Cycles from './pages/Cycles'
 import Products from './pages/Products'
-import Marketing from './pages/Marketing'
+import SocialAutopilot from './pages/SocialAutopilot'
 import Analytics from './pages/Analytics'
 import Team from './pages/Team'
 import Billing from './pages/Billing'
@@ -18,6 +18,8 @@ import Checkout from './pages/Checkout'
 import OrderSuccess from './pages/OrderSuccess'
 import TrackOrder from './pages/TrackOrder'
 import SellerOrders from './pages/SellerOrders'
+import DesignStudio from './pages/DesignStudio'
+import CampaignBuilder from './pages/CampaignBuilder'
 
 export default function App() {
   return (
@@ -41,12 +43,14 @@ export default function App() {
       <Route path="/app" element={<Home />} />
       <Route path="/app/cycles" element={<Cycles />} />
       <Route path="/app/products" element={<Products />} />
-      <Route path="/app/marketing" element={<Marketing />} />
+      <Route path="/app/marketing" element={<SocialAutopilot />} />
       <Route path="/app/analytics" element={<Analytics />} />
       <Route path="/app/team" element={<Team />} />
       <Route path="/app/billing" element={<Billing />} />
       <Route path="/app/admin" element={<AdminSettings />} />
       <Route path="/app/orders" element={<SellerOrders />} />
+      <Route path="/app/design-studio" element={<DesignStudio />} />
+      <Route path="/app/campaigns" element={<CampaignBuilder />} />
 
       <Route path="*" element={<NotFound />} />
     </Routes>

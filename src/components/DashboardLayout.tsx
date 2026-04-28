@@ -14,6 +14,9 @@ import {
   ChevronRight,
   Sparkles,
   CreditCard,
+  Wand2,
+  Rocket,
+  Package,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -23,9 +26,12 @@ import { cn } from "@/lib/utils";
 
 const navigation = [
   { name: "Dashboard", href: "/app", icon: LayoutDashboard },
+  { name: "Design Studio", href: "/app/design-studio", icon: Wand2 },
   { name: "Cycles", href: "/app/cycles", icon: RotateCcw },
+  { name: "Campaigns", href: "/app/campaigns", icon: Rocket },
   { name: "Products", href: "/app/products", icon: ShoppingBag },
   { name: "Marketing", href: "/app/marketing", icon: Megaphone },
+  { name: "Orders", href: "/app/orders", icon: Package },
   { name: "Analytics", href: "/app/analytics", icon: BarChart3 },
   { name: "Team", href: "/app/team", icon: Users },
   { name: "Billing", href: "/app/billing", icon: CreditCard },
