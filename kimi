@@ -1,0 +1,10 @@
+# Extract the ZIP
+cd app
+
+# Initialize fresh repo
+git init
+git add .
+git commit -m "Admin dashboard fullstack v1"
+
+# Create GitHub repo and push
+gh repo create my-admin-dashboard --public --source=. --push
