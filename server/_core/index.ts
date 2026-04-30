@@ -6,6 +6,9 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { initializeDatabase } from '../db/connection';
+import { initializeCronJob, triggerCycleManually } from '../jobs/cycleRunnerJob';
+import { query } from '../db/connection';
 
 /**
  * Create and configure Express server
@@ -46,6 +49,78 @@ export function createServer(): Express {
     res.json({ status: 'ok', timestamp: new Date() });
   });
 
+  // ─── Cycle Runner REST API ──────────────────────────────────────────────
+
+  /**
+   * POST /api/cycle/run
+   * Manually trigger the 9-step daily cycle.
+   */
+  app.post('/api/cycle/run', async (_req: Request, res: Response) => {
+    try {
+      // Fire-and-forget: respond immediately, cycle runs in background
+      res.json({ success: true, message: 'Cycle triggered — running in background' });
+      await triggerCycleManually();
+    } catch (err: any) {
+      // Error already logged inside cycleRunner; response already sent
+      console.error('Cycle run error:', err.message);
+    }
+  });
+
+  /**
+   * GET /api/cycle/history
+   * Returns the last 20 cycle runs with status and summary.
+   */
+  app.get('/api/cycle/history', async (_req: Request, res: Response) => {
+    try {
+      const rows = await query(
+        `SELECT id, status, started_at, completed_at, error_message,
+                JSON_LENGTH(summary) AS has_summary
+         FROM cycle_runs
+         ORDER BY started_at DESC
+         LIMIT 20`
+      );
+      res.json({ success: true, runs: rows });
+    } catch (err: any) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  /**
+   * GET /api/cycle/run/:id
+   * Returns full details for a specific cycle run including step logs.
+   */
+  app.get('/api/cycle/run/:id', async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id, 10);
+      if (isNaN(id)) {
+        res.status(400).json({ success: false, error: 'Invalid run ID' });
+        return;
+      }
+
+      const [run] = await query(
+        'SELECT * FROM cycle_runs WHERE id = ?',
+        [id]
+      );
+
+      if (!run) {
+        res.status(404).json({ success: false, error: 'Cycle run not found' });
+        return;
+      }
+
+      const steps = await query(
+        `SELECT step_number, step_name, status, started_at, completed_at, result, error_message
+         FROM cycle_steps
+         WHERE cycle_run_id = ?
+         ORDER BY step_number ASC`,
+        [id]
+      );
+
+      res.json({ success: true, run, steps });
+    } catch (err: any) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
   // tRPC API
   app.use(
     '/api/trpc',
@@ -78,12 +153,27 @@ export function createServer(): Express {
  * Start server
  */
 async function start() {
+  // Initialize database tables (idempotent — safe to run on every startup)
+  try {
+    await initializeDatabase();
+  } catch (err: any) {
+    console.error('⚠️  Database initialization failed (continuing):', err.message);
+  }
+
+  // Initialize the daily cron job
+  try {
+    initializeCronJob();
+  } catch (err: any) {
+    console.error('⚠️  Cron job initialization failed (continuing):', err.message);
+  }
+
   const app = createServer();
   const port = process.env.PORT || 3000;
 
   app.listen(port, () => {
     console.log(`✅ Server running on http://localhost:${port}`);
     console.log(`📡 tRPC API available at http://localhost:${port}/api/trpc`);
+    console.log(`🔄 Cycle API available at http://localhost:${port}/api/cycle/run`);
   });
 }
 
