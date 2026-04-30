@@ -1,4 +1,4 @@
-git clone https://github.com/YOURNAME/better-daze-dashboard.git .
+git clone https://github.com/williamrichardson743/better-daze-dashboard.git .
 ls
 npm install
 npm run build
