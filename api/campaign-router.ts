@@ -101,4 +101,52 @@ export const campaignRouter = createRouter({
       return { success: true };
     }),
   }),
+
+  posts: createRouter({
+    list: authedQuery.query(async ({ ctx }) => {
+      const db = getDb();
+      return db.select().from(schema.socialPosts).where(eq(schema.socialPosts.accountId, ctx.user.id)).orderBy(desc(schema.socialPosts.scheduledAt));
+    }),
+    create: authedQuery
+      .input(
+        z.object({
+          cycleId: z.number(),
+          platform: z.enum(["instagram", "tiktok", "twitter", "facebook", "pinterest", "youtube", "other"]),
+          content: z.string().min(1),
+          mediaUrls: z.array(z.string()).optional(),
+          scheduledAt: z.date().optional(),
+          status: z.enum(["scheduled", "published", "failed", "draft"]).default("draft"),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const db = getDb();
+        await db.insert(schema.socialPosts).values({
+          accountId: ctx.user.id,
+          ...input,
+          mediaUrls: input.mediaUrls || [],
+        });
+        return { success: true };
+      }),
+    update: authedQuery
+      .input(
+        z.object({
+          id: z.number(),
+          content: z.string().optional(),
+          status: z.enum(["scheduled", "published", "failed", "draft"]).optional(),
+          scheduledAt: z.date().optional(),
+          mediaUrls: z.array(z.string()).optional(),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const db = getDb();
+        const { id, ...data } = input;
+        await db.update(schema.socialPosts).set(data).where(eq(schema.socialPosts.id, id));
+        return { success: true };
+      }),
+    delete: authedQuery.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
+      const db = getDb();
+      await db.delete(schema.socialPosts).where(eq(schema.socialPosts.id, input.id));
+      return { success: true };
+    }),
+  }),
 });

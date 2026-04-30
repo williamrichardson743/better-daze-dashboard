@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
+import { trpc } from "@/providers/trpc";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,21 +13,22 @@ import {
   Shirt,
   Coffee,
   Sticker,
-  Download,
   CheckCircle2,
   Loader2,
   Palette,
   Type,
   Layout,
   Zap,
+  ImageIcon,
+  Trash2,
 } from "lucide-react";
 
 const productTypes = [
-  { id: "tshirt", name: "T-Shirt", icon: <Shirt className="h-5 w-5" />, basePrice: 24.99 },
-  { id: "hoodie", name: "Hoodie", icon: <Shirt className="h-5 w-5" />, basePrice: 44.99 },
-  { id: "mug", name: "Mug", icon: <Coffee className="h-5 w-5" />, basePrice: 14.99 },
-  { id: "sticker", name: "Sticker", icon: <Sticker className="h-5 w-5" />, basePrice: 3.99 },
-  { id: "poster", name: "Poster", icon: <Layout className="h-5 w-5" />, basePrice: 19.99 },
+  { id: "tshirt", name: "T-Shirt", icon: <Shirt className="h-5 w-5" />, basePrice: "24.99" },
+  { id: "hoodie", name: "Hoodie", icon: <Shirt className="h-5 w-5" />, basePrice: "44.99" },
+  { id: "mug", name: "Mug", icon: <Coffee className="h-5 w-5" />, basePrice: "14.99" },
+  { id: "sticker", name: "Sticker", icon: <Sticker className="h-5 w-5" />, basePrice: "3.99" },
+  { id: "poster", name: "Poster", icon: <Layout className="h-5 w-5" />, basePrice: "19.99" },
 ];
 
 const designStyles = [
@@ -37,63 +39,133 @@ const designStyles = [
   { id: "nature", name: "Nature", desc: "Organic, earthy, botanical" },
 ];
 
-// Simulated AI design generation
-function generateMockDesign(prompt: string, style: string, productType: string) {
-  const seed = prompt.split("").reduce((a, b) => a + b.charCodeAt(0), 0);
-  const colors = [
-    ["#FF6B6B", "#4ECDC4", "#45B7D1"],
-    ["#F7DC6F", "#BB8FCE", "#85C1E2"],
-    ["#2ECC71", "#E74C3C", "#3498DB"],
-    ["#1ABC9C", "#F39C12", "#9B59B6"],
-    ["#34495E", "#E67E22", "#16A085"],
-  ];
-  const colorSet = colors[seed % colors.length];
-  
-  return {
-    id: `design_${Date.now()}`,
-    prompt,
-    style,
-    productType,
-    colors: colorSet,
-    mockupUrl: `https://images.unsplash.com/photo-${1500000000000 + (seed % 1000000)}?w=600&h=600&fit=crop`,
-    createdAt: new Date(),
+function getStylePromptModifier(style: string) {
+  const modifiers: Record<string, string> = {
+    minimal: "minimalist design, clean typography, lots of negative space, simple elegant",
+    retro: "retro vintage aesthetic, bold saturated colors, 70s 80s inspired, distressed texture",
+    abstract: "abstract geometric art, fluid shapes, contemporary digital art, bold composition",
+    streetwear: "urban streetwear style, bold graffiti elements, hip hop culture, edgy raw aesthetic",
+    nature: "organic nature inspired, botanical illustrations, earthy tones, flowing natural forms",
   };
+  return modifiers[style] || modifiers.minimal;
+}
+
+function getProductPromptModifier(productType: string) {
+  const modifiers: Record<string, string> = {
+    tshirt: "centered on a premium blank t-shirt mockup, front view, studio lighting",
+    hoodie: "on a premium pullover hoodie mockup, front view, casual studio photography",
+    mug: "wrapped around a white ceramic coffee mug, product photography, clean background",
+    sticker: "as a die-cut vinyl sticker design, clean edges, product shot on flat surface",
+    poster: "as a wall art poster print, framed mockup, modern interior setting",
+  };
+  return modifiers[productType] || modifiers.tshirt;
 }
 
 export default function DesignStudio() {
+  const utils = trpc.useUtils();
+  const { data: allProducts, isLoading: loadingProducts } = trpc.dashboard.products.useQuery();
+  const createProduct = trpc.dashboard.product.create.useMutation({
+    onSuccess: () => {
+      utils.dashboard.products.invalidate();
+      toast.success("Design saved to database!");
+    },
+  });
+  const updateProduct = trpc.dashboard.product.update.useMutation({
+    onSuccess: () => utils.dashboard.products.invalidate(),
+  });
+  const publishProduct = trpc.dashboard.product.publish.useMutation({
+    onSuccess: () => {
+      utils.dashboard.products.invalidate();
+      toast.success("Design published to store!");
+    },
+  });
+  const deleteProduct = trpc.dashboard.product.delete.useMutation({
+    onSuccess: () => {
+      utils.dashboard.products.invalidate();
+      toast.success("Design deleted");
+    },
+  });
+
   const [prompt, setPrompt] = useState("");
   const [selectedStyle, setSelectedStyle] = useState("minimal");
   const [selectedProduct, setSelectedProduct] = useState("tshirt");
   const [generating, setGenerating] = useState(false);
-  const [generatedDesigns, setGeneratedDesigns] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState("generate");
+  const [generatingDesign, setGeneratingDesign] = useState<{ id: number; prompt: string; style: string; productType: string; mockupUrl: string | null; status: string } | null>(null);
 
-  const handleGenerate = () => {
+  const draftProducts = (allProducts || []).filter((p) => p.status === "draft");
+  const liveProducts = (allProducts || []).filter((p) => p.status === "live");
+
+  const handleGenerate = useCallback(async () => {
     if (!prompt.trim()) {
       toast.error("Enter a design prompt first");
       return;
     }
     setGenerating(true);
-    // Simulate AI generation delay
-    setTimeout(() => {
-      const design = generateMockDesign(prompt, selectedStyle, selectedProduct);
-      setGeneratedDesigns((prev) => [design, ...prev]);
+
+    try {
+      const styleModifier = getStylePromptModifier(selectedStyle);
+      const productModifier = getProductPromptModifier(selectedProduct);
+      const fullPrompt = `${prompt}, ${styleModifier}, ${productModifier}, high quality print-ready graphic design, isolated on clean background`;
+
+      toast.info("Generating AI mockup...");
+
+      const productTypeInfo = productTypes.find((p) => p.id === selectedProduct);
+
+      const result = await createProduct.mutateAsync({
+        name: prompt.slice(0, 60),
+        description: prompt,
+        productType: selectedProduct as any,
+        price: productTypeInfo?.basePrice || "24.99",
+        status: "draft",
+        inventory: 100,
+      });
+
+      setGeneratingDesign({
+        id: result.id,
+        prompt,
+        style: selectedStyle,
+        productType: selectedProduct,
+        mockupUrl: null,
+        status: "generating",
+      });
+
+      try {
+        const response = await fetch("http://localhost:3000/api/generate-mockup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt: fullPrompt, productId: result.id }),
+        });
+        if (response.ok) {
+          const data = await response.json();
+          await updateProduct.mutateAsync({
+            id: result.id,
+            designUrl: data.imageUrl,
+            mockupUrl: data.imageUrl,
+          });
+          setGeneratingDesign((prev) => prev ? { ...prev, mockupUrl: data.imageUrl, status: "complete" } : null);
+          toast.success("AI mockup generated and saved!");
+          setActiveTab("gallery");
+        }
+      } catch {
+        toast.error("Image generation unavailable. Design saved without mockup.");
+      }
+
+      setPrompt("");
+    } catch {
+      toast.error("Failed to save design");
+    } finally {
       setGenerating(false);
-      toast.success("Design generated!");
-    }, 2000);
-  };
+    }
+  }, [prompt, selectedStyle, selectedProduct, createProduct, updateProduct]);
 
-  const handlePublish = (_design: any) => {
-    toast.success("Design published to store!", {
-      description: "Your product is now live at /shop",
-    });
-  };
+  const handlePublish = useCallback((productId: number) => {
+    publishProduct.mutate({ id: productId });
+  }, [publishProduct]);
 
-  const handleScheduleSocial = (_design: any) => {
-    toast.success("Social posts scheduled!", {
-      description: "Auto-posting across connected platforms",
-    });
-  };
+  const handleDelete = useCallback((productId: number) => {
+    deleteProduct.mutate({ id: productId });
+  }, [deleteProduct]);
 
   return (
     <DashboardLayout>
@@ -119,7 +191,11 @@ export default function DesignStudio() {
             </TabsTrigger>
             <TabsTrigger value="gallery" className="gap-2">
               <Palette className="h-4 w-4" />
-              Gallery ({generatedDesigns.length})
+              Gallery ({draftProducts.length})
+            </TabsTrigger>
+            <TabsTrigger value="published" className="gap-2">
+              <CheckCircle2 className="h-4 w-4" />
+              Published ({liveProducts.length})
             </TabsTrigger>
             <TabsTrigger value="templates" className="gap-2">
               <Layout className="h-4 w-4" />
@@ -128,7 +204,6 @@ export default function DesignStudio() {
           </TabsList>
 
           <TabsContent value="generate" className="space-y-6">
-            {/* Prompt Input */}
             <Card className="p-6">
               <div className="space-y-4">
                 <div>
@@ -144,7 +219,6 @@ export default function DesignStudio() {
                   </p>
                 </div>
 
-                {/* Style Selector */}
                 <div>
                   <label className="text-sm font-medium mb-2 block">Style</label>
                   <div className="flex flex-wrap gap-2">
@@ -165,7 +239,6 @@ export default function DesignStudio() {
                   </div>
                 </div>
 
-                {/* Product Selector */}
                 <div>
                   <label className="text-sm font-medium mb-2 block">Product Type</label>
                   <div className="flex flex-wrap gap-2">
@@ -192,12 +265,12 @@ export default function DesignStudio() {
                 <Button
                   className="w-full h-12 gap-2"
                   onClick={handleGenerate}
-                  disabled={generating || !prompt.trim()}
+                  disabled={generating || !prompt.trim() || createProduct.isPending}
                 >
-                  {generating ? (
+                  {generating || createProduct.isPending ? (
                     <>
                       <Loader2 className="h-5 w-5 animate-spin" />
-                      Generating design...
+                      {generatingDesign?.status === "generating" ? "Generating AI mockup..." : "Saving design..."}
                     </>
                   ) : (
                     <>
@@ -206,46 +279,24 @@ export default function DesignStudio() {
                     </>
                   )}
                 </Button>
+
+                {generatingDesign?.status === "generating" && (
+                  <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-center">
+                    <Loader2 className="h-6 w-6 animate-spin text-amber-600 mx-auto mb-2" />
+                    <p className="text-sm text-amber-800 font-medium">AI is generating your mockup...</p>
+                    <p className="text-xs text-amber-600 mt-1">{generatingDesign.prompt.slice(0, 60)}...</p>
+                  </div>
+                )}
               </div>
             </Card>
-
-            {/* Recent Generations */}
-            {generatedDesigns.length > 0 && (
-              <div>
-                <h3 className="text-lg font-semibold mb-4">Recent Generations</h3>
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {generatedDesigns.slice(0, 3).map((design) => (
-                    <Card key={design.id} className="overflow-hidden">
-                      <div className="aspect-square bg-gradient-to-br from-primary/5 to-accent/5 flex items-center justify-center">
-                        <div className="text-center p-6">
-                          <div className="flex gap-1 justify-center mb-3">
-                            {design.colors.map((c: string) => (
-                              <div key={c} className="h-8 w-8 rounded-full border-2 border-white shadow-sm" style={{ backgroundColor: c }} />
-                            ))}
-                          </div>
-                          <p className="text-sm font-medium">{design.prompt.slice(0, 40)}...</p>
-                          <p className="text-xs text-muted-foreground capitalize mt-1">{design.style} · {design.productType}</p>
-                        </div>
-                      </div>
-                      <div className="p-4 space-y-2">
-                        <Button className="w-full gap-2" size="sm" onClick={() => handlePublish(design)}>
-                          <CheckCircle2 className="h-4 w-4" />
-                          Publish to Store
-                        </Button>
-                        <Button variant="outline" className="w-full gap-2" size="sm" onClick={() => handleScheduleSocial(design)}>
-                          <Zap className="h-4 w-4" />
-                          Auto-Post Social
-                        </Button>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            )}
           </TabsContent>
 
           <TabsContent value="gallery" className="space-y-6">
-            {generatedDesigns.length === 0 ? (
+            {loadingProducts ? (
+              <div className="flex items-center justify-center py-16">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              </div>
+            ) : draftProducts.length === 0 ? (
               <div className="text-center py-16">
                 <Palette className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                 <p className="text-muted-foreground">No designs yet. Generate your first one!</p>
@@ -255,34 +306,97 @@ export default function DesignStudio() {
               </div>
             ) : (
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {generatedDesigns.map((design) => (
-                  <Card key={design.id} className="overflow-hidden">
-                    <div className="aspect-square bg-gradient-to-br from-primary/5 to-accent/5 flex items-center justify-center">
-                      <div className="text-center p-6">
-                        <div className="flex gap-1 justify-center mb-3">
-                          {design.colors.map((c: string) => (
-                            <div key={c} className="h-8 w-8 rounded-full border-2 border-white shadow-sm" style={{ backgroundColor: c }} />
-                          ))}
+                {draftProducts.map((product) => (
+                  <Card key={product.id} className="overflow-hidden">
+                    <div className="aspect-square bg-gradient-to-br from-primary/5 to-accent/5 flex items-center justify-center relative">
+                      {product.mockupUrl || product.designUrl ? (
+                        <img
+                          src={product.mockupUrl || product.designUrl || ""}
+                          alt={product.name}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = "none";
+                          }}
+                        />
+                      ) : (
+                        <div className="text-center p-6">
+                          <ImageIcon className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+                          <p className="text-sm font-medium">{product.name}</p>
+                          <p className="text-xs text-muted-foreground capitalize mt-1">{product.productType}</p>
                         </div>
-                        <p className="text-sm font-medium">{design.prompt.slice(0, 50)}...</p>
-                        <p className="text-xs text-muted-foreground capitalize mt-1">{design.style} · {design.productType}</p>
-                      </div>
+                      )}
+                      <Badge variant="secondary" className="absolute top-2 right-2 text-[10px]">
+                        Draft
+                      </Badge>
                     </div>
                     <div className="p-4 space-y-2">
+                      <p className="text-sm font-medium truncate">{product.name}</p>
+                      <p className="text-xs text-muted-foreground capitalize">{product.productType} · ${product.price}</p>
                       <div className="flex gap-2">
-                        <Button className="flex-1 gap-1" size="sm" onClick={() => handlePublish(design)}>
+                        <Button
+                          className="flex-1 gap-1"
+                          size="sm"
+                          onClick={() => handlePublish(product.id)}
+                          disabled={publishProduct.isPending}
+                        >
                           <CheckCircle2 className="h-3.5 w-3.5" />
                           Publish
                         </Button>
-                        <Button variant="outline" className="flex-1 gap-1" size="sm" onClick={() => handleScheduleSocial(design)}>
-                          <Zap className="h-3.5 w-3.5" />
-                          Social
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="gap-1"
+                          onClick={() => handleDelete(product.id)}
+                          disabled={deleteProduct.isPending}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
                         </Button>
                       </div>
-                      <Button variant="ghost" className="w-full gap-1" size="sm">
-                        <Download className="h-3.5 w-3.5" />
-                        Download Assets
-                      </Button>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="published" className="space-y-6">
+            {loadingProducts ? (
+              <div className="flex items-center justify-center py-16">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              </div>
+            ) : liveProducts.length === 0 ? (
+              <div className="text-center py-16">
+                <CheckCircle2 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground">No published products yet.</p>
+                <Button className="mt-4" onClick={() => setActiveTab("gallery")}>
+                  View Drafts
+                </Button>
+              </div>
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {liveProducts.map((product) => (
+                  <Card key={product.id} className="overflow-hidden">
+                    <div className="aspect-square bg-gradient-to-br from-primary/5 to-accent/5 flex items-center justify-center relative">
+                      {product.mockupUrl || product.designUrl ? (
+                        <img
+                          src={product.mockupUrl || product.designUrl || ""}
+                          alt={product.name}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = "none";
+                          }}
+                        />
+                      ) : (
+                        <div className="text-center p-6">
+                          <ImageIcon className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+                          <p className="text-sm font-medium">{product.name}</p>
+                        </div>
+                      )}
+                      <Badge className="absolute top-2 right-2 text-[10px]">Live</Badge>
+                    </div>
+                    <div className="p-4">
+                      <p className="text-sm font-medium truncate">{product.name}</p>
+                      <p className="text-xs text-muted-foreground capitalize mt-1">{product.productType} · ${product.price}</p>
                     </div>
                   </Card>
                 ))}
@@ -300,12 +414,16 @@ export default function DesignStudio() {
                 { name: "Botanical Line", style: "nature", desc: "Minimal plant illustrations" },
                 { name: "Gradient Glow", style: "abstract", desc: "Soft gradient backgrounds" },
               ].map((template, i) => (
-                <Card key={i} className="p-5 cursor-pointer hover:border-primary/40 transition-all" onClick={() => {
-                  setPrompt(`Create a ${template.style} design: ${template.desc}`);
-                  setSelectedStyle(template.style);
-                  setActiveTab("generate");
-                  toast.info(`Template "${template.name}" loaded`);
-                }}>
+                <Card
+                  key={i}
+                  className="p-5 cursor-pointer hover:border-primary/40 transition-all"
+                  onClick={() => {
+                    setPrompt(`Create a ${template.style} design: ${template.desc}`);
+                    setSelectedStyle(template.style);
+                    setActiveTab("generate");
+                    toast.info(`Template "${template.name}" loaded`);
+                  }}
+                >
                   <div className="flex items-center gap-3 mb-2">
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
                       <Type className="h-5 w-5 text-primary" />

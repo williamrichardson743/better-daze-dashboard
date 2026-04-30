@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { trpc } from "@/providers/trpc";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,6 +29,7 @@ import {
   MessageCircle,
   Bot,
   Sparkles,
+  Loader2,
 } from "lucide-react";
 
 const platforms = [
@@ -53,18 +55,44 @@ function generateCaption(productName: string, style: string) {
 }
 
 export default function SocialAutopilot() {
+  const utils = trpc.useUtils();
+
+  // tRPC queries and mutations
+  const { data: dbTemplates, isLoading: loadingTemplates } = trpc.campaign.templates.list.useQuery();
+  const { data: dbPosts, isLoading: loadingPosts } = trpc.campaign.posts.list.useQuery();
+  const createTemplate = trpc.campaign.templates.create.useMutation({
+    onSuccess: () => {
+      utils.campaign.templates.list.invalidate();
+      toast.success("Template saved!");
+    },
+  });
+  const deleteTemplate = trpc.campaign.templates.delete.useMutation({
+    onSuccess: () => {
+      utils.campaign.templates.list.invalidate();
+      toast.success("Template deleted");
+    },
+  });
+  const createPost = trpc.campaign.posts.create.useMutation({
+    onSuccess: () => {
+      utils.campaign.posts.list.invalidate();
+      toast.success("Post scheduled!");
+    },
+  });
+  const deletePost = trpc.campaign.posts.delete.useMutation({
+    onSuccess: () => {
+      utils.campaign.posts.list.invalidate();
+      toast.success("Post removed");
+    },
+  });
   const [activeTab, setActiveTab] = useState("autopilot");
   const [autopilotEnabled, setAutopilotEnabled] = useState(false);
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(["instagram", "twitter"]);
   const [postFrequency, setPostFrequency] = useState("daily");
   const [newTemplateName, setNewTemplateName] = useState("");
   const [newTemplateCaption, setNewTemplateCaption] = useState("");
-  const [newTemplatePlatform, setNewTemplatePlatform] = useState("instagram");
-  const [scheduledPosts, setScheduledPosts] = useState<any[]>([
-    { id: 1, platform: "instagram", content: "Summer Vibes drop is LIVE", scheduled: "2026-05-01T10:00", status: "scheduled" },
-    { id: 2, platform: "tiktok", content: "POV: You just found your new favorite tee", scheduled: "2026-05-02T14:00", status: "scheduled" },
-    { id: 3, platform: "twitter", content: "New design alert — Limited quantities.", scheduled: "2026-05-03T09:00", status: "published" },
-  ]);
+  const [newTemplatePlatform, setNewTemplatePlatform] = useState<"instagram" | "tiktok" | "twitter" | "facebook" | "pinterest">("instagram");
+  const [newPostContent, setNewPostContent] = useState("");
+  const [newPostPlatform, setNewPostPlatform] = useState<"instagram" | "tiktok" | "twitter" | "facebook" | "pinterest" | "youtube" | "other">("instagram");
 
   const togglePlatform = (platformId: string) => {
     setSelectedPlatforms((prev) =>
@@ -84,18 +112,62 @@ export default function SocialAutopilot() {
       toast.error("Fill in template details");
       return;
     }
-    toast.success("Template saved!");
+    createTemplate.mutate({
+      name: newTemplateName,
+      platform: newTemplatePlatform,
+      captionTemplate: newTemplateCaption,
+      hashtagSet: ["#BetterDaze", "#PrintOnDemand"],
+    });
     setNewTemplateName("");
     setNewTemplateCaption("");
   };
 
   const handleGeneratePosts = () => {
-    const newPosts = [
-      { id: Date.now(), platform: "instagram", content: generateCaption("Neon City Tee", "urban").caption, scheduled: "Auto", status: "draft" },
-      { id: Date.now() + 1, platform: "twitter", content: generateCaption("Sunset Dreams Hoodie", "retro").caption, scheduled: "Auto", status: "draft" },
+    const captions = [
+      generateCaption("Neon City Tee", "urban"),
+      generateCaption("Sunset Dreams Hoodie", "retro"),
     ];
-    setScheduledPosts((prev) => [...newPosts, ...prev]);
+    captions.forEach((c, i) => {
+      const platform = (["instagram", "twitter"] as const)[i % 2];
+      createPost.mutate({
+        cycleId: 1,
+        platform,
+        content: `${c.caption} ${c.hashtags.join(" ")}`,
+        scheduledAt: new Date(Date.now() + (i + 1) * 86400000),
+        status: "draft",
+      });
+    });
     toast.success("AI-generated posts ready for review!");
+  };
+
+  const handleCreatePost = () => {
+    if (!newPostContent) {
+      toast.error("Enter post content");
+      return;
+    }
+    createPost.mutate({
+      cycleId: 1,
+      platform: newPostPlatform,
+      content: newPostContent,
+      scheduledAt: new Date(Date.now() + 86400000),
+      status: "scheduled",
+    });
+    setNewPostContent("");
+  };
+
+  const platformBadgeColor = (platform: string) => {
+    const p = platforms.find((pl) => pl.id === platform);
+    return p?.color || "bg-muted";
+  };
+
+  const platformIcon = (platform: string) => {
+    const p = platforms.find((pl) => pl.id === platform);
+    return p?.icon || <Megaphone className="h-4 w-4" />;
+  };
+
+  const platformName = (platform: string) => {
+    const p = platforms.find((pl) => pl.id === platform);
+    return p?.name || platform;
   };
 
   return (
@@ -245,38 +317,80 @@ export default function SocialAutopilot() {
           </TabsContent>
 
           <TabsContent value="scheduler" className="space-y-6">
+            <Card className="p-6">
+              <h3 className="text-lg font-semibold mb-4">Create New Post</h3>
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Platform</Label>
+                    <select
+                      value={newPostPlatform}
+                      onChange={(e) => setNewPostPlatform(e.target.value as any)}
+                      className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
+                    >
+                      {platforms.map((p) => (
+                        <option key={p.id} value={p.id}>{p.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Schedule</Label>
+                    <Input type="datetime-local" defaultValue={new Date(Date.now() + 86400000).toISOString().slice(0, 16)} />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Content</Label>
+                  <textarea
+                    placeholder="What's happening?"
+                    value={newPostContent}
+                    onChange={(e) => setNewPostContent(e.target.value)}
+                    className="w-full min-h-[80px] rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <Button onClick={handleCreatePost} disabled={createPost.isPending || !newPostContent}>
+                    {createPost.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plus className="mr-2 h-4 w-4" />}
+                    Schedule Post
+                  </Button>
+                  <Button variant="outline" onClick={handleGeneratePosts} disabled={createPost.isPending}>
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    AI Generate
+                  </Button>
+                </div>
+              </div>
+            </Card>
+
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">Scheduled Posts</h3>
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={handleGeneratePosts}>
-                  <Sparkles className="mr-2 h-4 w-4" />
-                  AI Generate
-                </Button>
-                <Button size="sm">
-                  <Plus className="mr-2 h-4 w-4" />
-                  New Post
-                </Button>
-              </div>
+              <Badge variant="secondary">{dbPosts?.length || 0} posts</Badge>
             </div>
 
-            <div className="space-y-3">
-              {scheduledPosts.map((post) => {
-                const platform = platforms.find((p) => p.id === post.platform);
-                return (
+            {loadingPosts ? (
+              <div className="flex items-center justify-center py-16">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              </div>
+            ) : !dbPosts || dbPosts.length === 0 ? (
+              <div className="text-center py-12">
+                <Calendar className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+                <p className="text-muted-foreground">No scheduled posts yet.</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {dbPosts.map((post) => (
                   <Card key={post.id} className="p-4">
                     <div className="flex items-start justify-between">
                       <div className="flex items-start gap-3">
-                        <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${platform?.color || "bg-muted"}`}>
-                          {platform?.icon || <Megaphone className="h-4 w-4" />}
+                        <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${platformBadgeColor(post.platform)}`}>
+                          {platformIcon(post.platform)}
                         </div>
                         <div>
                           <p className="text-sm font-medium">{post.content}</p>
                           <div className="flex items-center gap-3 mt-1">
-                            <span className="text-xs text-muted-foreground">{platform?.name}</span>
+                            <span className="text-xs text-muted-foreground">{platformName(post.platform)}</span>
                             <span className="text-xs text-muted-foreground">·</span>
                             <span className="text-xs text-muted-foreground flex items-center gap-1">
                               <Clock className="h-3 w-3" />
-                              {post.scheduled}
+                              {post.scheduledAt ? new Date(post.scheduledAt).toLocaleDateString() : "Draft"}
                             </span>
                           </div>
                         </div>
@@ -295,18 +409,21 @@ export default function SocialAutopilot() {
                           )}
                           {post.status}
                         </Badge>
-                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => {
-                          setScheduledPosts((prev) => prev.filter((p) => p.id !== post.id));
-                          toast.success("Post removed");
-                        }}>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7"
+                          onClick={() => deletePost.mutate({ id: post.id })}
+                          disabled={deletePost.isPending}
+                        >
                           <Trash2 className="h-4 w-4 text-red-600" />
                         </Button>
                       </div>
                     </div>
                   </Card>
-                );
-              })}
-            </div>
+                ))}
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="templates" className="space-y-6">
@@ -326,7 +443,7 @@ export default function SocialAutopilot() {
                     <Label>Platform</Label>
                     <select
                       value={newTemplatePlatform}
-                      onChange={(e) => setNewTemplatePlatform(e.target.value)}
+                      onChange={(e) => setNewTemplatePlatform(e.target.value as any)}
                       className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
                     >
                       {platforms.map((p) => (
@@ -344,29 +461,51 @@ export default function SocialAutopilot() {
                     className="w-full min-h-[100px] rounded-md border border-input bg-background px-3 py-2 text-sm"
                   />
                 </div>
-                <Button onClick={handleAddTemplate}>
-                  <Plus className="mr-2 h-4 w-4" />
+                <Button onClick={handleAddTemplate} disabled={createTemplate.isPending || !newTemplateName || !newTemplateCaption}>
+                  {createTemplate.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plus className="mr-2 h-4 w-4" />}
                   Save Template
                 </Button>
               </div>
             </Card>
 
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {[
-                { name: "Product Drop", platform: "instagram", caption: "{productName} just dropped! ${price} — link in bio." },
-                { name: "Flash Sale", platform: "twitter", caption: "FLASH SALE: {productName} now ${price}! Limited time only." },
-                { name: "Behind the Scenes", platform: "tiktok", caption: "POV: Creating {productName}. The process is the result." },
-                { name: "Testimonial Style", platform: "facebook", caption: "Customers are loving {productName}! Grab yours for ${price}." },
-              ].map((template, i) => (
-                <Card key={i} className="p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    {platforms.find((p) => p.id === template.platform)?.icon}
-                    <span className="text-sm font-medium">{template.name}</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground">{template.caption}</p>
-                </Card>
-              ))}
-            </div>
+            {loadingTemplates ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              </div>
+            ) : !dbTemplates || dbTemplates.length === 0 ? (
+              <div className="text-center py-12">
+                <Wand2 className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+                <p className="text-muted-foreground">No templates yet. Create your first one above.</p>
+              </div>
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {dbTemplates.map((template) => (
+                  <Card key={template.id} className="p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <div className={`flex h-7 w-7 items-center justify-center rounded-md ${platformBadgeColor(template.platform)}`}>
+                          {platformIcon(template.platform)}
+                        </div>
+                        <span className="text-sm font-medium">{template.name}</span>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6"
+                        onClick={() => deleteTemplate.mutate({ id: template.id })}
+                        disabled={deleteTemplate.isPending}
+                      >
+                        <Trash2 className="h-3 w-3 text-red-500" />
+                      </Button>
+                    </div>
+                    <p className="text-xs text-muted-foreground line-clamp-3">{template.captionTemplate}</p>
+                    {template.hashtagSet && Array.isArray(template.hashtagSet) && (template.hashtagSet as string[]).length > 0 ? (
+                      <p className="text-[10px] text-primary mt-2">{(template.hashtagSet as string[]).join(" ")}</p>
+                    ) : null}
+                  </Card>
+                ))}
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="analytics" className="space-y-6">
