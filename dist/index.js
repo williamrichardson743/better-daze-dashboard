@@ -722,7 +722,8 @@ var appRouter = router({
         printifyConfigured: !!process.env.PRINTIFY_API_KEY,
         shopifyConfigured: !!process.env.SHOPIFY_STORE_DOMAIN,
         elevenLabsConfigured: !!process.env.ELEVENLABS_API_KEY,
-        ayrshareConfigured: !!process.env.AYRSHARE_API_KEY
+        ayrshareConfigured: !!process.env.AYRSHARE_API_KEY,
+        youtubeConfigured: !!process.env.YOUTUBE_API
       };
     }),
     saveApiKeys: protectedProcedure.input(
