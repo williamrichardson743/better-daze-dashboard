@@ -396,4 +396,4 @@
 
 **Last Updated:** April 14, 2026  
 **Next Review:** April 21, 2026  
-**Version:** 1.0
+**Version:** 1.1
