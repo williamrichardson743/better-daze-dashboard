@@ -394,6 +394,8 @@
 
 ---
 
-**Last Updated:** April 14, 2026  
+**Last Updated:** April 15, 2026  
 **Next Review:** April 21, 2026  
-**Version:** 1.1
+**Version:** 1.2
+
+<!-- Deployment note: Removed invalid YOUTUBE API (with space) env var from Railway service config to resolve "secret YOUTUBE not found" build error. -->
