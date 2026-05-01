@@ -1,3 +1,4 @@
+// Schema definitions for the application database
 import { mysqlTable, int, varchar, timestamp, text, float, boolean, index, sqlEnum, json } from 'drizzle-orm/mysql-core';
 import { relations } from 'drizzle-orm';
 
