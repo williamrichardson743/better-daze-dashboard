@@ -20,6 +20,9 @@ import TrackOrder from './pages/TrackOrder'
 import SellerOrders from './pages/SellerOrders'
 import DesignStudio from './pages/DesignStudio'
 import CampaignBuilder from './pages/CampaignBuilder'
+import Pipeline from './pages/Pipeline'
+import Checklist from './pages/Checklist'
+import HealthPanel from './pages/HealthPanel'
 
 export default function App() {
   return (
@@ -51,6 +54,9 @@ export default function App() {
       <Route path="/app/orders" element={<SellerOrders />} />
       <Route path="/app/design-studio" element={<DesignStudio />} />
       <Route path="/app/campaigns" element={<CampaignBuilder />} />
+      <Route path="/app/pipeline" element={<Pipeline />} />
+      <Route path="/app/checklist" element={<Checklist />} />
+      <Route path="/app/health" element={<HealthPanel />} />
 
       <Route path="*" element={<NotFound />} />
     </Routes>

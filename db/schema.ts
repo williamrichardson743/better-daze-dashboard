@@ -404,3 +404,65 @@ export const socialTemplates = mysqlTable("socialTemplates", {
 
 export type SocialTemplate = typeof socialTemplates.$inferSelect;
 export type InsertSocialTemplate = typeof socialTemplates.$inferInsert;
+
+// Pipeline runs (autonomous cycle phases)
+export const pipelineRuns = mysqlTable("pipelineRuns", {
+  id: serial("id").primaryKey(),
+  cycleId: bigint("cycleId", { mode: "number", unsigned: true }),
+  name: varchar("name", { length: 255 }).notNull(),
+  status: mysqlEnum("status", ["pending", "in_progress", "completed", "failed", "cancelled"]).default("pending").notNull(),
+  currentPhase: mysqlEnum("currentPhase", ["trend", "design", "printify", "shopify", "social", "log", "complete"]).default("trend").notNull(),
+  trendPhaseStatus: mysqlEnum("trendPhaseStatus", ["pending", "in_progress", "completed", "failed"]).default("pending"),
+  designPhaseStatus: mysqlEnum("designPhaseStatus", ["pending", "in_progress", "completed", "failed"]).default("pending"),
+  printifyPhaseStatus: mysqlEnum("printifyPhaseStatus", ["pending", "in_progress", "completed", "failed"]).default("pending"),
+  shopifyPhaseStatus: mysqlEnum("shopifyPhaseStatus", ["pending", "in_progress", "completed", "failed"]).default("pending"),
+  socialPhaseStatus: mysqlEnum("socialPhaseStatus", ["pending", "in_progress", "completed", "failed"]).default("pending"),
+  logPhaseStatus: mysqlEnum("logPhaseStatus", ["pending", "in_progress", "completed", "failed"]).default("pending"),
+  startedAt: timestamp("startedAt").defaultNow(),
+  completedAt: timestamp("completedAt"),
+  duration: int("duration"), // seconds
+  result: json("result"),
+  errorMessage: text("errorMessage"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().notNull().$onUpdate(() => new Date()),
+});
+
+export type PipelineRun = typeof pipelineRuns.$inferSelect;
+export type InsertPipelineRun = typeof pipelineRuns.$inferInsert;
+
+// Action items / checklist
+export const actionItems = mysqlTable("actionItems", {
+  id: serial("id").primaryKey(),
+  userId: bigint("userId", { mode: "number", unsigned: true }).notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  section: mysqlEnum("section", ["immediate", "short_term", "deferred"]).default("immediate").notNull(),
+  priority: mysqlEnum("priority", ["low", "medium", "high", "critical"]).default("medium").notNull(),
+  status: mysqlEnum("status", ["open", "in_progress", "completed", "cancelled"]).default("open").notNull(),
+  dueDate: timestamp("dueDate"),
+  completedAt: timestamp("completedAt"),
+  tags: json("tags"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().notNull().$onUpdate(() => new Date()),
+});
+
+export type ActionItem = typeof actionItems.$inferSelect;
+export type InsertActionItem = typeof actionItems.$inferInsert;
+
+// API credentials health monitoring
+export const apiCredentials = mysqlTable("apiCredentials", {
+  id: serial("id").primaryKey(),
+  userId: bigint("userId", { mode: "number", unsigned: true }).notNull(),
+  serviceName: varchar("serviceName", { length: 100 }).notNull(),
+  displayName: varchar("displayName", { length: 255 }).notNull(),
+  status: mysqlEnum("status", ["active", "expiring", "expired", "needs_rotation", "error", "unknown"]).default("unknown").notNull(),
+  lastVerifiedAt: timestamp("lastVerifiedAt"),
+  expiresAt: timestamp("expiresAt"),
+  scope: varchar("scope", { length: 500 }),
+  metadata: json("metadata"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().notNull().$onUpdate(() => new Date()),
+});
+
+export type ApiCredential = typeof apiCredentials.$inferSelect;
+export type InsertApiCredential = typeof apiCredentials.$inferInsert;

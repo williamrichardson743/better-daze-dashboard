@@ -17,6 +17,9 @@ import {
   Wand2,
   Rocket,
   Package,
+  GitBranch,
+  CheckSquare,
+  Shield,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -35,6 +38,9 @@ const navigation = [
   { name: "Analytics", href: "/app/analytics", icon: BarChart3 },
   { name: "Team", href: "/app/team", icon: Users },
   { name: "Billing", href: "/app/billing", icon: CreditCard },
+  { name: "Pipeline", href: "/app/pipeline", icon: GitBranch },
+  { name: "Checklist", href: "/app/checklist", icon: CheckSquare },
+  { name: "Health", href: "/app/health", icon: Shield },
 ];
 
 const adminNavigation = [

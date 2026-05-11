@@ -4,6 +4,7 @@ import { adminRouter } from "./admin-router";
 import { billingRouter } from "./billing-router";
 import { shopRouter } from "./shop-router";
 import { campaignRouter } from "./campaign-router";
+import { operationsRouter } from "./operations-router";
 import { createRouter, publicQuery } from "./middleware";
 
 export const appRouter = createRouter({
@@ -14,6 +15,7 @@ export const appRouter = createRouter({
   billing: billingRouter,
   shop: shopRouter,
   campaign: campaignRouter,
+  operations: operationsRouter,
 });
 
 export type AppRouter = typeof appRouter;
