@@ -1,0 +1,6 @@
+[deploy]
+startCommand = "npm start"
+healthcheckPath = "/api/trpc/ping"
+healthcheckTimeout = 100
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3
