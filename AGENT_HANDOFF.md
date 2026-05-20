@@ -1,6 +1,6 @@
 # Better Daze POD Dashboard — Agent Handoff
 
-## Project Status: PRODUCTION-READY
+## Project Status: CODE COMPLETE — DEPLOYMENT PENDING
 
 **Date:** May 13, 2026  
 **Current Agent:** Kimi  
@@ -241,4 +241,27 @@ cd db && npx tsx seed.ts   # Run seed script (create one first)
 
 ---
 
-Handoff complete. Dashboard is production-built and ready for deployment.
+## Deployment Status (May 13, 2026)
+
+| Asset | Status | URL |
+|-------|--------|-----|
+| Shopify Store | LIVE | shop.better-daze-sf.com (4 products) |
+| GitHub Pages Storefront | LIVE | williamrichardson743.github.io/official-narrative-div |
+| Webflow Brand Site | SSL BROKEN | better-daze-sf.com |
+| Dashboard API | NOT DEPLOYED | Needs Railway deploy from master |
+| Dashboard Domain | NOT CONFIGURED | Point dashboard.better-daze-sf.com to Railway |
+
+### What's Blocking
+1. **Railway project** — needs to be created and connected to `better-daze-dashboard` repo
+2. **Environment variables** — DATABASE_URL, Stripe keys, OAuth creds need to be set in Railway
+3. **DNS** — `dashboard.better-daze-sf.com` needs CNAME to Railway domain
+4. **SSL** — `better-daze-sf.com` SSL certificate needs re-issue in IONOS/Webflow
+
+### Next Agent Tasks
+1. Create Railway project, deploy from `master` branch
+2. Add env vars to Railway dashboard
+3. Configure DNS for dashboard subdomain
+4. Fix SSL on main domain
+5. Connect storefront checkout to dashboard API
+
+Handoff complete.
