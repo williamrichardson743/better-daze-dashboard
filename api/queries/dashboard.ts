@@ -226,21 +226,4 @@ export async function findAllAuditLogs(limit?: number) {
   return baseQuery;
 }
 
-// Subscription queries
-export async function findSubscriptionByUserId(userId: number) {
-  const db = getDb();
-  const rows = await db.select().from(schema.subscriptions).where(eq(schema.subscriptions.userId, userId)).limit(1);
-  return rows.at(0);
-}
 
-export async function upsertSubscription(data: typeof schema.subscriptions.$inferInsert) {
-  const db = getDb();
-  const existing = await findSubscriptionByUserId(data.userId);
-  if (existing) {
-    await db.update(schema.subscriptions).set(data).where(eq(schema.subscriptions.id, existing.id));
-    return { ...existing, ...data };
-  } else {
-    await db.insert(schema.subscriptions).values(data);
-    return data;
-  }
-}

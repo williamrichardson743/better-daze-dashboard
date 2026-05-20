@@ -230,12 +230,12 @@ export const shopRouter = createRouter({
       return { order: orders[0], items };
     }),
 
-  // Update order payment status
+  // Update order payment status (Shopify Payments)
   updatePayment: publicQuery
     .input(
       z.object({
         orderId: z.number(),
-        paymentIntentId: z.string(),
+        paymentReference: z.string(),
         status: z.enum(["paid", "failed", "refunded"]),
       })
     )
@@ -244,7 +244,7 @@ export const shopRouter = createRouter({
       await db
         .update(schema.customerOrders)
         .set({
-          stripePaymentIntentId: input.paymentIntentId,
+          paymentReference: input.paymentReference,
           paymentStatus: input.status,
           status: input.status === "paid" ? "paid" : input.status === "failed" ? "pending" : "cancelled",
         })

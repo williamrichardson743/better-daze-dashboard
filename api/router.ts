@@ -1,7 +1,6 @@
 import { authRouter } from "./auth-router";
 import { dashboardRouter } from "./dashboard-router";
 import { adminRouter } from "./admin-router";
-import { billingRouter } from "./billing-router";
 import { shopRouter } from "./shop-router";
 import { campaignRouter } from "./campaign-router";
 import { operationsRouter } from "./operations-router";
@@ -12,7 +11,6 @@ export const appRouter = createRouter({
   auth: authRouter,
   dashboard: dashboardRouter,
   admin: adminRouter,
-  billing: billingRouter,
   shop: shopRouter,
   campaign: campaignRouter,
   operations: operationsRouter,
