@@ -447,3 +447,77 @@ export const apiCredentials = mysqlTable("apiCredentials", {
 
 export type ApiCredential = typeof apiCredentials.$inferSelect;
 export type InsertApiCredential = typeof apiCredentials.$inferInsert;
+
+// ─── AGENT HUB TABLES ───
+
+// Registered agents (AI + human)
+export const agents = mysqlTable("agents", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 100 }).notNull(),
+  type: mysqlEnum("type", ["ai_agent", "human", "system"]).default("ai_agent").notNull(),
+  status: mysqlEnum("status", ["online", "offline", "busy", "idle"]).default("idle").notNull(),
+  currentTaskId: bigint("currentTaskId", { mode: "number", unsigned: true }),
+  lastActive: timestamp("lastActive").defaultNow(),
+  capabilities: json("capabilities").$type<string[]>().default([]),
+  webhookUrl: varchar("webhookUrl", { length: 500 }),
+  apiKey: varchar("apiKey", { length: 255 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().notNull().$onUpdate(() => new Date()),
+});
+
+export type Agent = typeof agents.$inferSelect;
+export type InsertAgent = typeof agents.$inferInsert;
+
+// Tasks for agents
+export const agentTasks = mysqlTable("agentTasks", {
+  id: serial("id").primaryKey(),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  assignedAgentId: bigint("assignedAgentId", { mode: "number", unsigned: true }),
+  createdBy: bigint("createdBy", { mode: "number", unsigned: true }).notNull(),
+  status: mysqlEnum("status", ["pending", "in_progress", "completed", "failed", "blocked"]).default("pending").notNull(),
+  priority: mysqlEnum("priority", ["low", "medium", "high", "urgent"]).default("medium").notNull(),
+  dueDate: timestamp("dueDate"),
+  category: mysqlEnum("category", ["immediate", "short_term", "deferred"]).default("short_term").notNull(),
+  requiresApproval: boolean("requiresApproval").default(false),
+  approvedBy: bigint("approvedBy", { mode: "number", unsigned: true }),
+  approvedAt: timestamp("approvedAt"),
+  result: json("result"),
+  errorMessage: text("errorMessage"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().notNull().$onUpdate(() => new Date()),
+  completedAt: timestamp("completedAt"),
+});
+
+export type AgentTask = typeof agentTasks.$inferSelect;
+export type InsertAgentTask = typeof agentTasks.$inferInsert;
+
+// Agent-to-agent messaging
+export const agentMessages = mysqlTable("agentMessages", {
+  id: serial("id").primaryKey(),
+  fromAgentId: bigint("fromAgentId", { mode: "number", unsigned: true }).notNull(),
+  toAgentId: bigint("toAgentId", { mode: "number", unsigned: true }), // null = broadcast
+  taskId: bigint("taskId", { mode: "number", unsigned: true }),
+  messageType: mysqlEnum("messageType", ["status_update", "question", "result", "error", "broadcast", "handoff"]).default("status_update").notNull(),
+  content: text("content").notNull(),
+  metadata: json("metadata"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type AgentMessage = typeof agentMessages.$inferSelect;
+export type InsertAgentMessage = typeof agentMessages.$inferInsert;
+
+// Task assignment tracking
+export const agentAssignments = mysqlTable("agentAssignments", {
+  id: serial("id").primaryKey(),
+  agentId: bigint("agentId", { mode: "number", unsigned: true }).notNull(),
+  taskId: bigint("taskId", { mode: "number", unsigned: true }).notNull(),
+  assignedAt: timestamp("assignedAt").defaultNow().notNull(),
+  startedAt: timestamp("startedAt"),
+  completedAt: timestamp("completedAt"),
+  result: json("result"),
+  status: mysqlEnum("status", ["assigned", "started", "completed", "failed"]).default("assigned").notNull(),
+});
+
+export type AgentAssignment = typeof agentAssignments.$inferSelect;
+export type InsertAgentAssignment = typeof agentAssignments.$inferInsert;
