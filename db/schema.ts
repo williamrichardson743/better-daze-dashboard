@@ -19,10 +19,17 @@ export const users = mysqlTable("users", {
   name: varchar("name", { length: 255 }),
   email: varchar("email", { length: 320 }),
   avatar: text("avatar"),
-  role: mysqlEnum("role", ["user", "admin", "viewer"]).default("user").notNull(),
-  status: mysqlEnum("status", ["active", "inactive"]).default("active").notNull(),
+  role: mysqlEnum("role", ["user", "admin", "viewer"])
+    .default("user")
+    .notNull(),
+  status: mysqlEnum("status", ["active", "inactive"])
+    .default("active")
+    .notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().notNull().$onUpdate(() => new Date()),
+  updatedAt: timestamp("updatedAt")
+    .defaultNow()
+    .notNull()
+    .$onUpdate(() => new Date()),
   lastSignInAt: timestamp("lastSignInAt").defaultNow().notNull(),
 });
 
@@ -35,16 +42,38 @@ export const cycles = mysqlTable("cycles", {
   userId: bigint("userId", { mode: "number", unsigned: true }).notNull(),
   cycleNumber: int("cycleNumber").notNull(),
   name: varchar("name", { length: 255 }),
-  status: mysqlEnum("status", ["draft", "active", "paused", "completed", "archived"]).default("draft").notNull(),
-  currentPhase: mysqlEnum("currentPhase", ["ideation", "design", "review", "production", "marketing", "complete"]).default("ideation").notNull(),
+  status: mysqlEnum("status", [
+    "draft",
+    "active",
+    "paused",
+    "completed",
+    "archived",
+  ])
+    .default("draft")
+    .notNull(),
+  currentPhase: mysqlEnum("currentPhase", [
+    "ideation",
+    "design",
+    "review",
+    "production",
+    "marketing",
+    "complete",
+  ])
+    .default("ideation")
+    .notNull(),
   startDate: timestamp("startDate"),
   endDate: timestamp("endDate"),
   targetRevenue: decimal("targetRevenue", { precision: 10, scale: 2 }),
-  actualRevenue: decimal("actualRevenue", { precision: 10, scale: 2 }).default("0.00"),
+  actualRevenue: decimal("actualRevenue", { precision: 10, scale: 2 }).default(
+    "0.00"
+  ),
   slogan: varchar("slogan", { length: 500 }),
   theme: varchar("theme", { length: 100 }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().notNull().$onUpdate(() => new Date()),
+  updatedAt: timestamp("updatedAt")
+    .defaultNow()
+    .notNull()
+    .$onUpdate(() => new Date()),
 });
 
 export type Cycle = typeof cycles.$inferSelect;
@@ -60,14 +89,37 @@ export const products = mysqlTable("products", {
   slogan: varchar("slogan", { length: 500 }),
   designUrl: varchar("designUrl", { length: 500 }),
   mockupUrl: varchar("mockupUrl", { length: 500 }),
-  productType: mysqlEnum("productType", ["tshirt", "hoodie", "mug", "poster", "sticker", "hat", "tote", "other"]).default("tshirt").notNull(),
+  productType: mysqlEnum("productType", [
+    "tshirt",
+    "hoodie",
+    "mug",
+    "poster",
+    "sticker",
+    "hat",
+    "tote",
+    "other",
+  ])
+    .default("tshirt")
+    .notNull(),
   price: decimal("price", { precision: 10, scale: 2 }).notNull(),
   cost: decimal("cost", { precision: 10, scale: 2 }),
-  status: mysqlEnum("status", ["draft", "pending", "approved", "live", "sold_out", "discontinued"]).default("draft").notNull(),
+  status: mysqlEnum("status", [
+    "draft",
+    "pending",
+    "approved",
+    "live",
+    "sold_out",
+    "discontinued",
+  ])
+    .default("draft")
+    .notNull(),
   inventory: int("inventory").default(0),
   salesCount: int("salesCount").default(0),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().notNull().$onUpdate(() => new Date()),
+  updatedAt: timestamp("updatedAt")
+    .defaultNow()
+    .notNull()
+    .$onUpdate(() => new Date()),
 });
 
 export type Product = typeof products.$inferSelect;
@@ -83,11 +135,23 @@ export const orders = mysqlTable("orders", {
   quantity: int("quantity").default(1).notNull(),
   unitPrice: decimal("unitPrice", { precision: 10, scale: 2 }).notNull(),
   totalRevenue: decimal("totalRevenue", { precision: 10, scale: 2 }).notNull(),
-  status: mysqlEnum("status", ["pending", "processing", "shipped", "delivered", "cancelled", "refunded"]).default("pending").notNull(),
+  status: mysqlEnum("status", [
+    "pending",
+    "processing",
+    "shipped",
+    "delivered",
+    "cancelled",
+    "refunded",
+  ])
+    .default("pending")
+    .notNull(),
   shippingAddress: json("shippingAddress"),
   trackingNumber: varchar("trackingNumber", { length: 100 }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().notNull().$onUpdate(() => new Date()),
+  updatedAt: timestamp("updatedAt")
+    .defaultNow()
+    .notNull()
+    .$onUpdate(() => new Date()),
 });
 
 export type Order = typeof orders.$inferSelect;
@@ -97,13 +161,23 @@ export type InsertOrder = typeof orders.$inferInsert;
 export const socialAccounts = mysqlTable("socialAccounts", {
   id: serial("id").primaryKey(),
   userId: bigint("userId", { mode: "number", unsigned: true }).notNull(),
-  platform: mysqlEnum("platform", ["instagram", "tiktok", "twitter", "facebook", "pinterest", "youtube", "other"]).notNull(),
+  platform: mysqlEnum("platform", [
+    "instagram",
+    "tiktok",
+    "twitter",
+    "facebook",
+    "pinterest",
+    "youtube",
+    "other",
+  ]).notNull(),
   accountHandle: varchar("accountHandle", { length: 255 }),
   accountId: varchar("accountId", { length: 255 }),
   accessToken: text("accessToken"),
   refreshToken: text("refreshToken"),
   followerCount: int("followerCount").default(0),
-  status: mysqlEnum("status", ["active", "expired", "disconnected", "error"]).default("active").notNull(),
+  status: mysqlEnum("status", ["active", "expired", "disconnected", "error"])
+    .default("active")
+    .notNull(),
   lastSyncAt: timestamp("lastSyncAt"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
@@ -116,11 +190,21 @@ export const socialPosts = mysqlTable("socialPosts", {
   id: serial("id").primaryKey(),
   cycleId: bigint("cycleId", { mode: "number", unsigned: true }).notNull(),
   accountId: bigint("accountId", { mode: "number", unsigned: true }).notNull(),
-  platform: mysqlEnum("platform", ["instagram", "tiktok", "twitter", "facebook", "pinterest", "youtube", "other"]).notNull(),
+  platform: mysqlEnum("platform", [
+    "instagram",
+    "tiktok",
+    "twitter",
+    "facebook",
+    "pinterest",
+    "youtube",
+    "other",
+  ]).notNull(),
   postId: varchar("postId", { length: 255 }),
   content: text("content"),
   mediaUrls: json("mediaUrls"),
-  status: mysqlEnum("status", ["scheduled", "published", "failed", "draft"]).default("draft").notNull(),
+  status: mysqlEnum("status", ["scheduled", "published", "failed", "draft"])
+    .default("draft")
+    .notNull(),
   scheduledAt: timestamp("scheduledAt"),
   publishedAt: timestamp("publishedAt"),
   metrics: json("metrics"),
@@ -135,8 +219,25 @@ export const transmissionLogs = mysqlTable("transmissionLogs", {
   id: serial("id").primaryKey(),
   cycleId: bigint("cycleId", { mode: "number", unsigned: true }).notNull(),
   message: text("message").notNull(),
-  logType: mysqlEnum("logType", ["info", "warning", "error", "success", "debug"]).default("info").notNull(),
-  phase: mysqlEnum("phase", ["ideation", "design", "review", "production", "marketing", "complete"]).default("ideation").notNull(),
+  logType: mysqlEnum("logType", [
+    "info",
+    "warning",
+    "error",
+    "success",
+    "debug",
+  ])
+    .default("info")
+    .notNull(),
+  phase: mysqlEnum("phase", [
+    "ideation",
+    "design",
+    "review",
+    "production",
+    "marketing",
+    "complete",
+  ])
+    .default("ideation")
+    .notNull(),
   metadata: json("metadata"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
@@ -148,19 +249,34 @@ export type InsertTransmissionLog = typeof transmissionLogs.$inferInsert;
 export const adminSettings = mysqlTable("adminSettings", {
   id: serial("id").primaryKey(),
   userId: bigint("userId", { mode: "number", unsigned: true }).notNull(),
-  theme: mysqlEnum("theme", ["light", "dark", "auto"]).default("auto").notNull(),
+  theme: mysqlEnum("theme", ["light", "dark", "auto"])
+    .default("auto")
+    .notNull(),
   emailNotifications: boolean("emailNotifications").default(true),
   inAppNotifications: boolean("inAppNotifications").default(true),
-  notificationFrequency: mysqlEnum("notificationFrequency", ["instant", "daily", "weekly"]).default("daily").notNull(),
+  notificationFrequency: mysqlEnum("notificationFrequency", [
+    "instant",
+    "daily",
+    "weekly",
+  ])
+    .default("daily")
+    .notNull(),
   itemsPerPage: int("itemsPerPage").default(20),
-  defaultView: mysqlEnum("defaultView", ["grid", "list"]).default("grid").notNull(),
+  defaultView: mysqlEnum("defaultView", ["grid", "list"])
+    .default("grid")
+    .notNull(),
   autoPublish: boolean("autoPublish").default(false),
-  cycleFrequency: mysqlEnum("cycleFrequency", ["daily", "weekly", "monthly"]).default("weekly").notNull(),
+  cycleFrequency: mysqlEnum("cycleFrequency", ["daily", "weekly", "monthly"])
+    .default("weekly")
+    .notNull(),
   companyName: varchar("companyName", { length: 255 }).default("Better Daze"),
   logoUrl: varchar("logoUrl", { length: 500 }),
   primaryColor: varchar("primaryColor", { length: 7 }).default("#6366f1"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().notNull().$onUpdate(() => new Date()),
+  updatedAt: timestamp("updatedAt")
+    .defaultNow()
+    .notNull()
+    .$onUpdate(() => new Date()),
 });
 
 export type AdminSetting = typeof adminSettings.$inferSelect;
@@ -215,7 +331,10 @@ export const roles = mysqlTable("roles", {
   description: varchar("description", { length: 255 }),
   isCustom: boolean("isCustom").default(false),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().notNull().$onUpdate(() => new Date()),
+  updatedAt: timestamp("updatedAt")
+    .defaultNow()
+    .notNull()
+    .$onUpdate(() => new Date()),
 });
 
 export type Role = typeof roles.$inferSelect;
@@ -225,7 +344,15 @@ export type InsertRole = typeof roles.$inferInsert;
 export const permissions = mysqlTable("permissions", {
   id: serial("id").primaryKey(),
   roleId: bigint("roleId", { mode: "number", unsigned: true }).notNull(),
-  resource: mysqlEnum("resource", ["products", "orders", "cycles", "users", "settings", "analytics", "social"]).notNull(),
+  resource: mysqlEnum("resource", [
+    "products",
+    "orders",
+    "cycles",
+    "users",
+    "settings",
+    "analytics",
+    "social",
+  ]).notNull(),
   action: mysqlEnum("action", ["create", "read", "update", "delete"]).notNull(),
   granted: boolean("granted").default(false),
 });
@@ -247,6 +374,39 @@ export const auditLogs = mysqlTable("auditLogs", {
 export type AuditLog = typeof auditLogs.$inferSelect;
 export type InsertAuditLog = typeof auditLogs.$inferInsert;
 
+// Subscriptions table (Stripe billing)
+export const subscriptions = mysqlTable("subscriptions", {
+  id: serial("id").primaryKey(),
+  userId: bigint("userId", { mode: "number", unsigned: true })
+    .notNull()
+    .unique(),
+  stripeCustomerId: varchar("stripeCustomerId", { length: 255 }),
+  stripeSubscriptionId: varchar("stripeSubscriptionId", { length: 255 }),
+  stripePriceId: varchar("stripePriceId", { length: 255 }),
+  plan: mysqlEnum("plan", ["starter", "growth", "enterprise"])
+    .default("starter")
+    .notNull(),
+  status: mysqlEnum("status", [
+    "active",
+    "canceled",
+    "past_due",
+    "unpaid",
+    "trialing",
+  ])
+    .default("active")
+    .notNull(),
+  currentPeriodStart: timestamp("currentPeriodStart"),
+  currentPeriodEnd: timestamp("currentPeriodEnd"),
+  cancelAtPeriodEnd: boolean("cancelAtPeriodEnd").default(false),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt")
+    .defaultNow()
+    .notNull()
+    .$onUpdate(() => new Date()),
+});
+
+export type Subscription = typeof subscriptions.$inferSelect;
+export type InsertSubscription = typeof subscriptions.$inferInsert;
 // ─── E-COMMERCE TABLES ───
 
 // Product variants (sizes, colors)
@@ -299,7 +459,10 @@ export type InsertCollection = typeof collections.$inferInsert;
 export const productCollections = mysqlTable("productCollections", {
   id: serial("id").primaryKey(),
   productId: bigint("productId", { mode: "number", unsigned: true }).notNull(),
-  collectionId: bigint("collectionId", { mode: "number", unsigned: true }).notNull(),
+  collectionId: bigint("collectionId", {
+    mode: "number",
+    unsigned: true,
+  }).notNull(),
 });
 
 export type ProductCollection = typeof productCollections.$inferSelect;
@@ -312,9 +475,34 @@ export const customerOrders = mysqlTable("customerOrders", {
   email: varchar("email", { length: 320 }).notNull(),
   customerName: varchar("customerName", { length: 255 }),
   phone: varchar("phone", { length: 30 }),
-  status: mysqlEnum("status", ["pending", "paid", "processing", "shipped", "delivered", "cancelled", "refunded"]).default("pending").notNull(),
-  fulfillmentStatus: mysqlEnum("fulfillmentStatus", ["unfulfilled", "pending", "fulfilled", "partial", "returned"]).default("unfulfilled").notNull(),
-  paymentStatus: mysqlEnum("paymentStatus", ["pending", "paid", "failed", "refunded"]).default("pending").notNull(),
+  status: mysqlEnum("status", [
+    "pending",
+    "paid",
+    "processing",
+    "shipped",
+    "delivered",
+    "cancelled",
+    "refunded",
+  ])
+    .default("pending")
+    .notNull(),
+  fulfillmentStatus: mysqlEnum("fulfillmentStatus", [
+    "unfulfilled",
+    "pending",
+    "fulfilled",
+    "partial",
+    "returned",
+  ])
+    .default("unfulfilled")
+    .notNull(),
+  paymentStatus: mysqlEnum("paymentStatus", [
+    "pending",
+    "paid",
+    "failed",
+    "refunded",
+  ])
+    .default("pending")
+    .notNull(),
   subtotal: decimal("subtotal", { precision: 10, scale: 2 }).notNull(),
   shipping: decimal("shipping", { precision: 10, scale: 2 }).default("0.00"),
   tax: decimal("tax", { precision: 10, scale: 2 }).default("0.00"),
@@ -327,7 +515,10 @@ export const customerOrders = mysqlTable("customerOrders", {
   trackingUrl: varchar("trackingUrl", { length: 500 }),
   notes: text("notes"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().notNull().$onUpdate(() => new Date()),
+  updatedAt: timestamp("updatedAt")
+    .defaultNow()
+    .notNull()
+    .$onUpdate(() => new Date()),
 });
 
 export type CustomerOrder = typeof customerOrders.$inferSelect;
@@ -356,15 +547,30 @@ export const campaigns = mysqlTable("campaigns", {
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
   cycleId: bigint("cycleId", { mode: "number", unsigned: true }),
-  status: mysqlEnum("status", ["draft", "scheduled", "active", "paused", "completed"]).default("draft").notNull(),
+  status: mysqlEnum("status", [
+    "draft",
+    "scheduled",
+    "active",
+    "paused",
+    "completed",
+  ])
+    .default("draft")
+    .notNull(),
   startDate: timestamp("startDate"),
   endDate: timestamp("endDate"),
   platforms: json("platforms"), // ["instagram", "tiktok", "twitter"]
   autoPublishProducts: boolean("autoPublishProducts").default(false),
   autoGenerateSocial: boolean("autoGenerateSocial").default(false),
-  postFrequency: mysqlEnum("postFrequency", ["hourly", "daily", "weekly"]).default("daily"),
+  postFrequency: mysqlEnum("postFrequency", [
+    "hourly",
+    "daily",
+    "weekly",
+  ]).default("daily"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().notNull().$onUpdate(() => new Date()),
+  updatedAt: timestamp("updatedAt")
+    .defaultNow()
+    .notNull()
+    .$onUpdate(() => new Date()),
 });
 
 export type Campaign = typeof campaigns.$inferSelect;
@@ -375,7 +581,13 @@ export const socialTemplates = mysqlTable("socialTemplates", {
   id: serial("id").primaryKey(),
   userId: bigint("userId", { mode: "number", unsigned: true }).notNull(),
   name: varchar("name", { length: 255 }).notNull(),
-  platform: mysqlEnum("platform", ["instagram", "tiktok", "twitter", "facebook", "pinterest"]).notNull(),
+  platform: mysqlEnum("platform", [
+    "instagram",
+    "tiktok",
+    "twitter",
+    "facebook",
+    "pinterest",
+  ]).notNull(),
   captionTemplate: text("captionTemplate"),
   hashtagSet: json("hashtagSet"),
   imagePrompt: text("imagePrompt"),
@@ -391,21 +603,72 @@ export const pipelineRuns = mysqlTable("pipelineRuns", {
   id: serial("id").primaryKey(),
   cycleId: bigint("cycleId", { mode: "number", unsigned: true }),
   name: varchar("name", { length: 255 }).notNull(),
-  status: mysqlEnum("status", ["pending", "in_progress", "completed", "failed", "cancelled"]).default("pending").notNull(),
-  currentPhase: mysqlEnum("currentPhase", ["trend", "design", "printify", "shopify", "social", "log", "complete"]).default("trend").notNull(),
-  trendPhaseStatus: mysqlEnum("trendPhaseStatus", ["pending", "in_progress", "completed", "failed"]).default("pending"),
-  designPhaseStatus: mysqlEnum("designPhaseStatus", ["pending", "in_progress", "completed", "failed"]).default("pending"),
-  printifyPhaseStatus: mysqlEnum("printifyPhaseStatus", ["pending", "in_progress", "completed", "failed"]).default("pending"),
-  shopifyPhaseStatus: mysqlEnum("shopifyPhaseStatus", ["pending", "in_progress", "completed", "failed"]).default("pending"),
-  socialPhaseStatus: mysqlEnum("socialPhaseStatus", ["pending", "in_progress", "completed", "failed"]).default("pending"),
-  logPhaseStatus: mysqlEnum("logPhaseStatus", ["pending", "in_progress", "completed", "failed"]).default("pending"),
+  status: mysqlEnum("status", [
+    "pending",
+    "in_progress",
+    "completed",
+    "failed",
+    "cancelled",
+  ])
+    .default("pending")
+    .notNull(),
+  currentPhase: mysqlEnum("currentPhase", [
+    "trend",
+    "design",
+    "printify",
+    "shopify",
+    "social",
+    "log",
+    "complete",
+  ])
+    .default("trend")
+    .notNull(),
+  trendPhaseStatus: mysqlEnum("trendPhaseStatus", [
+    "pending",
+    "in_progress",
+    "completed",
+    "failed",
+  ]).default("pending"),
+  designPhaseStatus: mysqlEnum("designPhaseStatus", [
+    "pending",
+    "in_progress",
+    "completed",
+    "failed",
+  ]).default("pending"),
+  printifyPhaseStatus: mysqlEnum("printifyPhaseStatus", [
+    "pending",
+    "in_progress",
+    "completed",
+    "failed",
+  ]).default("pending"),
+  shopifyPhaseStatus: mysqlEnum("shopifyPhaseStatus", [
+    "pending",
+    "in_progress",
+    "completed",
+    "failed",
+  ]).default("pending"),
+  socialPhaseStatus: mysqlEnum("socialPhaseStatus", [
+    "pending",
+    "in_progress",
+    "completed",
+    "failed",
+  ]).default("pending"),
+  logPhaseStatus: mysqlEnum("logPhaseStatus", [
+    "pending",
+    "in_progress",
+    "completed",
+    "failed",
+  ]).default("pending"),
   startedAt: timestamp("startedAt").defaultNow(),
   completedAt: timestamp("completedAt"),
   duration: int("duration"), // seconds
   result: json("result"),
   errorMessage: text("errorMessage"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().notNull().$onUpdate(() => new Date()),
+  updatedAt: timestamp("updatedAt")
+    .defaultNow()
+    .notNull()
+    .$onUpdate(() => new Date()),
 });
 
 export type PipelineRun = typeof pipelineRuns.$inferSelect;
@@ -417,18 +680,65 @@ export const actionItems = mysqlTable("actionItems", {
   userId: bigint("userId", { mode: "number", unsigned: true }).notNull(),
   title: varchar("title", { length: 255 }).notNull(),
   description: text("description"),
-  section: mysqlEnum("section", ["immediate", "short_term", "deferred"]).default("immediate").notNull(),
-  priority: mysqlEnum("priority", ["low", "medium", "high", "critical"]).default("medium").notNull(),
-  status: mysqlEnum("status", ["open", "in_progress", "completed", "cancelled"]).default("open").notNull(),
+  section: mysqlEnum("section", ["immediate", "short_term", "deferred"])
+    .default("immediate")
+    .notNull(),
+  priority: mysqlEnum("priority", ["low", "medium", "high", "critical"])
+    .default("medium")
+    .notNull(),
+  status: mysqlEnum("status", ["open", "in_progress", "completed", "cancelled"])
+    .default("open")
+    .notNull(),
   dueDate: timestamp("dueDate"),
   completedAt: timestamp("completedAt"),
   tags: json("tags"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().notNull().$onUpdate(() => new Date()),
+  updatedAt: timestamp("updatedAt")
+    .defaultNow()
+    .notNull()
+    .$onUpdate(() => new Date()),
 });
 
 export type ActionItem = typeof actionItems.$inferSelect;
 export type InsertActionItem = typeof actionItems.$inferInsert;
+
+// Agent Hub tasks
+export const agentTasks = mysqlTable("agentTasks", {
+  id: serial("id").primaryKey(),
+  createdBy: bigint("createdBy", { mode: "number", unsigned: true }).notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  priority: mysqlEnum("priority", ["low", "medium", "high", "urgent"])
+    .default("medium")
+    .notNull(),
+  category: varchar("category", { length: 100 })
+    .default("01_content_creation")
+    .notNull(),
+  status: mysqlEnum("status", [
+    "pending",
+    "in_progress",
+    "completed",
+    "failed",
+    "blocked",
+  ])
+    .default("pending")
+    .notNull(),
+  requiresApproval: boolean("requiresApproval").default(false),
+  metadata: json("metadata"),
+  contextStack:
+    json("contextStack").$type<
+      Array<{ origin: string; timestamp: string; log: string }>
+    >(),
+  outputData: json("outputData").$type<Record<string, unknown>>(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt")
+    .defaultNow()
+    .notNull()
+    .$onUpdate(() => new Date()),
+});
+
+export type AgentTask = typeof agentTasks.$inferSelect;
+export type InsertAgentTask = typeof agentTasks.$inferInsert;
 
 // API credentials health monitoring
 export const apiCredentials = mysqlTable("apiCredentials", {
@@ -436,13 +746,25 @@ export const apiCredentials = mysqlTable("apiCredentials", {
   userId: bigint("userId", { mode: "number", unsigned: true }).notNull(),
   serviceName: varchar("serviceName", { length: 100 }).notNull(),
   displayName: varchar("displayName", { length: 255 }).notNull(),
-  status: mysqlEnum("status", ["active", "expiring", "expired", "needs_rotation", "error", "unknown"]).default("unknown").notNull(),
+  status: mysqlEnum("status", [
+    "active",
+    "expiring",
+    "expired",
+    "needs_rotation",
+    "error",
+    "unknown",
+  ])
+    .default("unknown")
+    .notNull(),
   lastVerifiedAt: timestamp("lastVerifiedAt"),
   expiresAt: timestamp("expiresAt"),
   scope: varchar("scope", { length: 500 }),
   metadata: json("metadata"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().notNull().$onUpdate(() => new Date()),
+  updatedAt: timestamp("updatedAt")
+    .defaultNow()
+    .notNull()
+    .$onUpdate(() => new Date()),
 });
 
 export type ApiCredential = typeof apiCredentials.$inferSelect;
