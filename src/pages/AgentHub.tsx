@@ -1,525 +1,441 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { trpc } from "@/providers/trpc";
 import DashboardLayout from "@/components/DashboardLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { toast } from "sonner";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
+  Bot,
+  Loader2,
+  Plus,
+  CheckCircle2,
+  Clock,
   AlertTriangle,
-  MapPin,
-  Layers,
-  ShieldAlert,
-  History,
-  Database,
+  XCircle,
+  CircleDot,
+  Send,
+  MessageSquare,
+  Zap,
+  User,
+  Radio,
 } from "lucide-react";
 
+const statusConfig: Record<string, { color: string; icon: React.ReactNode }> = {
+  online: { color: "text-green-500", icon: <Radio className="h-3 w-3" /> },
+  offline: { color: "text-gray-500", icon: <CircleDot className="h-3 w-3" /> },
+  busy: { color: "text-amber-500", icon: <Zap className="h-3 w-3" /> },
+  idle: { color: "text-blue-500", icon: <Clock className="h-3 w-3" /> },
+};
+
+const taskStatusConfig: Record<string, { variant: "default" | "secondary" | "destructive" | "outline"; icon: React.ReactNode }> = {
+  pending: { variant: "outline", icon: <Clock className="h-3 w-3" /> },
+  in_progress: { variant: "secondary", icon: <Zap className="h-3 w-3" /> },
+  completed: { variant: "default", icon: <CheckCircle2 className="h-3 w-3" /> },
+  failed: { variant: "destructive", icon: <XCircle className="h-3 w-3" /> },
+  blocked: { variant: "outline", icon: <AlertTriangle className="h-3 w-3" /> },
+};
+
+const priorityColors: Record<string, string> = {
+  low: "bg-gray-500/10 text-gray-400",
+  medium: "bg-blue-500/10 text-blue-400",
+  high: "bg-amber-500/10 text-amber-400",
+  urgent: "bg-red-500/10 text-red-400",
+};
+
+const typeConfig: Record<string, { icon: React.ReactNode; color: string }> = {
+  ai_agent: { icon: <Bot className="h-4 w-4" />, color: "text-purple-400" },
+  human: { icon: <User className="h-4 w-4" />, color: "text-green-400" },
+  system: { icon: <Zap className="h-4 w-4" />, color: "text-yellow-400" },
+};
+
 export default function AgentHub() {
-  const utils = trpc.useContext();
-  const { data: tasks, isLoading } = trpc.agentHub.listTasks.useQuery({});
-  const { data: user } = trpc.auth.me.useQuery();
+  const utils = trpc.useUtils();
+  const { data: agents, isLoading: loadingAgents } = trpc.agent.list.useQuery();
+  const { data: tasks, isLoading: loadingTasks } = trpc.agent.tasks.list.useQuery();
+  const { data: messages, isLoading: loadingMessages } = trpc.agent.messages.list.useQuery();
 
-  const [pushAlerts, setPushAlerts] = useState<
-    Array<{ id: number; message: string }>
-  >([]);
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [priority, setPriority] = useState<
-    "low" | "medium" | "high" | "urgent"
-  >("medium");
-  const [category, setCategory] = useState("01_content_creation");
-  const [isHyperLocal, setIsHyperLocal] = useState(false);
-  const [requiresApproval, setRequiresApproval] = useState(false);
-
-  const createTaskMutation = trpc.agentHub.createTask.useMutation({
-    onSuccess: () => {
-      utils.agentHub.listTasks.invalidate();
-      setTitle("");
-      setDescription("");
-    },
+  const createAgent = trpc.agent.register.useMutation({
+    onSuccess: () => { utils.agent.list.invalidate(); toast.success("Agent registered!"); },
+  });
+  const createTask = trpc.agent.tasks.create.useMutation({
+    onSuccess: () => { utils.agent.tasks.list.invalidate(); toast.success("Task created!"); },
+  });
+  const updateTask = trpc.agent.tasks.update.useMutation({
+    onSuccess: () => { utils.agent.tasks.list.invalidate(); },
+  });
+  const sendMessage = trpc.agent.messages.send.useMutation({
+    onSuccess: () => { utils.agent.messages.list.invalidate(); },
   });
 
-  const approveTaskMutation = trpc.agentHub.updateTaskStatus.useMutation({
-    onSuccess: () => utils.agentHub.listTasks.invalidate(),
-  });
+  const [newTaskTitle, setNewTaskTitle] = useState("");
+  const [newTaskDesc, setNewTaskDesc] = useState("");
+  const [newTaskPriority, setNewTaskPriority] = useState<"low" | "medium" | "high" | "urgent">("medium");
+  const [newTaskCategory, setNewTaskCategory] = useState<"immediate" | "short_term" | "deferred">("short_term");
+  const [newAgentName, setNewAgentName] = useState("");
+  const [newAgentType, setNewAgentType] = useState<"ai_agent" | "human" | "system">("ai_agent");
+  const [newMsg, setNewMsg] = useState("");
+  const [activeTab, setActiveTab] = useState("agents");
 
-  // Derive approval-gate alerts from live task list
-  useEffect(() => {
-    const gated =
-      tasks?.filter(t => t.requiresApproval && t.status === "pending") ?? [];
-    setPushAlerts(
-      gated.map(t => ({
-        id: t.id,
-        message: `ACTION CONSTRAINED: "${t.title}" holds pipeline progress. Signature validation required.`,
-      }))
-    );
-  }, [tasks]);
-
-  const isAdmin = user?.role === "admin";
-
-  if (isLoading)
-    return (
-      <DashboardLayout>
-        <div className="p-8 text-center font-mono animate-pulse">
-          LOADING SYSTEM CONTEXT...
-        </div>
-      </DashboardLayout>
-    );
-
-  const pending = tasks?.filter(t => t.status === "pending") || [];
-  const inProgress = tasks?.filter(t => t.status === "in_progress") || [];
-  const completed = tasks?.filter(t => t.status === "completed") || [];
-
-  const handleCreateTask = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!title) return;
-    await createTaskMutation.mutateAsync({
-      title,
-      description,
-      priority,
-      category,
-      requiresApproval,
-      metadata: { isHyperLocal },
-    });
-  };
-
-  const getPriorityColor = (lvl: string) => {
-    switch (lvl) {
-      case "urgent":
-        return "bg-red-600 text-white border-red-700";
-      case "high":
-        return "bg-orange-500 text-black border-orange-600";
-      case "medium":
-        return "bg-amber-400 text-black border-amber-500";
-      default:
-        return "bg-zinc-100 text-zinc-800 border-zinc-300 dark:bg-zinc-800 dark:text-zinc-200";
-    }
-  };
+  const pendingCount = (tasks || []).filter((t) => t.status === "pending").length;
+  const inProgressCount = (tasks || []).filter((t) => t.status === "in_progress").length;
+  const completedCount = (tasks || []).filter((t) => t.status === "completed").length;
 
   return (
     <DashboardLayout>
-      <div className="space-y-8 font-mono max-w-7xl mx-auto text-zinc-900 dark:text-zinc-50">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b-4 border-black dark:border-zinc-800 pb-4 gap-4">
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-black uppercase tracking-tighter">
-              Agent Operational Hub
-            </h1>
-            <p className="text-xs text-zinc-500 mt-1 uppercase">
-              Classification: Unclassified // Dissemination: Unlimited
+            <h1 className="text-2xl font-bold tracking-tight">Agent Hub</h1>
+            <p className="text-sm text-muted-foreground">
+              Command center for all AI agents and tasks. Register agents, assign work, track progress.
             </p>
           </div>
-          <div className="text-right text-xs bg-black text-white px-3 py-1.5 uppercase font-bold tracking-widest dark:bg-zinc-800">
-            DOC. NO. BD-OPS-2026
-          </div>
+          <Badge variant="secondary" className="gap-1">
+            <Bot className="h-3 w-3" />
+            {agents?.length || 0} agents
+          </Badge>
         </div>
 
-        {/* Approval-gate alert banner */}
-        {pushAlerts.length > 0 && (
-          <div className="border-4 border-red-600 bg-red-50 dark:bg-zinc-950 text-red-600 p-4 rounded-none shadow-md space-y-2">
-            <div className="flex items-center gap-2 font-black text-sm uppercase tracking-wider">
-              <ShieldAlert className="h-5 w-5 animate-bounce" />
-              <span>⚠️ Core Push Notification: Attention Flag Set</span>
-            </div>
-            <div className="text-xs space-y-1.5 font-bold">
-              {pushAlerts.map(alert => (
-                <div
-                  key={alert.id}
-                  className="bg-white dark:bg-red-950/40 p-2 border border-red-300 flex justify-between items-center"
-                >
-                  <span>{alert.message}</span>
-                  <span className="text-[10px] bg-red-600 text-white px-1.5 py-0.5 ml-4 shrink-0">
-                    PENDING VERIFICATION
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+        {/* Stats */}
+        <div className="grid gap-4 sm:grid-cols-4">
+          <Card>
+            <CardContent className="p-5">
+              <div className="flex items-center gap-2 mb-2">
+                <Bot className="h-4 w-4 text-purple-400" />
+                <span className="text-sm text-muted-foreground">Agents</span>
+              </div>
+              <p className="text-2xl font-bold">{agents?.length || 0}</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-5">
+              <div className="flex items-center gap-2 mb-2">
+                <Clock className="h-4 w-4 text-amber-400" />
+                <span className="text-sm text-muted-foreground">Pending</span>
+              </div>
+              <p className="text-2xl font-bold">{pendingCount}</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-5">
+              <div className="flex items-center gap-2 mb-2">
+                <Zap className="h-4 w-4 text-blue-400" />
+                <span className="text-sm text-muted-foreground">In Progress</span>
+              </div>
+              <p className="text-2xl font-bold">{inProgressCount}</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-5">
+              <div className="flex items-center gap-2 mb-2">
+                <CheckCircle2 className="h-4 w-4 text-green-400" />
+                <span className="text-sm text-muted-foreground">Done</span>
+              </div>
+              <p className="text-2xl font-bold">{completedCount}</p>
+            </CardContent>
+          </Card>
+        </div>
 
-        {/* Kanban Board */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Pending */}
-          <Card className="border-2 border-black rounded-none shadow-md bg-zinc-50 dark:bg-zinc-900/40">
-            <CardHeader className="border-b-2 border-black bg-white dark:bg-zinc-950 p-4">
-              <CardTitle className="text-base font-bold uppercase flex justify-between items-center">
-                <span>01 // Pending Gates</span>
-                <Badge
-                  variant="secondary"
-                  className="rounded-none bg-black text-white"
-                >
-                  {pending.length}
-                </Badge>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-4 space-y-4 max-h-[60vh] overflow-y-auto">
-              {pending.map(task => (
-                <TaskCard
-                  key={task.id}
-                  task={task}
-                  isAdmin={isAdmin}
-                  onApprove={() =>
-                    approveTaskMutation.mutate({
-                      taskId: task.id,
-                      status: "in_progress",
-                      agentLog:
-                        "Vector manual clearance verified. Action dispatched to execution pipeline.",
-                    })
-                  }
-                  colorFn={getPriorityColor}
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList>
+            <TabsTrigger value="agents" className="gap-2">
+              <Bot className="h-4 w-4" />
+              Agents
+            </TabsTrigger>
+            <TabsTrigger value="tasks" className="gap-2">
+              <Zap className="h-4 w-4" />
+              Tasks
+            </TabsTrigger>
+            <TabsTrigger value="messages" className="gap-2">
+              <MessageSquare className="h-4 w-4" />
+              Messages
+            </TabsTrigger>
+          </TabsList>
+
+          {/* AGENTS TAB */}
+          <TabsContent value="agents" className="space-y-6">
+            <Card className="p-5">
+              <h3 className="text-sm font-semibold mb-4">Register New Agent</h3>
+              <div className="flex gap-3">
+                <Input
+                  placeholder="Agent name (e.g., Manus, Claude)"
+                  value={newAgentName}
+                  onChange={(e) => setNewAgentName(e.target.value)}
+                  className="flex-1"
                 />
-              ))}
-            </CardContent>
-          </Card>
-
-          {/* In Progress */}
-          <Card className="border-2 border-black rounded-none shadow-md bg-zinc-50 dark:bg-zinc-900/40">
-            <CardHeader className="border-b-2 border-black bg-white dark:bg-zinc-950 p-4">
-              <CardTitle className="text-base font-bold uppercase flex justify-between items-center">
-                <span>02 // Pipeline Execution</span>
-                <Badge
-                  variant="secondary"
-                  className="rounded-none bg-black text-white"
+                <select
+                  value={newAgentType}
+                  onChange={(e) => setNewAgentType(e.target.value as any)}
+                  className="h-10 rounded-md border border-input bg-background px-3 text-sm"
                 >
-                  {inProgress.length}
-                </Badge>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-4 space-y-4 max-h-[60vh] overflow-y-auto">
-              {inProgress.map(task => (
-                <TaskCard
-                  key={task.id}
-                  task={task}
-                  isAdmin={isAdmin}
-                  onApprove={() =>
-                    approveTaskMutation.mutate({
-                      taskId: task.id,
-                      status: "completed",
-                      agentLog:
-                        "Pipeline execution finished. Triggering state machine evaluation.",
-                    })
-                  }
-                  isRunning
-                  colorFn={getPriorityColor}
-                />
-              ))}
-            </CardContent>
-          </Card>
-
-          {/* Completed */}
-          <Card className="border-2 border-black rounded-none shadow-md bg-zinc-50 dark:bg-zinc-900/40">
-            <CardHeader className="border-b-2 border-black bg-white dark:bg-zinc-950 p-4">
-              <CardTitle className="text-base font-bold uppercase flex justify-between items-center">
-                <span>03 // Logged Output</span>
-                <Badge
-                  variant="secondary"
-                  className="rounded-none bg-black text-white"
+                  <option value="ai_agent">AI Agent</option>
+                  <option value="human">Human</option>
+                  <option value="system">System</option>
+                </select>
+                <Button
+                  onClick={() => {
+                    if (!newAgentName) { toast.error("Enter a name"); return; }
+                    createAgent.mutate({ name: newAgentName, type: newAgentType, capabilities: [] });
+                    setNewAgentName("");
+                  }}
+                  disabled={createAgent.isPending}
                 >
-                  {completed.length}
-                </Badge>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-4 space-y-4 max-h-[60vh] overflow-y-auto">
-              {completed.map(task => (
-                <TaskCard
-                  key={task.id}
-                  task={task}
-                  isAdmin={isAdmin}
-                  colorFn={getPriorityColor}
-                />
-              ))}
-            </CardContent>
-          </Card>
-        </div>
+                  <Plus className="mr-1 h-4 w-4" />
+                  Register
+                </Button>
+              </div>
+            </Card>
 
-        {/* Admin Task Injection */}
-        {isAdmin && (
-          <Card className="border-2 border-black rounded-none bg-white dark:bg-zinc-950">
-            <CardHeader className="border-b border-zinc-200 p-4 bg-zinc-50 dark:bg-zinc-900">
-              <CardTitle className="text-sm font-black uppercase tracking-wider flex items-center gap-2">
-                <Layers className="h-4 w-4" /> Inject New Tactical Vector
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-6">
-              <form
-                onSubmit={handleCreateTask}
-                className="grid grid-cols-1 md:grid-cols-2 gap-6"
-              >
-                <div className="space-y-4">
-                  <div>
-                    <Label className="text-xs uppercase font-bold">
-                      Vector Heading (Title)
-                    </Label>
-                    <Input
-                      value={title}
-                      onChange={e => setTitle(e.target.value)}
-                      placeholder="e.g., Run Drop Sequence"
-                      className="rounded-none border-zinc-400 mt-1"
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-xs uppercase font-bold">
-                      Operational Context (Description)
-                    </Label>
-                    <Textarea
-                      value={description}
-                      onChange={e => setDescription(e.target.value)}
-                      placeholder="Provide task directives..."
-                      className="rounded-none border-zinc-400 mt-1 h-24"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-4 flex flex-col justify-between">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label className="text-xs uppercase font-bold">
-                        Marketing Blueprint Gap
-                      </Label>
-                      <Select value={category} onValueChange={setCategory}>
-                        <SelectTrigger className="rounded-none border-zinc-400 mt-1 uppercase text-xs">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="font-mono text-xs uppercase">
-                          <SelectItem value="01_content_creation">
-                            01 Content Creation
-                          </SelectItem>
-                          <SelectItem value="02_platform_presence">
-                            02 Platform Presence
-                          </SelectItem>
-                          <SelectItem value="03_email_dm_outreach">
-                            03 Email & DM Outreach
-                          </SelectItem>
-                          <SelectItem value="04_closing_conversion">
-                            04 Closing & Conversion
-                          </SelectItem>
-                          <SelectItem value="05_brand_building">
-                            05 Brand Building
-                          </SelectItem>
-                          <SelectItem value="06_local_community">
-                            06 Local & Community
-                          </SelectItem>
-                          <SelectItem value="07_seo_discoverability">
-                            07 SEO & Discoverability
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label className="text-xs uppercase font-bold">
-                        Risk Priority
-                      </Label>
-                      <Select
-                        value={priority}
-                        onValueChange={(v: any) => setPriority(v)}
-                      >
-                        <SelectTrigger className="rounded-none border-zinc-400 mt-1 uppercase text-xs">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="font-mono text-xs uppercase">
-                          <SelectItem value="low">Low</SelectItem>
-                          <SelectItem value="medium">Medium</SelectItem>
-                          <SelectItem value="high">High</SelectItem>
-                          <SelectItem value="urgent">Urgent</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  <div className="space-y-3 bg-zinc-50 dark:bg-zinc-900 p-3 border border-zinc-200">
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-0.5">
-                        <Label className="text-xs uppercase font-bold flex items-center gap-1">
-                          <MapPin className="h-3 w-3 text-amber-500" />{" "}
-                          Hyper-Local Scope
-                        </Label>
-                        <p className="text-[10px] text-zinc-500">
-                          Flags alignment to North Marin / Novato, CA
-                          parameters.
-                        </p>
+            {loadingAgents ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              </div>
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {(agents || []).map((agent) => {
+                  const tConfig = typeConfig[agent.type] || typeConfig.ai_agent;
+                  const sConfig = statusConfig[agent.status] || statusConfig.idle;
+                  return (
+                    <Card key={agent.id} className="p-4">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className={`flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 ${tConfig.color}`}>
+                          {tConfig.icon}
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold">{agent.name}</p>
+                          <div className="flex items-center gap-1">
+                            <span className={sConfig.color}>{sConfig.icon}</span>
+                            <span className={`text-xs capitalize ${sConfig.color}`}>{agent.status}</span>
+                          </div>
+                        </div>
                       </div>
-                      <Switch
-                        checked={isHyperLocal}
-                        onCheckedChange={setIsHyperLocal}
-                      />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-0.5">
-                        <Label className="text-xs uppercase font-bold flex items-center gap-1 text-red-500">
-                          <AlertTriangle className="h-3 w-3" /> Mandatory
-                          Approval Gate
-                        </Label>
-                        <p className="text-[10px] text-zinc-500">
-                          Requires manual confirmation before automation
-                          execution.
-                        </p>
-                      </div>
-                      <Switch
-                        checked={requiresApproval}
-                        onCheckedChange={setRequiresApproval}
-                      />
-                    </div>
-                  </div>
-
-                  <Button
-                    type="submit"
-                    disabled={createTaskMutation.isPending}
-                    className="w-full rounded-none bg-black hover:bg-zinc-800 text-white font-black uppercase tracking-widest dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
-                  >
-                    {createTaskMutation.isPending
-                      ? "Deploying..."
-                      : "Deploy Directive Vector ⚡"}
-                  </Button>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-    </DashboardLayout>
-  );
-}
-
-type ContextEntry = { origin: string; timestamp: string; log: string };
-
-function TaskCard({
-  task,
-  isAdmin,
-  onApprove,
-  isRunning = false,
-  colorFn,
-}: {
-  task: any;
-  isAdmin: boolean;
-  onApprove?: () => void;
-  isRunning?: boolean;
-  colorFn: (lvl: string) => string;
-}) {
-  const localFlag =
-    (task.metadata as any)?.isHyperLocal || task.category?.includes("local");
-  const contextStack: ContextEntry[] = (task.contextStack as ContextEntry[]) ?? [];
-
-  return (
-    <Card className="border border-black bg-white dark:bg-zinc-950 font-mono tracking-tight shadow-sm rounded-none">
-      <div className="p-3 space-y-3">
-        <div className="flex justify-between items-center text-[10px] border-b border-zinc-200 pb-1.5 uppercase text-zinc-400 font-bold">
-          <span>GAP: {task.category?.replace(/_/g, " ")}</span>
-          <span>BD-LOG-{task.id}</span>
-        </div>
-
-        <div>
-          <h4 className="font-black text-sm uppercase tracking-wide flex items-center gap-1.5">
-            {isRunning && (
-              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-ping inline-block" />
-            )}
-            {task.title}
-          </h4>
-          <p className="text-xs text-zinc-600 dark:text-zinc-400 mt-1 line-clamp-2 leading-relaxed">
-            {task.description}
-          </p>
-        </div>
-
-        <div className="flex flex-wrap gap-1.5 pt-1 justify-between items-center">
-          <div className="flex gap-1.5">
-            <Badge
-              variant="outline"
-              className={`text-[9px] uppercase font-black px-1.5 py-0.5 rounded-none border-2 ${colorFn(task.priority)}`}
-            >
-              {task.priority}
-            </Badge>
-            {localFlag && (
-              <Badge className="text-[9px] uppercase font-black px-1.5 py-0.5 rounded-none bg-amber-400 text-black hover:bg-amber-400 border border-black flex items-center gap-0.5">
-                📍 North Marin
-              </Badge>
-            )}
-          </div>
-
-          {/* Context stack history dialog */}
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-5 text-[9px] font-bold uppercase tracking-tighter gap-0.5 px-1 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
-              >
-                <History className="h-3 w-3" />
-                Log ({contextStack.length})
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="font-mono rounded-none border-2 border-black max-w-lg bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50">
-              <DialogHeader className="border-b-2 border-black pb-2">
-                <DialogTitle className="text-sm font-black uppercase flex items-center gap-1.5">
-                  <Database className="h-4 w-4 text-emerald-500" />
-                  Context Stack: BD-LOG-{task.id}
-                </DialogTitle>
-              </DialogHeader>
-              <div className="space-y-2 my-2 text-xs max-h-[40vh] overflow-y-auto pr-1">
-                {contextStack.length === 0 ? (
-                  <p className="text-zinc-400 text-center py-4">
-                    No context entries.
-                  </p>
-                ) : (
-                  contextStack.map((ctx, idx) => (
-                    <div
-                      key={idx}
-                      className="p-2 border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 space-y-1"
-                    >
-                      <div className="flex justify-between items-center text-[9px] text-zinc-400 uppercase font-bold border-b border-zinc-200 dark:border-zinc-800 pb-0.5">
-                        <span>{ctx.origin}</span>
-                        <span>{new Date(ctx.timestamp).toLocaleString()}</span>
-                      </div>
-                      <p className="text-[11px] text-zinc-700 dark:text-zinc-300 whitespace-pre-wrap">
-                        {ctx.log}
+                      {agent.capabilities && Array.isArray(agent.capabilities) && (agent.capabilities as string[]).length > 0 && (
+                        <div className="flex flex-wrap gap-1 mb-2">
+                          {(agent.capabilities as string[]).map((cap) => (
+                            <Badge key={cap} variant="outline" className="text-[10px]">{cap}</Badge>
+                          ))}
+                        </div>
+                      )}
+                      <p className="text-xs text-muted-foreground">
+                        Last active: {agent.lastActive ? new Date(agent.lastActive).toLocaleTimeString() : "Never"}
                       </p>
-                    </div>
-                  ))
+                    </Card>
+                  );
+                })}
+                {(!agents || agents.length === 0) && (
+                  <div className="text-center py-12 col-span-full">
+                    <Bot className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+                    <p className="text-muted-foreground">No agents registered yet.</p>
+                  </div>
                 )}
               </div>
-            </DialogContent>
-          </Dialog>
-        </div>
-
-        {task.status !== "completed" && isAdmin && (
-          <div className="pt-2 border-t border-dashed border-zinc-200">
-            {task.requiresApproval && task.status === "pending" ? (
-              <Button
-                variant="destructive"
-                size="sm"
-                className="w-full text-[10px] font-black uppercase tracking-wider bg-red-600 hover:bg-red-700 text-white rounded-none h-7"
-                onClick={onApprove}
-              >
-                ⚠️ Approve & Execute
-              </Button>
-            ) : (
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full text-[10px] font-bold uppercase tracking-wider border-black hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-900 rounded-none h-7"
-                onClick={onApprove}
-              >
-                Advance Status →
-              </Button>
             )}
-          </div>
-        )}
+          </TabsContent>
+
+          {/* TASKS TAB */}
+          <TabsContent value="tasks" className="space-y-6">
+            <Card className="p-5">
+              <h3 className="text-sm font-semibold mb-4">Create New Task</h3>
+              <div className="space-y-3">
+                <Input
+                  placeholder="Task title..."
+                  value={newTaskTitle}
+                  onChange={(e) => setNewTaskTitle(e.target.value)}
+                />
+                <Input
+                  placeholder="Description..."
+                  value={newTaskDesc}
+                  onChange={(e) => setNewTaskDesc(e.target.value)}
+                />
+                <div className="flex gap-3">
+                  <select
+                    value={newTaskPriority}
+                    onChange={(e) => setNewTaskPriority(e.target.value as any)}
+                    className="h-10 rounded-md border border-input bg-background px-3 text-sm"
+                  >
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                    <option value="urgent">Urgent</option>
+                  </select>
+                  <select
+                    value={newTaskCategory}
+                    onChange={(e) => setNewTaskCategory(e.target.value as any)}
+                    className="h-10 rounded-md border border-input bg-background px-3 text-sm"
+                  >
+                    <option value="immediate">Immediate</option>
+                    <option value="short_term">Short-Term</option>
+                    <option value="deferred">Deferred</option>
+                  </select>
+                  <Button
+                    onClick={() => {
+                      if (!newTaskTitle) { toast.error("Enter a title"); return; }
+                      createTask.mutate({
+                        title: newTaskTitle,
+                        description: newTaskDesc || undefined,
+                        priority: newTaskPriority,
+                        category: newTaskCategory,
+                      });
+                      setNewTaskTitle("");
+                      setNewTaskDesc("");
+                    }}
+                    disabled={createTask.isPending}
+                  >
+                    <Plus className="mr-1 h-4 w-4" />
+                    Create Task
+                  </Button>
+                </div>
+              </div>
+            </Card>
+
+            {loadingTasks ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {(tasks || []).map((task) => {
+                  const sConfig = taskStatusConfig[task.status] || taskStatusConfig.pending;
+                  return (
+                    <Card key={task.id} className="p-4">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <p className="text-sm font-semibold">{task.title}</p>
+                            <Badge variant={sConfig.variant} className="text-[10px] gap-1">
+                              {sConfig.icon}
+                              {task.status.replace("_", " ")}
+                            </Badge>
+                            <Badge variant="outline" className={`text-[10px] ${priorityColors[task.priority]}`}>
+                              {task.priority}
+                            </Badge>
+                          </div>
+                          {task.description && <p className="text-xs text-muted-foreground mb-2">{task.description}</p>}
+                          <div className="flex items-center gap-3">
+                            <span className="text-[10px] text-muted-foreground capitalize">{task.category?.replace("_", "-")}</span>
+                            {task.assignedAgentId && <span className="text-[10px] text-blue-400">Assigned to #{task.assignedAgentId}</span>}
+                            {task.dueDate && <span className="text-[10px] text-amber-400">Due {new Date(task.dueDate).toLocaleDateString()}</span>}
+                          </div>
+                        </div>
+                        <div className="flex gap-1">
+                          {task.status === "pending" && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-7 text-[10px]"
+                              onClick={() => updateTask.mutate({ id: task.id, status: "in_progress" })}
+                            >
+                              <Zap className="h-3 w-3 mr-1" />
+                              Start
+                            </Button>
+                          )}
+                          {task.status === "in_progress" && (
+                            <>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-7 text-[10px]"
+                                onClick={() => updateTask.mutate({ id: task.id, status: "completed" })}
+                              >
+                                <CheckCircle2 className="h-3 w-3 mr-1 text-green-500" />
+                                Done
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-7 text-[10px]"
+                                onClick={() => updateTask.mutate({ id: task.id, status: "failed" })}
+                              >
+                                <XCircle className="h-3 w-3 mr-1 text-red-500" />
+                                Fail
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </Card>
+                  );
+                })}
+                {(!tasks || tasks.length === 0) && (
+                  <div className="text-center py-12">
+                    <Zap className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+                    <p className="text-muted-foreground">No tasks yet. Create your first one!</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </TabsContent>
+
+          {/* MESSAGES TAB */}
+          <TabsContent value="messages" className="space-y-6">
+            <Card className="p-5">
+              <h3 className="text-sm font-semibold mb-4">Send Message</h3>
+              <div className="flex gap-3">
+                <Input
+                  placeholder="Broadcast a message to all agents..."
+                  value={newMsg}
+                  onChange={(e) => setNewMsg(e.target.value)}
+                  className="flex-1"
+                />
+                <Button
+                  onClick={() => {
+                    if (!newMsg) { toast.error("Enter a message"); return; }
+                    sendMessage.mutate({
+                      fromAgentId: 1,
+                      content: newMsg,
+                      messageType: "broadcast",
+                    });
+                    setNewMsg("");
+                    toast.success("Message sent!");
+                  }}
+                  disabled={sendMessage.isPending}
+                >
+                  <Send className="mr-1 h-4 w-4" />
+                  Send
+                </Button>
+              </div>
+            </Card>
+
+            {loadingMessages ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {(messages || []).map((msg) => (
+                  <Card key={msg.id} className="p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
+                        <Bot className="h-4 w-4 text-primary" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-xs font-medium">Agent #{msg.fromAgentId}</span>
+                          <Badge variant="outline" className="text-[10px]">{msg.messageType.replace("_", " ")}</Badge>
+                          {msg.taskId && <span className="text-[10px] text-muted-foreground">Task #{msg.taskId}</span>}
+                        </div>
+                        <p className="text-sm">{msg.content}</p>
+                        <p className="text-[10px] text-muted-foreground mt-1">
+                          {new Date(msg.createdAt).toLocaleString()}
+                        </p>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+                {(!messages || messages.length === 0) && (
+                  <div className="text-center py-12">
+                    <MessageSquare className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+                    <p className="text-muted-foreground">No messages yet.</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
       </div>
-    </Card>
+    </DashboardLayout>
   );
 }

@@ -23,6 +23,7 @@ import CampaignBuilder from './pages/CampaignBuilder'
 import Pipeline from './pages/Pipeline'
 import Checklist from './pages/Checklist'
 import HealthPanel from './pages/HealthPanel'
+import AgentHub from './pages/AgentHub'
 
 export default function App() {
   return (
@@ -57,6 +58,7 @@ export default function App() {
       <Route path="/app/pipeline" element={<Pipeline />} />
       <Route path="/app/checklist" element={<Checklist />} />
       <Route path="/app/health" element={<HealthPanel />} />
+      <Route path="/app/agents" element={<AgentHub />} />
 
       <Route path="*" element={<NotFound />} />
     </Routes>

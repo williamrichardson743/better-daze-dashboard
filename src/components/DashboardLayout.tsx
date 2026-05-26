@@ -20,6 +20,7 @@ import {
   GitBranch,
   CheckSquare,
   Shield,
+  Bot,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -41,6 +42,7 @@ const navigation = [
   { name: "Pipeline", href: "/app/pipeline", icon: GitBranch },
   { name: "Checklist", href: "/app/checklist", icon: CheckSquare },
   { name: "Health", href: "/app/health", icon: Shield },
+  { name: "Agent Hub", href: "/app/agents", icon: Bot },
 ];
 
 const adminNavigation = [
