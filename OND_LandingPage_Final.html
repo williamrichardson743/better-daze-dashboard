@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BETTER DAZE | OFFICIAL NARRATIVE DIV</title>
+    <style>
+        :root {
+            --primary: #FFC800;
+            --bg: #0A0A0A;
+            --surface: #1A1A1A;
+            --text: #E0E0E0;
+            --mono: 'IBM Plex Mono', 'Courier New', monospace;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: var(--mono);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Scanline Effect */
+        body::before {
+            content: " ";
+            display: block;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 9999;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        header {
+            padding: 2rem 0;
+            border-bottom: 1px solid var(--surface);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            color: var(--primary);
+            font-weight: 800;
+            letter-spacing: -1px;
+            font-size: 1.5rem;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+            color: #4ADE80;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #4ADE80;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #4ADE80;
+            animation: blink 1.5s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .hero {
+            padding: 8rem 0;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            font-weight: 900;
+            color: var(--primary);
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+            letter-spacing: -2px;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 0 auto 2rem;
+            opacity: 0.8;
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: var(--primary);
+            color: var(--bg);
+            padding: 1rem 2.5rem;
+            text-decoration: none;
+            font-weight: 800;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            border: 2px solid var(--primary);
+        }
+
+        .btn:hover {
+            background-color: transparent;
+            color: var(--primary);
+        }
+
+        .manifesto {
+            background-color: var(--surface);
+            padding: 6rem 0;
+            border-top: 1px solid var(--primary);
+            border-bottom: 1px solid var(--primary);
+        }
+
+        .manifesto-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .manifesto h2 {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+        }
+
+        .products {
+            padding: 8rem 0;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            margin-bottom: 4rem;
+            text-align: center;
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--surface);
+            padding-bottom: 1rem;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .product-card {
+            background-color: var(--surface);
+            border: 1px solid #333;
+            padding: 1.5rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .product-card:hover {
+            border-color: var(--primary);
+        }
+
+        .product-image {
+            width: 100%;
+            aspect-ratio: 1;
+            background-color: #000;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-image::after {
+            content: "OFFICIAL NARRATIVE DIV";
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            font-size: 0.6rem;
+            opacity: 0.5;
+        }
+
+        .product-info h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-price {
+            color: var(--primary);
+            font-weight: 800;
+            font-size: 1.5rem;
+        }
+
+        .scarcity {
+            padding: 4rem 0;
+            background-color: #FFC800;
+            color: #000;
+            text-align: center;
+            font-weight: 900;
+            text-transform: uppercase;
+            font-size: 1.5rem;
+        }
+
+        .email-capture {
+            padding: 8rem 0;
+            text-align: center;
+        }
+
+        .email-form {
+            max-width: 500px;
+            margin: 2rem auto 0;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .email-form input {
+            flex: 1;
+            background: transparent;
+            border: 1px solid var(--surface);
+            padding: 1rem;
+            color: white;
+            font-family: var(--mono);
+        }
+
+        .email-form input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        footer {
+            padding: 4rem 0;
+            border-top: 1px solid var(--surface);
+            text-align: center;
+            font-size: 0.8rem;
+            opacity: 0.5;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.5rem; }
+            .manifesto-grid { grid-template-columns: 1fr; }
+            .email-form { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">BETTER DAZE // OND</div>
+            <div class="status-indicator">
+                <div class="status-dot"></div>
+                NARRATIVE FEED: ACTIVE
+            </div>
+        </header>
+
+        <section class="hero">
+            <h1>Control is an Illusion.</h1>
+            <p>The Official Narrative Division provides the uniform for the skeptical. High-contrast streetwear for the post-privacy era.</p>
+            <a href="https://shop.better-daze-sf.com" class="btn">Access the Catalog</a>
+        </section>
+    </div>
+
+    <section class="manifesto">
+        <div class="container">
+            <div class="manifesto-grid">
+                <div>
+                    <h2>The Manifesto</h2>
+                    <p>We don't sell clothes. We sell the official record. In a world of deepfakes and data leaks, the only thing you can trust is the fabric on your back. Better Daze OND is the institutional response to a decentralized reality.</p>
+                </div>
+                <div style="text-align: right; opacity: 0.2; font-size: 5rem; font-weight: 900;">
+                    [REDACTED]
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="container">
+        <section class="products">
+            <h2 class="section-title">Current Transmissions</h2>
+            <div class="product-grid">
+                <div class="product-card">
+                    <div class="product-image">
+                        <img src="https://shop.better-daze-sf.com/cdn/shop/files/tee_mockup_1.png" alt="Institutional Tee" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <div class="product-info">
+                        <h3>YOUR DATA, OUR VISION</h3>
+                        <p style="font-size: 0.8rem; margin-bottom: 1rem; opacity: 0.7;">Official Narrative Div Standard Issue Tee</p>
+                        <div class="product-price">$32.99</div>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <div class="product-image">
+                        <img src="https://shop.better-daze-sf.com/cdn/shop/files/mug_mockup_1.png" alt="Institutional Mug" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <div class="product-info">
+                        <h3>DATA PRIVACY IS OBSOLETE</h3>
+                        <p style="font-size: 0.8rem; margin-bottom: 1rem; opacity: 0.7;">11oz Ceramic Surveillance Vessel</p>
+                        <div class="product-price">$19.99</div>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <div class="product-image">
+                        <img src="https://shop.better-daze-sf.com/cdn/shop/files/tee_mockup_2.png" alt="Institutional Tee" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <div class="product-info">
+                        <h3>AI SURVEILLANCE: FOR YOUR SAFETY</h3>
+                        <p style="font-size: 0.8rem; margin-bottom: 1rem; opacity: 0.7;">Official Narrative Div Standard Issue Tee</p>
+                        <div class="product-price">$32.99</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <section class="scarcity">
+        BATCH 001 // LIMITED DISTRIBUTION // NO REPRINTS
+    </section>
+
+    <div class="container">
+        <section class="email-capture">
+            <h2>Join the Narrative</h2>
+            <p>Receive official updates and redacted intelligence.</p>
+            <form class="email-form">
+                <input type="email" placeholder="ENTER EMAIL ADDRESS" required>
+                <button type="submit" class="btn">Subscribe</button>
+            </form>
+        </section>
+    </div>
+
+    <footer>
+        &copy; 2026 BETTER DAZE // OFFICIAL NARRATIVE DIVISION // ALL RIGHTS RESERVED // [STAY SKEPTICAL]
+    </footer>
+</body>
+</html>
