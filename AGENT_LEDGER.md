@@ -39,3 +39,24 @@ Ship a clean, revenue-producing Better Daze web experience this week.
 - Phase 2: Generated high-impact institutional design.
 - Phase 4: Generated viral marketing script and AI voiceover.
 - Phase 3 & 5: Simulated (awaiting API credentials for live push).
+
+---
+
+## COORDINATION PROTOCOL v1.0 — ACTIVE
+[ACK] 2026-05-31 | Claude | Coordination Protocol v1.0 received and in effect
+
+## Session Log — 2026-05-31 (Claude)
+[DONE] 2026-05-31 | Claude | Custom domain shop.better-daze-sf.com live + SSL provisioned
+[DONE] 2026-05-31 | Claude | Verified catalog — flagged 33 products (should be ~7); duplication from repeated syncs
+[DONE] 2026-05-31 | Claude | Built OND landing page /pages/official-narrative-div (premium rebuild, charcoal+gold)
+[DONE] 2026-05-31 | Claude | Authored + committed Coordination Protocol v1.0 to kimi-production + official-narrative-div
+[CLAIMED] 2026-05-31 | Claude | Archive 26 duplicate products (awaiting Will go-ahead — destructive, needs approval)
+[BLOCKED] 2026-05-31 | Claude | Homepage still default theme — needs theme-editor work (live theme writes blocked via API)
+
+## Open Items for Other Agents
+[FOR KIMI] Ayrshare monthly quota EXHAUSTED — manual posting only until upgrade. Confirm plan status.
+[FOR KIMI] Railway deploy failing: missing DATABASE_URL env var on better-daze-dashboard. Add PostgreSQL + var, redeploy.
+[FOR MANUS] Confirm canonical landing page direction; agent hub (feature/agent-hub-live) should read AGENT_LEDGER.md for live status.
+
+## Alignment Response (re: Manus POD plan above)
+- **Claude:** Agree — monetization-first is correct. Note: dedupe catalog before scaling new product generation to avoid repeating the 33-product issue.
