@@ -1,0 +1,68 @@
+[
+  {
+    "slogan": "PRIVACY IS A PRIVILEGE",
+    "design_path": "/home/ubuntu/pod_designs/design_privacy_is_a_privilege.png",
+    "product_id": "6a208216bc4dad924d096026",
+    "published": true,
+    "social": {
+      "caption": "CLASSIFIED: New standard issue drop. 'PRIVACY IS A PRIVILEGE' \u2014 This wasn't supposed to go public. Link in bio before it's pulled.",
+      "hook_type": "urgency",
+      "hashtags": [
+        "#streetwear",
+        "#dystopian",
+        "#betterdaze",
+        "#officialnarrativediv",
+        "#surveillance",
+        "#dataprivacy",
+        "#graphicdesign",
+        "#alternativefashion",
+        "#undergroundfashion",
+        "#limiteddrop"
+      ]
+    }
+  },
+  {
+    "slogan": "COMPLY OR BE FLAGGED",
+    "design_path": "/home/ubuntu/pod_designs/design_comply_or_be_flagged.png",
+    "product_id": "6a208243ff056782c6025f4e",
+    "published": true,
+    "social": {
+      "caption": "Bureau notice: 'COMPLY OR BE FLAGGED' \u2014 Compliance is optional. Awareness is not. Official Narrative Div. Link in bio.",
+      "hook_type": "authority",
+      "hashtags": [
+        "#streetwear",
+        "#dystopian",
+        "#betterdaze",
+        "#officialnarrativediv",
+        "#surveillance",
+        "#dataprivacy",
+        "#graphicdesign",
+        "#alternativefashion",
+        "#undergroundfashion",
+        "#limiteddrop"
+      ]
+    }
+  },
+  {
+    "slogan": "YOUR SILENCE IS CONSENT",
+    "design_path": "/home/ubuntu/pod_designs/design_your_silence_is_consent.png",
+    "product_id": "6a20827a79527a840009fea6",
+    "published": true,
+    "social": {
+      "caption": "Bureau notice: 'YOUR SILENCE IS CONSENT' \u2014 Compliance is optional. Awareness is not. Official Narrative Div. Link in bio.",
+      "hook_type": "authority",
+      "hashtags": [
+        "#streetwear",
+        "#dystopian",
+        "#betterdaze",
+        "#officialnarrativediv",
+        "#surveillance",
+        "#dataprivacy",
+        "#graphicdesign",
+        "#alternativefashion",
+        "#undergroundfashion",
+        "#limiteddrop"
+      ]
+    }
+  }
+]
