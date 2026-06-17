@@ -18,8 +18,10 @@ import time
 import base64
 import requests
 from datetime import datetime
+from dotenv import load_dotenv
 
 # ─── CONFIGURATION ───
+load_dotenv()
 PRINTIFY_API_TOKEN = os.environ.get("PRINTIFY_API_TOKEN", "")
 PRINTIFY_SHOP_ID = "27082819"
 # OpenAI key is invalid — using pre-generated slogans and Manus image gen
@@ -30,13 +32,13 @@ HEADERS_PRINTIFY = {
     "Content-Type": "application/json"
 }
 
-# Blueprint 12 = Bella+Canvas 3001 Unisex Jersey Short Sleeve Tee
-# Provider 29 = Monster Digital
-BLUEPRINT_ID = 12
-PROVIDER_ID = 29
-# Black variants: S, M, L, XL, 2XL, 3XL
-BLACK_VARIANTS = [18100, 18101, 18102, 18103, 18104, 18105]
-PRICE_CENTS = 3299
+# Product Blueprints
+BLUEPRINTS = {
+    "tee": {"id": 12, "provider": 29, "variants": [18100, 18101, 18102, 18103, 18104, 18105], "price": 3299},
+    "mug": {"id": 68, "provider": 1, "variants": [33719], "price": 1999},
+    "poster": {"id": 282, "provider": 2, "variants": [43135, 43138, 43141, 43144, 43147], "price": 2499},
+    "hoodie": {"id": 77, "provider": 39, "variants": [32878, 32879, 32880, 32881, 32882], "price": 4999}
+}
 
 # ─── PHASE 1: TREND INGESTION & SLOGAN GENERATION ───
 def generate_slogans():
@@ -67,7 +69,7 @@ def generate_design(slogan, index):
     
     # Look for pre-generated design files
     design_dir = "/home/ubuntu/pod_designs"
-    safe_name = slogan.lower().replace(" ", "_").replace("'", "")
+    safe_name = slogan.lower().replace(" ", "_").replace("'", "").replace(",", "")
     expected_path = f"{design_dir}/design_{safe_name}.png"
     
     if os.path.exists(expected_path):
@@ -106,21 +108,22 @@ def upload_to_printify(filepath):
         return None
 
 
-def create_product(slogan, image_id):
+def create_product(slogan, image_id, product_type="tee"):
     """Create a product on Printify and publish to Shopify."""
-    print(f"  Creating product...")
+    print(f"  Creating {product_type} product...")
     
-    title = f"{slogan} - Official Narrative Div Tee"
-    description = f"Official Narrative Div Standard Issue. '{slogan}' — Institutional compliance series. Limited batch. Bella+Canvas 3001 premium unisex tee."
+    bp = BLUEPRINTS.get(product_type, BLUEPRINTS["tee"])
+    title = f"{slogan} - Official Narrative Div {product_type.capitalize()}"
+    description = f"Official Narrative Div Standard Issue. '{slogan}' — Institutional compliance series. Limited batch. Premium {product_type}."
     
     product_payload = {
         "title": title,
         "description": description,
-        "blueprint_id": BLUEPRINT_ID,
-        "print_provider_id": PROVIDER_ID,
-        "variants": [{"id": v, "price": PRICE_CENTS, "is_enabled": True} for v in BLACK_VARIANTS],
+        "blueprint_id": bp["id"],
+        "print_provider_id": bp["provider"],
+        "variants": [{"id": v, "price": bp["price"], "is_enabled": True} for v in bp["variants"]],
         "print_areas": [{
-            "variant_ids": BLACK_VARIANTS,
+            "variant_ids": bp["variants"],
             "placeholders": [{
                 "position": "front",
                 "images": [{"id": image_id, "x": 0.5, "y": 0.5, "scale": 1, "angle": 0}]
@@ -200,7 +203,7 @@ def run_pipeline():
     
     for i, slogan in enumerate(slogans):
         print(f"\n{'='*60}")
-        print(f"[PRODUCT {i+1}/3] Processing: '{slogan}'")
+        print(f"[SLOGAN {i+1}/{len(slogans)}] Processing: '{slogan}'")
         print(f"{'='*60}")
         
         # Phase 2: Generate design
@@ -215,7 +218,28 @@ def run_pipeline():
             print(f"  SKIPPED: Upload failed.")
             continue
         
-        product_id = create_product(slogan, image_id)
+        # Create all 4 product types for each slogan to ensure a professional catalog
+        product_types = ["tee", "mug", "poster", "hoodie"]
+        for p_type in product_types:
+            product_id = create_product(slogan, image_id, p_type)
+            if not product_id:
+                print(f"  SKIPPED: {p_type} creation failed.")
+                continue
+            
+            # Phase 4: Publish to Shopify
+            published = publish_to_shopify(product_id)
+            
+            # Phase 5: Generate social content
+            social = generate_social_content(slogan)
+            
+            results.append({
+                "slogan": slogan,
+                "type": p_type,
+                "product_id": product_id,
+                "published": published,
+                "social": social
+            })
+            time.sleep(2)
         if not product_id:
             print(f"  SKIPPED: Product creation failed.")
             continue
