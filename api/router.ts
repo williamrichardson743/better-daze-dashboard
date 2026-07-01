@@ -5,6 +5,7 @@ import { shopRouter } from "./shop-router";
 import { campaignRouter } from "./campaign-router";
 import { operationsRouter } from "./operations-router";
 import { agentRouter } from "./agent-router";
+import { agentHubRouter } from "./agent-hub-router";
 import { createRouter, publicQuery } from "./middleware";
 
 export const appRouter = createRouter({
@@ -16,6 +17,7 @@ export const appRouter = createRouter({
   campaign: campaignRouter,
   operations: operationsRouter,
   agent: agentRouter,
+  agentHub: agentHubRouter,
 });
 
 export type AppRouter = typeof appRouter;
