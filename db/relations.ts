@@ -14,6 +14,9 @@ import {
   roles,
   permissions,
   auditLogs,
+  agents,
+  agentTasks,
+  apiCredentials,
 } from "./schema";
 
 export const usersRelations = relations(users, ({ many }) => ({
@@ -85,5 +88,23 @@ export const permissionsRelations = relations(permissions, ({ one }) => ({
   role: one(roles, {
     fields: [permissions.roleId],
     references: [roles.id],
+  }),
+}));
+
+export const agentsRelations = relations(agents, ({ many }) => ({
+  tasks: many(agentTasks),
+}));
+
+export const agentTasksRelations = relations(agentTasks, ({ one }) => ({
+  assignedAgent: one(agents, {
+    fields: [agentTasks.assignedAgentId],
+    references: [agents.id],
+  }),
+}));
+
+export const apiCredentialsRelations = relations(apiCredentials, ({ one }) => ({
+  user: one(users, {
+    fields: [apiCredentials.userId],
+    references: [users.id],
   }),
 }));
