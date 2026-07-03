@@ -15,7 +15,19 @@ export async function createContext(
   try {
     ctx.user = await authenticateRequest(opts.req.headers);
   } catch {
-    // Authentication is optional here
+    // SSO auth disabled for development — fall back to a mock admin user
+    ctx.user = {
+      id: 1,
+      unionId: "dev-local",
+      name: "Dev User",
+      email: "dev@local",
+      avatar: null,
+      role: "admin",
+      status: "active",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      lastSignInAt: new Date(),
+    };
   }
   return ctx;
 }
