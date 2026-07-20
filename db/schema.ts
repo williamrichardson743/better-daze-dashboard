@@ -755,3 +755,39 @@ export const agentAssignments = mysqlTable("agentAssignments", {
 
 export type AgentAssignment = typeof agentAssignments.$inferSelect;
 export type InsertAgentAssignment = typeof agentAssignments.$inferInsert;
+
+// API Credentials table (Missing from schema but referenced in code)
+
+// API Credentials table (Missing from schema but referenced in code)
+export const apiCredentials = mysqlTable("apiCredentials", {
+  id: serial("id").primaryKey(),
+  userId: bigint("userId", { mode: "number", unsigned: true }).notNull(),
+  serviceName: varchar("serviceName", { length: 255 }).notNull(),
+  displayName: varchar("displayName", { length: 255 }).notNull(),
+  status: mysqlEnum("status", ["active", "expiring", "expired", "needs_rotation", "error", "unknown"]).default("unknown").notNull(),
+  lastVerifiedAt: timestamp("lastVerifiedAt"),
+  expiresAt: timestamp("expiresAt"),
+  scope: text("scope"),
+  metadata: json("metadata"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().notNull().$onUpdate(() => new Date()),
+});
+
+export type ApiCredential = typeof apiCredentials.$inferSelect;
+export type InsertApiCredential = typeof apiCredentials.$inferInsert;
+
+// Agents table (Missing from schema but referenced in code)
+export const agents = mysqlTable("agents", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  type: varchar("type", { length: 100 }).notNull(),
+  status: mysqlEnum("status", ["idle", "busy", "offline", "error"]).default("idle").notNull(),
+  lastActive: timestamp("lastActive"),
+  capabilities: json("capabilities"),
+  metadata: json("metadata"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().notNull().$onUpdate(() => new Date()),
+});
+
+export type Agent = typeof agents.$inferSelect;
+export type InsertAgent = typeof agents.$inferInsert;
