@@ -23,49 +23,49 @@ import { cn } from "@/lib/utils";
 const features = [
   {
     icon: <RotateCcw className="h-5 w-5" />,
-    title: "Lightning Cycles",
-    description: "From idea to live product in under 48 hours with our streamlined design pipeline.",
+    title: "Intake Velocity",
+    description: "Concept to catalog in under 48 hours. No delays. No exceptions.",
   },
   {
     icon: <ShoppingBag className="h-5 w-5" />,
-    title: "POD Integration",
-    description: "One-click publishing to Shopify, Printful, and all major print-on-demand platforms.",
+    title: "Institutional Compliance",
+    description: "Direct routing to Shopify, Printful, and all recognized fulfillment channels. Fully standardized.",
   },
   {
     icon: <BarChart3 className="h-5 w-5" />,
-    title: "Revenue Analytics",
-    description: "Real-time profit tracking, margin analysis, and sales forecasting in one view.",
+    title: "Ledger Oversight",
+    description: "Continuous margin auditing and sales projection, rendered in real time.",
   },
   {
     icon: <Megaphone className="h-5 w-5" />,
-    title: "Social Sync",
-    description: "Auto-schedule product drops across Instagram, TikTok, Twitter, and more.",
+    title: "Distribution Protocol",
+    description: "Scheduled release across all monitored channels: Instagram, TikTok, X, and beyond.",
   },
   {
     icon: <Shield className="h-5 w-5" />,
-    title: "Team Security",
-    description: "Role-based access control with audit logs and two-factor authentication.",
+    title: "Access Control",
+    description: "Role-based clearance, full audit trail, mandatory two-factor authentication.",
   },
   {
     icon: <TrendingUp className="h-5 w-5" />,
-    title: "Growth Tools",
-    description: "A/B testing for designs, pricing optimization, and inventory alerts.",
+    title: "Performance Directive",
+    description: "Controlled testing, pricing calibration, and inventory thresholds enforced automatically.",
   },
 ];
 
 const plans = [
   {
-    name: "Starter",
+    name: "Field Issue",
     price: 29,
-    description: "Perfect for solo creators getting started.",
+    description: "Minimum viable clearance for independent operators.",
     features: ["3 active cycles", "20 products", "Basic analytics", "2 social accounts", "Email support"],
-    cta: "Start Free Trial",
+    cta: "Request Clearance",
     popular: false,
   },
   {
-    name: "Growth",
+    name: "Standard Issue",
     price: 79,
-    description: "For brands scaling their merchandise.",
+    description: "Full operational clearance for scaling brands.",
     features: [
       "10 active cycles",
       "Unlimited products",
@@ -75,13 +75,13 @@ const plans = [
       "Team collaboration",
       "API access",
     ],
-    cta: "Start Free Trial",
+    cta: "Request Clearance",
     popular: true,
   },
   {
-    name: "Enterprise",
+    name: "Command Tier",
     price: 199,
-    description: "For established brands with complex ops.",
+    description: "Unrestricted access with dedicated oversight.",
     features: [
       "Unlimited cycles",
       "Unlimited products",
@@ -91,7 +91,7 @@ const plans = [
       "SSO & advanced security",
       "White-label options",
     ],
-    cta: "Contact Sales",
+    cta: "Request Command Access",
     popular: false,
   },
 ];
@@ -165,7 +165,7 @@ export default function LandingPage() {
                 <Link to="/login">Sign In</Link>
               </Button>
               <Button size="sm" asChild>
-                <Link to="/login">Get Started</Link>
+                <Link to="/login">Request Access</Link>
               </Button>
             </div>
 
@@ -187,7 +187,7 @@ export default function LandingPage() {
                   <Link to="/login">Sign In</Link>
                 </Button>
                 <Button className="flex-1" asChild>
-                  <Link to="/login">Get Started</Link>
+                  <Link to="/login">Request Access</Link>
                 </Button>
               </div>
             </div>
@@ -204,31 +204,31 @@ export default function LandingPage() {
           <div className="text-center max-w-3xl mx-auto">
             <Badge variant="secondary" className="mb-6 text-xs font-medium">
               <Zap className="mr-1 h-3 w-3" />
-              Now with AI-powered design suggestions
+              Standard Issue — Division 04
             </Badge>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-tight">
-              Print-on-Demand
+              Merchandise, Processed
               <br />
               <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                Made Simple.
+                Through Institutional Channels.
               </span>
             </h1>
             <p className="mt-6 text-lg text-muted-foreground max-w-2xl mx-auto">
-              Design, produce, and sell custom merchandise with the all-in-one operations dashboard built for creators who mean business.
+              Better Daze is not a marketplace. It is infrastructure. Product intake, fulfillment, and distribution, administered under a single compliant framework.
             </p>
             <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
               <Button size="lg" className="gap-2 text-base h-12 px-8" asChild>
                 <Link to="/login">
-                  Start Free Trial
+                  Request Clearance
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
               <Button variant="outline" size="lg" className="text-base h-12 px-8" asChild>
-                <Link to="/login">View Demo</Link>
+                <Link to="/login">Review Protocol</Link>
               </Button>
             </div>
             <p className="mt-4 text-xs text-muted-foreground">
-              14-day free trial · No credit card required · Cancel anytime
+              Provisional access granted for 14 days · No financial instrument required · Terminate at will
             </p>
           </div>
 
@@ -297,7 +297,7 @@ export default function LandingPage() {
                     ))}
                   </div>
                   <div className="rounded-lg border p-4 bg-gradient-to-br from-primary/10 to-accent/10">
-                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2">Pro Tip</p>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2">Directive</p>
                     <p className="text-xs leading-relaxed">
                       Cycles with social pre-launch campaigns see a <strong>43% higher</strong> first-week revenue.
                     </p>
@@ -313,9 +313,9 @@ export default function LandingPage() {
       <section id="features" className="py-20 sm:py-24 border-t border-border">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-16">
-            <h2 className="text-3xl font-bold tracking-tight">Everything you need to scale</h2>
+            <h2 className="text-3xl font-bold tracking-tight">Comprehensive Operational Coverage</h2>
             <p className="mt-4 text-muted-foreground">
-              From first sketch to sold-out drop, Better Daze handles the operations so you can focus on creating.
+              From intake to distribution, every operation is processed under standardized protocol.
             </p>
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -341,9 +341,9 @@ export default function LandingPage() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
             {[
               { value: "$2.4M+", label: "Revenue Processed" },
-              { value: "50K+", label: "Products Launched" },
-              { value: "1,200+", label: "Active Creators" },
-              { value: "98%", label: "Uptime SLA" },
+              { value: "50K+", label: "Units Processed" },
+              { value: "1,200+", label: "Registered Operators" },
+              { value: "98%", label: "System Uptime" },
             ].map((stat) => (
               <div key={stat.label}>
                 <p className="text-3xl font-bold text-primary">{stat.value}</p>
@@ -358,9 +358,9 @@ export default function LandingPage() {
       <section id="pricing" className="py-20 sm:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-16">
-            <h2 className="text-3xl font-bold tracking-tight">Simple, transparent pricing</h2>
+            <h2 className="text-3xl font-bold tracking-tight">Clearance Tiers</h2>
             <p className="mt-4 text-muted-foreground">
-              Start free, upgrade when you're ready. No hidden fees, no surprises.
+              Provisional access available. Escalate clearance at any time. No concealed terms.
             </p>
           </div>
           <div className="grid gap-6 lg:grid-cols-3">
@@ -410,9 +410,9 @@ export default function LandingPage() {
       <section id="testimonials" className="py-20 sm:py-24 border-t border-border bg-primary/[0.02]">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-16">
-            <h2 className="text-3xl font-bold tracking-tight">Loved by creators</h2>
+            <h2 className="text-3xl font-bold tracking-tight">Field Reports</h2>
             <p className="mt-4 text-muted-foreground">
-              Join thousands of creators who've streamlined their merch operations.
+              Documented accounts from operators under active clearance.
             </p>
           </div>
           <div className="grid gap-6 md:grid-cols-3">
@@ -444,20 +444,20 @@ export default function LandingPage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="rounded-2xl bg-gradient-to-br from-primary/10 via-background to-accent/10 border border-primary/20 p-12 text-center">
             <h2 className="text-3xl font-bold tracking-tight mb-4">
-              Ready to scale your merch?
+              Ready for Full Clearance?
             </h2>
             <p className="text-muted-foreground max-w-xl mx-auto mb-8">
-              Start your 14-day free trial today. No credit card required. Full access to all Growth plan features.
+              Provisional access available immediately. No financial instrument required. Full Standard Issue clearance included.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Button size="lg" className="gap-2 text-base h-12 px-8" asChild>
                 <Link to="/login">
-                  Start Free Trial
+                  Request Clearance
                   <ArrowUpRight className="h-4 w-4" />
                 </Link>
               </Button>
               <Button variant="outline" size="lg" className="text-base h-12 px-8" asChild>
-                <Link to="/login">Schedule Demo</Link>
+                <Link to="/login">Schedule Briefing</Link>
               </Button>
             </div>
           </div>
@@ -476,7 +476,7 @@ export default function LandingPage() {
                 <span className="text-base font-bold">Better Daze</span>
               </Link>
               <p className="text-sm text-muted-foreground">
-                The all-in-one POD operations dashboard for serious creators.
+                Institutional-grade operations infrastructure for standardized merchandise distribution.
               </p>
             </div>
             <div>
