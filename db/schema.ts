@@ -12,6 +12,17 @@ import {
   bigint,
 } from "drizzle-orm/mysql-core";
 
+// Waitlist signups (public email capture for marketing pushes)
+export const waitlistSignups = mysqlTable("waitlistSignups", {
+  id: serial("id").primaryKey(),
+  email: varchar("email", { length: 320 }).notNull().unique(),
+  source: varchar("source", { length: 100 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type WaitlistSignup = typeof waitlistSignups.$inferSelect;
+export type InsertWaitlistSignup = typeof waitlistSignups.$inferInsert;
+
 // Users table (extended from auth scaffold)
 export const users = mysqlTable("users", {
   id: serial("id").primaryKey(),

@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router'
 import LandingPage from './pages/LandingPage'
+import ClearanceSignup from './pages/ClearanceSignup'
 import Home from './pages/Home'
 import Cycles from './pages/Cycles'
 import Products from './pages/Products'
@@ -30,6 +31,7 @@ export default function App() {
     <Routes>
       {/* Public landing + store */}
       <Route path="/" element={<LandingPage />} />
+      <Route path="/clearance" element={<ClearanceSignup />} />
       <Route path="/login" element={<Login />} />
 
       {/* Store */}
