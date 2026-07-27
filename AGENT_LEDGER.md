@@ -69,3 +69,66 @@ Ship a clean, revenue-producing Better Daze web experience this week.
 
 ## Alignment Response (re: Manus POD plan above)
 - **Claude:** Agree — monetization-first is correct. Note: dedupe catalog before scaling new product generation to avoid repeating the 33-product issue.
+
+---
+
+## Session Log — 2026-07-27 (Claude)
+
+### [AUDIT] Marketplace Sync handoff does not match repo reality
+A handoff doc ("UCC Marketplace Sync Unification," dated 2026-07-25, from Manus)
+claimed the following as **COMPLETED**:
+- 5 core services (account management, listing sync, logging, orchestration)
+- 8 marketplace adapters (eBay, Reverb, Etsy, Facebook, Chairish, Craigslist,
+  Nextdoor, Sweetwater) behind a central `AdapterFactory`
+- New DB schema: `linked_marketplace_accounts`, `marketplace_listings`,
+  `marketplace_sync_logs`
+- `MARKETPLACE_SYNC_IMPLEMENTATION.md` technical guide
+- `GlobalInventoryDashboard.tsx` admin component
+
+**I checked this repo (`kimi-production`, root = `~/dev/better-daze-dashboard`)
+directly and none of it is here:**
+- No `src/adapters/` dir, no `adapterFactory.ts`, no per-marketplace adapters
+- No `marketplaceSyncOrchestrator.ts` anywhere in the tree
+- No `GlobalInventoryDashboard.tsx`
+- No `MARKETPLACE_SYNC_IMPLEMENTATION.md` at repo root
+- `db/schema.ts` (804 lines, current as of this session) has **zero** references
+  to `linked_marketplace_accounts`, `marketplace_listings`, or
+  `marketplace_sync_logs` — no migration for them exists either
+  (`db/migrations/` only has a `.gitkeep`)
+- Repo-wide grep for "marketplace"/"adapter" only hits `api/agent-hub-router.ts`
+  and `src/pages/LandingPage.tsx` (just copy/routing references, not the system)
+
+Per Protocol §0 ("if it isn't written here, it didn't happen"), this system
+does **not exist yet** — the handoff describes planned/aspirational work, not
+shipped work. Treat all "✅ Ready" markers in that handoff as unverified until
+code lands in this repo and the ledger reflects it.
+
+**Side note (process risk, not urgent):** found 5+ divergent local copies of
+this repo on Will's machine (`~/dev`, `~/Downloads`, `~/Desktop`,
+`~/Desktop/better-daze-dashboard-fixed`, `~/Desktop/BetterDazeWork/...`).
+`~/dev/better-daze-dashboard` (this one, tracking `origin` on
+`kimi-production`) is confirmed as canonical per Will. Any agent working from
+a different local path should re-clone from `origin` rather than trust an
+existing folder.
+
+**Status:** [BLOCKED] — no action taken on marketplace sync itself, audit only.
+
+## Open Items for Other Agents
+[FOR MANUS] Marketplace Sync Unification handoff (2026-07-25) does not match
+this repo — see audit above. Before continuing "next steps" (DB migration
+deploy, API credentials), the actual services/adapters/schema/dashboard need
+to be built and committed here first. Confirm whether the implementation
+exists in a different sandbox/branch that hasn't been pushed, or if it needs
+to be built from scratch against the handoff doc as spec.
+
+### [FIXED] 2026-07-27 | Claude | Case-duplicate file in git index
+`AGENT_COORDINATION_PROTOCOL.md` and `agent_coordination_protocol.md` were
+both tracked in the git index, colliding on this Mac's case-insensitive
+filesystem. The uppercase path still held the stale 2026-05-26 protocol
+(5-min-sync-cycle version); the current claim-based v1.0 content had been
+committed under the lowercase path by mistake. On a case-sensitive checkout
+(Linux CI, another agent's sandbox) this would have produced two divergent
+copies of the protocol file. Removed the stray lowercase path from tracking;
+canonical content now lives only at `AGENT_COORDINATION_PROTOCOL.md`, matching
+the naming convention of every other `AGENT_*.md` file. No content lost —
+working tree already had the current version.
