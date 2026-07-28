@@ -16,6 +16,7 @@ import {
   auditLogs,
   agents,
   agentTasks,
+  agentMessages,
   apiCredentials,
 } from "./schema";
 
@@ -106,5 +107,16 @@ export const apiCredentialsRelations = relations(apiCredentials, ({ one }) => ({
   user: one(users, {
     fields: [apiCredentials.userId],
     references: [users.id],
+  }),
+}));
+
+export const agentMessagesRelations = relations(agentMessages, ({ one }) => ({
+  fromAgent: one(agents, {
+    fields: [agentMessages.fromAgentId],
+    references: [agents.id],
+  }),
+  toAgent: one(agents, {
+    fields: [agentMessages.toAgentId],
+    references: [agents.id],
   }),
 }));
