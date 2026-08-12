@@ -61,7 +61,7 @@ export default function App() {
       <Route path="/app/checklist" element={<Checklist />} />
       <Route path="/app/health" element={<HealthPanel />} />
       <Route path="/app/agents" element={<AgentHub />} />
-
+      <Route path="/api/oauth/callback" element={<OAuthCallback />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   )
