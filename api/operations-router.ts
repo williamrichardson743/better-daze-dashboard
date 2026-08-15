@@ -3,6 +3,7 @@ import { eq, desc } from "drizzle-orm";
 import { createRouter, authedQuery, adminQuery } from "./middleware";
 import { getDb } from "./queries/connection";
 import * as schema from "@db/schema";
+import { runPhase3 } from "./integrations/cycleRunner";
 
 export const operationsRouter = createRouter({
   // ─── PIPELINE RUNS ───
@@ -60,15 +61,96 @@ export const operationsRouter = createRouter({
       await db.delete(schema.pipelineRuns).where(eq(schema.pipelineRuns.id, input.id));
       return { success: true };
     }),
-    start: adminQuery.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
-      const db = getDb();
-      await db.update(schema.pipelineRuns).set({
-        status: "in_progress",
-        trendPhaseStatus: "in_progress",
-        startedAt: new Date(),
-      }).where(eq(schema.pipelineRuns.id, input.id));
-      return { success: true };
-    }),
+
+    /**
+     * start — triggers the Printify/Shopify pipeline for a run.
+     *
+     * Accepts optional product details. When slogan + designImageUrl (or
+     * designImageBase64) are provided, Phase 3 runs immediately: image upload,
+     * product creation on Printify, and publish to Shopify. When those fields
+     * are omitted the run is simply marked in_progress so the caller can drive
+     * the trend/design phases and supply product details via a follow-up call.
+     *
+     * Backward-compatible: existing callers that pass only { id } still work.
+     */
+    start: adminQuery
+      .input(
+        z.object({
+          id: z.number(),
+          // Phase 3 inputs — optional so the endpoint stays backward-compatible.
+          slogan: z.string().optional(),
+          designImageUrl: z.string().url().optional(),
+          designImageBase64: z.string().optional(),
+          designFileName: z.string().optional(),
+          productType: z.enum(["tee", "mug", "poster", "hoodie"]).optional(),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const db = getDb();
+        const startedAt = new Date();
+
+        // Mark the run in-progress and enter the printify phase.
+        await db
+          .update(schema.pipelineRuns)
+          .set({
+            status: "in_progress",
+            currentPhase: "printify",
+            printifyPhaseStatus: "in_progress",
+            startedAt,
+          })
+          .where(eq(schema.pipelineRuns.id, input.id));
+
+        // Only execute Phase 3 when product details were supplied.
+        if (input.slogan && (input.designImageUrl || input.designImageBase64)) {
+          const result = await runPhase3({
+            slogan: input.slogan,
+            designImageUrl: input.designImageUrl,
+            designImageBase64: input.designImageBase64,
+            designFileName: input.designFileName,
+            productType: input.productType,
+          });
+
+          if (result.published && !result.error) {
+            // Phase 3 + Shopify publish succeeded — advance to social phase.
+            await db
+              .update(schema.pipelineRuns)
+              .set({
+                currentPhase: "social",
+                printifyPhaseStatus: "completed",
+                shopifyPhaseStatus: "completed",
+                name: `${input.slogan} | printify:${result.printifyProductId} | shopify:${result.shopifyProductId ?? "pending"}`,
+              })
+              .where(eq(schema.pipelineRuns.id, input.id));
+
+            return {
+              success: true,
+              printifyProductId: result.printifyProductId,
+              shopifyProductId: result.shopifyProductId,
+              title: result.title,
+              productType: result.productType,
+            };
+          } else {
+            // Phase 3 failed — mark the run failed with the error message.
+            await db
+              .update(schema.pipelineRuns)
+              .set({
+                status: "failed",
+                currentPhase: "printify",
+                printifyPhaseStatus: "failed",
+                errorMessage: result.error ?? "runPhase3 returned published=false",
+              })
+              .where(eq(schema.pipelineRuns.id, input.id));
+
+            return {
+              success: false,
+              error: result.error ?? "Phase 3 failed",
+            };
+          }
+        }
+
+        // No product details — return immediately. Caller drives the next phase.
+        return { success: true };
+      }),
   }),
 
   // ─── ACTION ITEMS / CHECKLIST ───
@@ -93,10 +175,10 @@ export const operationsRouter = createRouter({
       .mutation(async ({ ctx, input }) => {
         const db = getDb();
         const [result] = await db.insert(schema.actionItems).values({
-          userId: ctx.user.id,
           ...input,
+          userId: ctx.user.id,
         }).$returningId();
-        return result;
+        return { id: result.id };
       }),
     update: authedQuery
       .input(
@@ -106,9 +188,8 @@ export const operationsRouter = createRouter({
           description: z.string().optional(),
           section: z.enum(["immediate", "short_term", "deferred"]).optional(),
           priority: z.enum(["low", "medium", "high", "critical"]).optional(),
-          status: z.enum(["open", "in_progress", "completed", "cancelled"]).optional(),
+          isCompleted: z.boolean().optional(),
           dueDate: z.date().optional(),
-          tags: z.array(z.string()).optional(),
         })
       )
       .mutation(async ({ input }) => {
@@ -117,14 +198,19 @@ export const operationsRouter = createRouter({
         await db.update(schema.actionItems).set(data).where(eq(schema.actionItems.id, id));
         return { success: true };
       }),
-    toggleComplete: authedQuery.input(z.object({ id: z.number(), completed: z.boolean() })).mutation(async ({ input }) => {
-      const db = getDb();
-      await db.update(schema.actionItems).set({
-        status: input.completed ? "completed" : "open",
-        completedAt: input.completed ? new Date() : null,
-      }).where(eq(schema.actionItems.id, input.id));
-      return { success: true };
-    }),
+    toggleComplete: authedQuery
+      .input(z.object({ id: z.number(), isCompleted: z.boolean() }))
+      .mutation(async ({ input }) => {
+        const db = getDb();
+        await db
+          .update(schema.actionItems)
+          .set({
+            isCompleted: input.isCompleted,
+            completedAt: input.isCompleted ? new Date() : null,
+          })
+          .where(eq(schema.actionItems.id, input.id));
+        return { success: true };
+      }),
     delete: authedQuery.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
       const db = getDb();
       await db.delete(schema.actionItems).where(eq(schema.actionItems.id, input.id));
@@ -132,79 +218,60 @@ export const operationsRouter = createRouter({
     }),
   }),
 
-  // ─── API CREDENTIALS HEALTH ───
+  // ─── API CREDENTIALS HEALTH MONITORING ───
   credentials: createRouter({
-    list: authedQuery.query(async ({ ctx }) => {
+    list: authedQuery.query(async () => {
       const db = getDb();
-      return db.select({
-        id: schema.apiCredentials.id,
-        userId: schema.apiCredentials.userId,
-        serviceName: schema.apiCredentials.serviceName,
-        displayName: schema.apiCredentials.displayName,
-        status: schema.apiCredentials.status,
-        lastVerifiedAt: schema.apiCredentials.lastVerifiedAt,
-        expiresAt: schema.apiCredentials.expiresAt,
-        scope: schema.apiCredentials.scope,
-        metadata: schema.apiCredentials.metadata,
-        createdAt: schema.apiCredentials.createdAt,
-        updatedAt: schema.apiCredentials.updatedAt,
-      }).from(schema.apiCredentials)
-        .where(eq(schema.apiCredentials.userId, ctx.user.id))
-        .orderBy(desc(schema.apiCredentials.updatedAt));
+      return db.select().from(schema.apiCredentials).orderBy(desc(schema.apiCredentials.updatedAt));
     }),
     upsert: adminQuery
       .input(
         z.object({
-          id: z.number().optional(),
-          serviceName: z.string().min(1),
-          displayName: z.string().min(1),
-          status: z.enum(["active", "expiring", "expired", "needs_rotation", "error", "unknown"]).default("unknown"),
-          expiresAt: z.date().optional(),
-          scope: z.string().optional(),
+          service: z.string().min(1),
+          label: z.string().optional(),
+          status: z.enum(["active", "inactive", "error", "unknown"]).default("unknown"),
+          lastChecked: z.date().optional(),
           metadata: z.record(z.string(), z.any()).optional(),
-        })
-      )
-      .mutation(async ({ ctx, input }) => {
-        const db = getDb();
-        if (input.id) {
-          const { id, ...data } = input;
-          await db.update(schema.apiCredentials).set({
-            ...data,
-            lastVerifiedAt: new Date(),
-          }).where(eq(schema.apiCredentials.id, id));
-          return { success: true, id };
-        } else {
-          const [result] = await db.insert(schema.apiCredentials).values({
-            userId: ctx.user.id,
-            serviceName: input.serviceName,
-            displayName: input.displayName,
-            status: input.status,
-            lastVerifiedAt: new Date(),
-            expiresAt: input.expiresAt,
-            scope: input.scope,
-            metadata: input.metadata,
-          }).$returningId();
-          return { success: true, id: result.id };
-        }
-      }),
-    updateStatus: adminQuery
-      .input(
-        z.object({
-          id: z.number(),
-          status: z.enum(["active", "expiring", "expired", "needs_rotation", "error", "unknown"]),
         })
       )
       .mutation(async ({ input }) => {
         const db = getDb();
-        await db.update(schema.apiCredentials).set({
-          status: input.status,
-          lastVerifiedAt: new Date(),
-        }).where(eq(schema.apiCredentials.id, input.id));
+        const existing = await db
+          .select()
+          .from(schema.apiCredentials)
+          .where(eq(schema.apiCredentials.service, input.service))
+          .limit(1);
+
+        if (existing.length > 0) {
+          await db
+            .update(schema.apiCredentials)
+            .set({ ...input, updatedAt: new Date() })
+            .where(eq(schema.apiCredentials.service, input.service));
+        } else {
+          await db.insert(schema.apiCredentials).values(input);
+        }
         return { success: true };
       }),
-    delete: adminQuery.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
+    updateStatus: adminQuery
+      .input(
+        z.object({
+          service: z.string().min(1),
+          status: z.enum(["active", "inactive", "error", "unknown"]),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const db = getDb();
+        await db
+          .update(schema.apiCredentials)
+          .set({ status: input.status, lastChecked: new Date(), updatedAt: new Date() })
+          .where(eq(schema.apiCredentials.service, input.service));
+        return { success: true };
+      }),
+    delete: adminQuery.input(z.object({ service: z.string() })).mutation(async ({ input }) => {
       const db = getDb();
-      await db.delete(schema.apiCredentials).where(eq(schema.apiCredentials.id, input.id));
+      await db
+        .delete(schema.apiCredentials)
+        .where(eq(schema.apiCredentials.service, input.service));
       return { success: true };
     }),
   }),

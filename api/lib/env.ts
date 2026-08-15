@@ -18,5 +18,7 @@ export const env = {
   ownerUnionId: process.env.OWNER_UNION_ID ?? "",
   shopifyStoreUrl: process.env.SHOPIFY_STORE_URL ?? "",
   shopifyAdminToken: process.env.SHOPIFY_ADMIN_TOKEN ?? "",
+  printifyApiToken: process.env.PRINTIFY_API_TOKEN ?? "",
+  printifyShopId: process.env.PRINTIFY_SHOP_ID ?? "27082819",
   appUrl: process.env.APP_URL ?? "http://localhost:3000",
 };
