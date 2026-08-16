@@ -2,6 +2,10 @@
   "version": 2,
   "builds": [
     {
+      "src": "api/boot.ts",
+      "use": "@vercel/node"
+    },
+    {
       "src": "package.json",
       "use": "@vercel/static-build",
       "config": {
@@ -10,7 +14,17 @@
     }
   ],
   "routes": [
-    { "handle": "filesystem" },
-    { "src": "/(.*)", "dest": "/index.html" }
+    {
+      "src": "/api/(.*)",
+      "dest": "api/boot.ts"
+    },
+    {
+      "src": "/(assets|images|favicon.ico)(.*)",
+      "dest": "/$1$2"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
   ]
 }
