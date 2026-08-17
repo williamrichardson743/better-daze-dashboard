@@ -2,6 +2,14 @@
   "version": 2,
   "builds": [
     {
+      "src": "api/github-start.ts",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "api/oauth-callback.ts",
+      "use": "@vercel/node"
+    },
+    {
       "src": "api/boot.ts",
       "use": "@vercel/node"
     },
@@ -14,6 +22,14 @@
     }
   ],
   "routes": [
+    {
+      "src": "/api/auth/github/start",
+      "dest": "api/github-start.ts"
+    },
+    {
+      "src": "/api/oauth/callback",
+      "dest": "api/oauth-callback.ts"
+    },
     {
       "src": "/api/(.*)",
       "dest": "api/boot.ts"
