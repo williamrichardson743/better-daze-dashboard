@@ -1,8 +1,8 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { env } from "./lib/env";
-import { findUserByUnionId, upsertUser } from "./queries/users";
-import { signSessionToken } from "./auth/session";
-import { Session } from "../contracts/constants";
+import { env } from "./lib/env.js";
+import { findUserByUnionId, upsertUser } from "./queries/users.js";
+import { signSessionToken } from "./auth/session.js";
+import { Session } from "../contracts/constants.js";
 import * as cookie from "cookie";
 
 const stateCookieName = "bd_github_oauth_state";

@@ -2,9 +2,9 @@ import { z } from "zod";
 import { desc, eq } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { EventEmitter } from "events";
-import { createRouter, authedQuery, adminQuery } from "./middleware";
-import { getDb } from "./queries/connection";
-import * as schema from "@db/schema";
+import { createRouter, authedQuery, adminQuery } from "./middleware.js";
+import { getDb } from "./queries/connection.js";
+import * as schema from "../db/schema.js";
 
 // Real-time alert event hub — consumed by SSE endpoints or webhook listeners
 export const agentEE = new EventEmitter();

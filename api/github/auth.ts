@@ -1,12 +1,12 @@
 import type { Context } from "hono";
 import { getCookie, setCookie } from "hono/cookie";
 import * as cookie from "cookie";
-import { env } from "../lib/env";
-import { getSessionCookieOptions } from "../lib/cookies";
-import { Session, Paths } from "@contracts/constants";
-import { Errors } from "@contracts/errors";
-import { signSessionToken, verifySessionToken } from "../auth/session";
-import { findUserByUnionId, upsertUser } from "../queries/users";
+import { env } from "../lib/env.js";
+import { getSessionCookieOptions } from "../lib/cookies.js";
+import { Session, Paths } from "../../contracts/constants.js";
+import { Errors } from "../../contracts/errors.js";
+import { signSessionToken, verifySessionToken } from "../auth/session.js";
+import { findUserByUnionId, upsertUser } from "../queries/users.js";
 
 const stateCookieName = "bd_github_oauth_state";
 const stateLifetimeSeconds = 10 * 60;

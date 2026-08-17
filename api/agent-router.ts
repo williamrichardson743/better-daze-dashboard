@@ -1,8 +1,8 @@
 import { z } from "zod";
 import { eq, desc, and, isNull } from "drizzle-orm";
-import { createRouter, publicQuery, authedQuery } from "./middleware";
-import { getDb } from "./queries/connection";
-import * as schema from "@db/schema";
+import { createRouter, publicQuery, authedQuery } from "./middleware.js";
+import { getDb } from "./queries/connection.js";
+import * as schema from "../db/schema.js";
 
 export const agentRouter = createRouter({
   // ─── AGENTS ───

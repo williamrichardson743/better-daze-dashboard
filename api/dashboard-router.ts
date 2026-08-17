@@ -1,9 +1,9 @@
 import { z } from "zod";
 import { eq } from "drizzle-orm";
-import { createRouter, publicQuery, authedQuery } from "./middleware";
-import { getDb } from "./queries/connection";
-import * as schema from "@db/schema";
-import * as dashboardQueries from "./queries/dashboard";
+import { createRouter, publicQuery, authedQuery } from "./middleware.js";
+import { getDb } from "./queries/connection.js";
+import * as schema from "../db/schema.js";
+import * as dashboardQueries from "./queries/dashboard.js";
 
 export const dashboardRouter = createRouter({
   stats: publicQuery.query(async () => {

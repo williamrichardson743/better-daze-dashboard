@@ -1,12 +1,12 @@
-import { authRouter } from "./auth-router";
-import { dashboardRouter } from "./dashboard-router";
-import { adminRouter } from "./admin-router";
-import { shopRouter } from "./shop-router";
-import { campaignRouter } from "./campaign-router";
-import { operationsRouter } from "./operations-router";
-import { agentRouter } from "./agent-router";
-import { waitlistRouter } from "./waitlist-router";
-import { createRouter, publicQuery } from "./middleware";
+import { authRouter } from "./auth-router.js";
+import { dashboardRouter } from "./dashboard-router.js";
+import { adminRouter } from "./admin-router.js";
+import { shopRouter } from "./shop-router.js";
+import { campaignRouter } from "./campaign-router.js";
+import { operationsRouter } from "./operations-router.js";
+import { agentRouter } from "./agent-router.js";
+import { waitlistRouter } from "./waitlist-router.js";
+import { createRouter, publicQuery } from "./middleware.js";
 
 export const appRouter = createRouter({
   ping: publicQuery.query(() => ({ ok: true, ts: Date.now() })),

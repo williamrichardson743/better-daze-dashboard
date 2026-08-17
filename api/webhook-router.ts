@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { timingSafeEqual } from "crypto";
-import { agentHubRouter } from "./agent-hub-router";
-import type { User } from "@db/schema";
+import { agentHubRouter } from "./agent-hub-router.js";
+import type { User } from "../db/schema.js";
 
 export const webhookRouter = new Hono();
 

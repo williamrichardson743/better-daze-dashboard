@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
-import { createRouter, authedQuery, adminQuery } from "./middleware";
-import * as dashboardQueries from "./queries/dashboard";
+import { createRouter, authedQuery, adminQuery } from "./middleware.js";
+import * as dashboardQueries from "./queries/dashboard.js";
 
 export const adminRouter = createRouter({
   // User Management

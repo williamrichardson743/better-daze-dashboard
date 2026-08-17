@@ -1,6 +1,6 @@
 import { eq, and, desc } from "drizzle-orm";
-import * as schema from "@db/schema";
-import { getDb } from "./connection";
+import * as schema from "../../db/schema.js";
+import { getDb } from "./connection.js";
 
 // User queries
 export async function findAllUsers(limit?: number, offset?: number) {
