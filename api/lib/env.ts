@@ -13,7 +13,7 @@ export const env = {
   githubClientSecret: process.env.GITHUB_CLIENT_SECRET ?? "",
   sessionSecret: process.env.SESSION_SECRET ?? process.env.APP_SECRET ?? "",
   isProduction: process.env.NODE_ENV === "production",
-  databaseUrl: required("DATABASE_URL"),
+  databaseUrl: process.env.DATABASE_URL ?? "",
   ownerUnionId: process.env.OWNER_UNION_ID ?? "github:257014198",
   shopifyStoreUrl: process.env.SHOPIFY_STORE_URL ?? "",
   shopifyAdminToken: process.env.SHOPIFY_ADMIN_TOKEN ?? "",
