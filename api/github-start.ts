@@ -1,8 +1,7 @@
 import { randomUUID } from "node:crypto";
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { env } from "./lib/env";
-
 const stateCookieName = "bd_github_oauth_state";
+const publicGithubClientId = "Ov23lir7wuMbVr5DR3Ms";
 const callbackPath = "/api/oauth/callback";
 const githubAuthorizeUrl = "https://github.com/login/oauth/authorize";
 
@@ -10,7 +9,7 @@ type VercelRequest = IncomingMessage & { query?: Record<string, string | string[
 type VercelResponse = ServerResponse;
 
 function appUrl(req: IncomingMessage) {
-  const configured = env.appUrl && !env.appUrl.includes("localhost") ? env.appUrl : "";
+  const configured = process.env.APP_URL && !process.env.APP_URL.includes("localhost") ? process.env.APP_URL : "";
   if (configured) return configured.replace(/\/$/, "");
   const proto = Array.isArray(req.headers["x-forwarded-proto"])
     ? req.headers["x-forwarded-proto"][0]
@@ -33,17 +32,10 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
     return;
   }
 
-  if (!env.githubClientId) {
-    res.statusCode = 503;
-    res.setHeader("Content-Type", "application/json");
-    res.end(JSON.stringify({ error: "GITHUB_CLIENT_ID is not configured" }));
-    return;
-  }
-
   const state = randomUUID();
   const baseUrl = appUrl(req);
   const authorizationUrl = new URL(githubAuthorizeUrl);
-  authorizationUrl.searchParams.set("client_id", env.githubClientId);
+  authorizationUrl.searchParams.set("client_id", process.env.GITHUB_CLIENT_ID || publicGithubClientId);
   authorizationUrl.searchParams.set("redirect_uri", `${baseUrl}${callbackPath}`);
   authorizationUrl.searchParams.set("scope", "read:user user:email");
   authorizationUrl.searchParams.set("state", state);
