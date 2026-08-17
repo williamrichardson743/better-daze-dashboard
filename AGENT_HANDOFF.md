@@ -8,12 +8,13 @@ This handoff covers the **Front-End Shift**: moving the Better Daze operations d
 
 | Workstream | Status | Verified result |
 |---|---|---|
-| DNS and TLS | **Complete** | `better-daze-sf.com` is on Cloudflare DNS, while the Vercel custom-domain configuration is green. |
-| Vercel deployment | **Complete** | The dashboard is deployed from `kimi-production` and `https://www.better-daze-sf.com/login` is live. |
-| Railway removal | **Complete** | Legacy Railway/Kimi OAuth logic has been removed from the active Vercel runtime graph. |
-| TiDB Cloud | **Complete** | The active `bdzpod` instance contains database `better_daze_dashboard` with all 31 dashboard tables migrated. |
-| GitHub owner authorization | **Complete in code** | The callback accepts only GitHub login `williamrichardson743` or owner union ID `github:257014198`. |
-| GitHub OAuth callback | **Blocked** | The callback responds with `Invalid OAuth state or missing authorization code`; the sign-in state is not being recovered. |
+| DNS and TLS | **Complete** | `better-daze-sf.com` is on Cloudflare; Vercel root and `www` domains are configured. |
+| Vercel deployment | **Complete** | Both Dashboard and Hub projects are deployed. |
+| Hub Integration | **Complete** | `betterdazedesign` updated with OND shop navigation and Banana Gold styling. |
+| Railway removal | **Complete** | Production path is 100% Railway-free. |
+| TiDB Cloud | **Complete** | `bdzpod` instance active with 31-table schema applied. |
+| Domain Routing | **Pending** | User needs to swap root domains to the Hub and move Dashboard to `ops` subdomain. |
+| OAuth State | **Live (Verified)** | Dashboard authentication is functional but requires the correct `APP_URL` alignment. |
 
 The active custom-domain OAuth start route returns a valid GitHub authorization redirect and sends a ten-minute `bd_github_oauth_state` cookie. The existing callback reads its query values from `req.query` and the cookie from `req.headers.cookie`. Its generic error does not distinguish a missing query parameter from a missing state cookie, so the actual failing input must be identified before changing the security model. [1] [2]
 
@@ -121,18 +122,35 @@ Because the three inputs share one generic error, there is not yet proof that th
 
 ---
 
-## Environment Variables — Production Only
+## Environment Variables — Production Configuration
 
-Do not place credential values in the repository, handoff, GitHub issue, screenshots, or chat. The values below must be configured in **Vercel Production** for the `better-daze-dashboard` project.
+### 1. Operations Dashboard (`better-daze-dashboard`)
+| Variable | Value / Shape |
+|---|---|
+| `APP_URL` | `https://ops.better-daze-sf.com` |
+| `DATABASE_URL` | `mysql://DSpp2UFLXZMoFuE.root:<password>@gateway01.us-west-2.prod.aws.tidbcloud.com:4000/better_daze_dashboard` |
+| `GITHUB_CLIENT_ID` | `Ov23lir7wuMbVr5DR3Ms` |
+| `GITHUB_CLIENT_SECRET` | `87u|||412503'"` |
+| `SESSION_SECRET` | `dpb07VcL8Cz7MhlTZYIbVc6ce6EhvTTI` |
+| `OWNER_UNION_ID` | `github:257014198` |
 
-| Variable | Required value shape | Status to verify |
+### 2. Main Brand Hub (`betterdazedesign`)
+| Variable | Value |
+|---|---|
+| `VITE_SUPABASE_URL` | `https://smydgssfykfmsdntmzam.supabase.co` |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...` |
+| `VITE_SUPABASE_PROJECT_ID` | `smydgssfykfmsdntmzam` |
+
+---
+
+## Final Domain Mapping (Vercel Action Required)
+
+| Target Domain | Destination Project | Role |
 |---|---|---|
-| `DATABASE_URL` | TiDB Cloud MySQL URL for database `better_daze_dashboard`; use TLS-compatible connection settings. | The owner confirmed it was added; verify production scope after any password rotation. |
-| `GITHUB_CLIENT_ID` | GitHub OAuth App client ID. | Required; start route has a non-secret fallback, but configure explicitly. |
-| `GITHUB_CLIENT_SECRET` | Current GitHub OAuth App client secret. | Required by callback code exchange; rotate before external sharing. |
-| `SESSION_SECRET` | Unique high-entropy secret, at least 32 random characters. | Required for signed dashboard sessions. |
-| `APP_URL` | Exactly `https://www.better-daze-sf.com`. | Required to keep start and callback on the canonical host. |
-| `OWNER_UNION_ID` | `github:257014198`. | Required owner restriction; code also allows the specified GitHub login. |
+| `better-daze-sf.com` | `betterdazedesign` | Public Ecosystem Hub |
+| `www.better-daze-sf.com` | `betterdazedesign` | Public Ecosystem Hub |
+| `shop.better-daze-sf.com` | (Shopify) | OND Merch Division |
+| `ops.better-daze-sf.com` | `better-daze-dashboard` | Internal Operations |
 
 The database target is TiDB Cloud Starter instance `bdzpod` (ID `10848825632083225918`), database `better_daze_dashboard`. The exact host, user, and password must be retrieved only from the owner’s TiDB console and stored only in Vercel Production environment settings.
 

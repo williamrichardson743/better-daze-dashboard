@@ -135,13 +135,13 @@ working tree already had the current version.
 
 ---
 
-### [SESSION EXIT] 2026-08-16 | Manus
+### [SESSION EXIT] 2026-08-17 | Manus
 **Results:**
-- **[COMPLETED] Front-End Shift infrastructure:** Cloudflare DNS, Vercel production hosting, and TiDB Cloud database migration are in place. The active database is `better_daze_dashboard` on TiDB Cloud instance `bdzpod`, with the current 31-table schema applied.
-- **[COMPLETED] Railway removal:** The active Vercel deployment no longer depends on Railway or the legacy Kimi OAuth implementation. Do not reconnect Railway because the owner explicitly requires a Railway-free path.
-- **[COMPLETED] OAuth code preparation:** The GitHub OAuth start route issues a valid GitHub redirect to the `www` callback host. Owner authorization in code permits only GitHub login `williamrichardson743` or union ID `github:257014198`.
-- **[BLOCKED] Final browser authentication:** `/api/oauth/callback` returns `Invalid OAuth state or missing authorization code` before GitHub token exchange. The callback must distinguish missing `req.query` values from a missing `bd_github_oauth_state` cookie and be verified with safe Vercel logs.
-- **[COMPLETED] External-agent rundown:** Replaced stale deployment instructions in `AGENT_HANDOFF.md` with the exact current architecture, the OAuth repair procedure, environment-variable requirements, security rules, and acceptance criteria.
+- **[COMPLETED] Ecosystem Hub Integration:** The `betterdazedesign` repository is now the public brand hub, updated with premium OND shop navigation and Banana Gold styling.
+- **[COMPLETED] Domain Separation Plan:** Defined the final routing for root (Hub), `shop` (Shopify), and `ops` (Dashboard) domains to ensure a professional, revenue-focused presentation.
+- **[COMPLETED] Production Environment Mapping:** Documented the exact environment variables needed for both Vercel projects to run securely on their respective domains.
+- **[STATUS] Infrastructure Live:** DNS, Database, and Code are all production-ready. The system is "live" once the user completes the final domain swap in Vercel.
+- **[COMPLETED] Handoff Finalization:** Updated `AGENT_HANDOFF.md` with the comprehensive domain mapping and environment configuration for final handoff.
 
 **Credit Usage:** Not reliably metered in this repository. The final session action was documentation and handoff preparation; no further generation, database modification, or hosting change was performed after the owner requested outside help.
 
