@@ -132,3 +132,21 @@ copies of the protocol file. Removed the stray lowercase path from tracking;
 canonical content now lives only at `AGENT_COORDINATION_PROTOCOL.md`, matching
 the naming convention of every other `AGENT_*.md` file. No content lost —
 working tree already had the current version.
+
+---
+
+### [SESSION EXIT] 2026-08-16 | Manus
+**Results:**
+- **[COMPLETED] Front-End Shift infrastructure:** Cloudflare DNS, Vercel production hosting, and TiDB Cloud database migration are in place. The active database is `better_daze_dashboard` on TiDB Cloud instance `bdzpod`, with the current 31-table schema applied.
+- **[COMPLETED] Railway removal:** The active Vercel deployment no longer depends on Railway or the legacy Kimi OAuth implementation. Do not reconnect Railway because the owner explicitly requires a Railway-free path.
+- **[COMPLETED] OAuth code preparation:** The GitHub OAuth start route issues a valid GitHub redirect to the `www` callback host. Owner authorization in code permits only GitHub login `williamrichardson743` or union ID `github:257014198`.
+- **[BLOCKED] Final browser authentication:** `/api/oauth/callback` returns `Invalid OAuth state or missing authorization code` before GitHub token exchange. The callback must distinguish missing `req.query` values from a missing `bd_github_oauth_state` cookie and be verified with safe Vercel logs.
+- **[COMPLETED] External-agent rundown:** Replaced stale deployment instructions in `AGENT_HANDOFF.md` with the exact current architecture, the OAuth repair procedure, environment-variable requirements, security rules, and acceptance criteria.
+
+**Credit Usage:** Not reliably metered in this repository. The final session action was documentation and handoff preparation; no further generation, database modification, or hosting change was performed after the owner requested outside help.
+
+**Handover To:** External Vercel/TypeScript engineer (via `AGENT_HANDOFF.md`) for a focused OAuth callback repair and authenticated browser verification.
+
+**Final Status:** [BLOCKED — ONE AUTHENTICATION DEFECT REMAINS]
+
+**Security Note:** Treat the TiDB database password and GitHub OAuth client secret previously entered during troubleshooting as compromised. Rotate both values before granting external access, update Vercel Production environment variables, and do not store replacement secrets in this repository.
