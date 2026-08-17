@@ -1,5 +1,5 @@
-import { getDb } from "../api/queries/connection";
-import * as schema from "./schema";
+import { getDb } from "../api/queries/connection.js";
+import * as schema from "./schema.js";
 import { eq } from "drizzle-orm";
 
 async function seed() {

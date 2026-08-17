@@ -14,7 +14,7 @@ import {
   roles,
   permissions,
   auditLogs,
-} from "./schema";
+} from "./schema.js";
 
 export const usersRelations = relations(users, ({ many }) => ({
   cycles: many(cycles),
