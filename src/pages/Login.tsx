@@ -4,22 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Sparkles, ArrowRight, Zap, Shield, TrendingUp } from "lucide-react";
 
-function getOAuthUrl() {
-  const authUrl = import.meta.env.VITE_KIMI_AUTH_URL;
-  const appID = import.meta.env.VITE_APP_ID;
-  const redirectUri = `${window.location.origin}/api/oauth/callback`;
-  const state = btoa(redirectUri);
-
-  const url = new URL(authUrl);
-  url.searchParams.set("client_id", appID);
-  url.searchParams.set("redirect_uri", redirectUri);
-  url.searchParams.set("response_type", "code");
-  url.searchParams.set("scope", "profile");
-  url.searchParams.set("state", state);
-
-  return url.toString();
-}
-
 export default function Login() {
   const { user, isLoading } = useAuth();
 
@@ -117,10 +101,10 @@ export default function Login() {
             <Button
               className="w-full h-11 gap-2 text-sm"
               onClick={() => {
-                window.location.href = getOAuthUrl();
+                window.location.href = "/api/auth/github/start";
               }}
             >
-              Continue with SSO
+              Continue with GitHub
               <ArrowRight className="h-4 w-4" />
             </Button>
 

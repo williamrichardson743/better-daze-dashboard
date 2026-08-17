@@ -9,13 +9,12 @@ function required(name: string): string {
 }
 
 export const env = {
-  appId: process.env.APP_ID ?? "",
-  appSecret: process.env.APP_SECRET ?? "",
+  githubClientId: process.env.GITHUB_CLIENT_ID ?? "",
+  githubClientSecret: process.env.GITHUB_CLIENT_SECRET ?? "",
+  sessionSecret: process.env.SESSION_SECRET ?? process.env.APP_SECRET ?? "",
   isProduction: process.env.NODE_ENV === "production",
   databaseUrl: required("DATABASE_URL"),
-  kimiAuthUrl: process.env.KIMI_AUTH_URL ?? "",
-  kimiOpenUrl: process.env.KIMI_OPEN_URL ?? "",
-  ownerUnionId: process.env.OWNER_UNION_ID ?? "",
+  ownerUnionId: process.env.OWNER_UNION_ID ?? "github:257014198",
   shopifyStoreUrl: process.env.SHOPIFY_STORE_URL ?? "",
   shopifyAdminToken: process.env.SHOPIFY_ADMIN_TOKEN ?? "",
   printifyApiToken: process.env.PRINTIFY_API_TOKEN ?? "",
