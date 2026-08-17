@@ -133,8 +133,10 @@ export function createGitHubCallbackHandler() {
       const accessToken = await exchangeAuthCode(code);
       const profile = await getGitHubProfile(accessToken);
       const unionId = `github:${profile.id}`;
+      const authorizedByUnionId = unionId === env.ownerUnionId;
+      const authorizedByLogin = profile.login.trim().toLowerCase() === env.ownerGitHubLogin;
 
-      if (env.ownerUnionId && unionId !== env.ownerUnionId) {
+      if (!authorizedByUnionId && !authorizedByLogin) {
         return c.json({ error: "This GitHub account is not authorized" }, 403);
       }
 

@@ -130,7 +130,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const profile = await getProfile(await exchangeCode(code, `${appUrl(req)}/api/oauth/callback`));
     const unionId = `github:${profile.id}`;
-    if (env.ownerUnionId && unionId !== env.ownerUnionId) {
+    const authorizedByUnionId = unionId === env.ownerUnionId;
+    const authorizedByLogin = profile.login.trim().toLowerCase() === env.ownerGitHubLogin;
+    if (!authorizedByUnionId && !authorizedByLogin) {
       res.statusCode = 403;
       res.end("This GitHub account is not authorized");
       return;

@@ -15,6 +15,7 @@ export const env = {
   isProduction: process.env.NODE_ENV === "production",
   databaseUrl: process.env.DATABASE_URL ?? "",
   ownerUnionId: process.env.OWNER_UNION_ID ?? "github:257014198",
+  ownerGitHubLogin: (process.env.OWNER_GITHUB_LOGIN ?? "williamrichardson743").trim().toLowerCase(),
   shopifyStoreUrl: process.env.SHOPIFY_STORE_URL ?? "",
   shopifyAdminToken: process.env.SHOPIFY_ADMIN_TOKEN ?? "",
   printifyApiToken: process.env.PRINTIFY_API_TOKEN ?? "",
