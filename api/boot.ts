@@ -12,6 +12,7 @@ import { Paths } from "../contracts/constants.js";
 
 const app = new Hono<{ Bindings: HttpBindings }>();
 
+app.get("/api/health", (c) => c.json({ status: "ok" }, 200));
 app.get("/api/auth/github/start", createGitHubStartHandler());
 app.get(Paths.oauthCallback, createGitHubCallbackHandler());
 app.use("/api/trpc/*", async (c) => {
