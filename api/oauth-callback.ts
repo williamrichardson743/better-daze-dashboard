@@ -3,6 +3,8 @@ import { env } from "./lib/env.js";
 import { findUserByUnionId, upsertUser } from "./queries/users.js";
 import { signSessionToken } from "./auth/session.js";
 import { Session } from "../contracts/constants.js";
+import { readOAuthCallbackInput, statesMatch } from "./oauth-input.js";
+import { applyNodeSecurityHeaders } from "./lib/security.js";
 import * as cookie from "cookie";
 
 const stateCookieName = "bd_github_oauth_state";
@@ -21,10 +23,6 @@ type GitHubProfile = {
   email: string | null;
   avatar_url: string;
 };
-
-function valueOf(value: string | string[] | undefined) {
-  return Array.isArray(value) ? value[0] : value;
-}
 
 function appUrl(req: IncomingMessage) {
   const configured = env.appUrl && !env.appUrl.includes("localhost") ? env.appUrl : "";
@@ -48,17 +46,6 @@ function redirect(res: VercelResponse, location: string) {
   res.statusCode = 302;
   res.setHeader("Location", location);
   res.end();
-}
-
-function statesMatch(actual: string, expected: string) {
-  const actualBytes = new TextEncoder().encode(actual);
-  const expectedBytes = new TextEncoder().encode(expected);
-  if (actualBytes.length !== expectedBytes.length) return false;
-  let difference = 0;
-  for (let index = 0; index < actualBytes.length; index += 1) {
-    difference |= actualBytes[index] ^ expectedBytes[index];
-  }
-  return difference === 0;
 }
 
 async function exchangeCode(code: string, redirectUri: string) {
@@ -92,6 +79,8 @@ async function getProfile(accessToken: string) {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  applyNodeSecurityHeaders(res);
+
   if (req.method !== "GET") {
     res.statusCode = 405;
     res.setHeader("Allow", "GET");
@@ -100,12 +89,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   clearStateCookie(req, res);
-  const query = req.query || {};
-  const error = valueOf(query.error);
-  const code = valueOf(query.code);
-  const state = valueOf(query.state);
+  const { error, code, state } = readOAuthCallbackInput(req);
   const cookies = cookie.parse(String(req.headers.cookie || ""));
   const expectedState = cookies[stateCookieName];
+
+  // Presence-only telemetry makes the Vercel runtime mismatch diagnosable
+  // without logging an OAuth code, cookie, token, database URL, or secret.
+  console.info("[GitHub OAuth] callback input", {
+    hasError: Boolean(error),
+    hasCode: Boolean(code),
+    hasState: Boolean(state),
+    hasExpectedState: Boolean(expectedState),
+  });
 
   if (error === "access_denied") {
     redirect(res, "/login");

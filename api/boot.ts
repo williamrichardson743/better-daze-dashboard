@@ -9,8 +9,14 @@ import {
   createGitHubCallbackHandler,
 } from "./github/auth.js";
 import { Paths } from "../contracts/constants.js";
+import { applyHonoSecurityHeaders } from "./lib/security.js";
 
 const app = new Hono<{ Bindings: HttpBindings }>();
+
+app.use("/api/*", async (c, next) => {
+  applyHonoSecurityHeaders(c);
+  await next();
+});
 
 app.get("/api/health", (c) => c.json({ status: "ok" }, 200));
 app.get("/api/auth/github/start", createGitHubStartHandler());

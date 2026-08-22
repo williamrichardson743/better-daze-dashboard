@@ -1,6 +1,6 @@
 export const Session = {
   cookieName: "better_daze_sid",
-  maxAgeMs: 365 * 24 * 60 * 60 * 1000,
+  maxAgeMs: 24 * 60 * 60 * 1000,
 } as const;
 
 export const ErrorMessages = {

@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import type { IncomingMessage, ServerResponse } from "node:http";
+import { applyNodeSecurityHeaders } from "./lib/security.js";
 const stateCookieName = "bd_github_oauth_state";
 const publicGithubClientId = "Ov23lir7wuMbVr5DR3Ms";
 const callbackPath = "/api/oauth/callback";
@@ -25,6 +26,8 @@ function cookieOptions(req: IncomingMessage) {
 }
 
 export default function handler(req: VercelRequest, res: VercelResponse) {
+  applyNodeSecurityHeaders(res);
+
   if (req.method !== "GET") {
     res.statusCode = 405;
     res.setHeader("Allow", "GET");
