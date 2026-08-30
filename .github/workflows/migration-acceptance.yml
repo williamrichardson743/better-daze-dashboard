@@ -1,0 +1,116 @@
+name: Better Daze Migration Acceptance Gates
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [migration/live-three-divisions]
+  workflow_dispatch:
+    inputs:
+      preview_url:
+        description: "Existing Vercel preview URL to verify"
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: better-daze-migration-${{ github.workflow }}-${{ github.event.deployment.id || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  static-gates:
+    name: Static, type, test, and build gates
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Enable Corepack
+        run: corepack enable
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Type check
+        run: pnpm check
+      - name: Lint
+        run: pnpm lint
+      - name: Unit tests
+        run: pnpm test
+      - name: Production build
+        run: pnpm build
+
+  preview-deploy:
+    name: Provision Vercel preview for route gates
+    needs: static-gates
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    if: ${{ (github.event_name != 'workflow_dispatch' || inputs.preview_url == '') && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false) }}
+    outputs:
+      preview_url: ${{ steps.deploy.outputs.preview_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Enable Corepack
+        run: corepack enable
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Pull Vercel preview configuration
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: npx vercel pull --yes --environment=preview --token="$VERCEL_TOKEN" --scope="$VERCEL_ORG_ID"
+      - name: Build Vercel preview artifact
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: npx vercel build --token="$VERCEL_TOKEN" --scope="$VERCEL_ORG_ID"
+      - name: Deploy Vercel preview
+        id: deploy
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          preview_url="$(npx vercel deploy --prebuilt --yes --token="$VERCEL_TOKEN" --scope="$VERCEL_ORG_ID" | tail -n 1)"
+          echo "preview_url=$preview_url" >> "$GITHUB_OUTPUT"
+
+  preview-route-gates:
+    name: Preview availability, document, and Shopify handoff gates
+    needs: [static-gates, preview-deploy]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: ${{ always() && needs.static-gates.result == 'success' && (needs.preview-deploy.result == 'success' || (github.event_name == 'workflow_dispatch' && inputs.preview_url != '')) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify public route contract
+        env:
+          BASE_URL: ${{ needs.preview-deploy.outputs.preview_url || inputs.preview_url }}
+        run: node scripts/verify-public-routes.mjs
+      - name: Record browser-review requirement
+        run: |
+          echo "Client-rendered route content, keyboard behavior, and mobile layouts require browser review."
+          echo "Record this review in the pull request before root-domain promotion."
+
+  production-guard:
+    name: Root-domain promotion guard
+    needs: [static-gates, preview-route-gates]
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.preview_url != '' && vars.ALLOW_ROOT_DOMAIN_CUTOVER == 'true' }}
+    steps:
+      - name: Confirm gated release intent
+        run: |
+          echo "Static and preview-route gates passed."
+          echo "Production promotion remains a manual, audited Vercel action."
+          echo "Follow docs/vercel-cutover-rollback.md before changing the root-domain alias."
