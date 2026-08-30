@@ -16,6 +16,8 @@ Before enabling `.github/workflows/migration-acceptance.yml`, add these reposito
 
 The workflow intentionally skips Vercel preview provisioning for pull requests from forks because GitHub does not expose repository secrets to untrusted fork code. Those pull requests still receive static checks; a maintainer can run the preview gate after reviewing and copying the branch internally.
 
+The workflow installs dependencies with lifecycle scripts disabled, then explicitly rebuilds `esbuild`. This keeps the CI supply-chain boundary narrow while allowing the project’s Vite and server bundle steps to run deterministically.
+
 ## Required information before production
 
 Record the following in the release issue or pull request before a production promotion: the Vercel team and project that currently serve the root domain, the planned deployment URL, the known-good deployment URL, the current apex and `www` configuration, the rollback owner, and a current screenshot of domain mappings.

@@ -36,7 +36,9 @@ jobs:
       - name: Enable Corepack
         run: corepack enable
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Build esbuild binary
+        run: pnpm rebuild esbuild
       - name: Type check
         run: pnpm check
       - name: Lint
@@ -66,7 +68,9 @@ jobs:
       - name: Enable Corepack
         run: corepack enable
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Build esbuild binary
+        run: pnpm rebuild esbuild
       - name: Pull Vercel preview configuration
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
