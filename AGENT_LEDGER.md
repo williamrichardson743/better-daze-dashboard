@@ -150,3 +150,36 @@ working tree already had the current version.
 **Final Status:** [BLOCKED — ONE AUTHENTICATION DEFECT REMAINS]
 
 **Security Note:** Treat the TiDB database password and GitHub OAuth client secret previously entered during troubleshooting as compromised. Rotate both values before granting external access, update Vercel Production environment variables, and do not store replacement secrets in this repository.
+
+---
+
+## Session Log — 2026-09-01 (Manus) — Recovered Context Applied
+
+### [VERIFIED] Source recovery and canonical-ledger reconciliation
+
+- Recovered and preserved ten Better Daze agent, handoff, architecture, and launch documents from the user-provided `manusstuff.zip` archive.
+- Located this remote `AGENT_LEDGER.md` as the canonical collaboration ledger after the downloaded `better-daze-dashboard` snapshot was found without Git metadata.
+- Added `docs/AGENT_CONTEXT_RECOVERY_20260901.md` to reconcile recovered context with currently verified project and commerce facts.
+
+### [VERIFIED] Current public and managed-project facts
+
+- `https://better-daze-sf.com` is live and must retain its three-avenue public structure: Vintage Audio / Inventory, Restoration, and OND Shop.
+- Managed conversion project exists at `/home/ubuntu/better-daze-launch`, checkpoint `a9aba159`; it contains a responsive editorial homepage, Shopify cart integration, restoration request form, migration artifacts, and a Vercel rollback runbook.
+- Shopify is connected in the managed project. Printify installation was initiated in an authenticated owner browser, but no current Printify-to-Shopify product or variant sync was independently verified.
+
+### [HARD-LOCK] Current revenue rule
+
+No POD item is `[DONE]` or customer-facing until the Printify provider record, Shopify product and variants, media, retail price, shipping configuration, storefront availability, and cart-to-checkout handoff are each verified. Do not use historic SKU counts, prices, product URLs, or fulfillment claims as current evidence.
+
+### [BLOCKED] Migration and preview automation
+
+- The Vercel migration workflow and rollback runbook are documented, but preview deployment cannot be considered proven until existing dashboard TypeScript failures are resolved/classified and protected Vercel repository secrets are configured.
+- Root-domain aliases and DNS remain unchanged until static checks, preview route checks, manual browser QA, conversion-path verification, rollback evidence, and explicit release intent are complete.
+
+### Next Single Action
+
+**Owner:** Claude / Manus
+
+**Action:** Re-clone the current canonical repository, inspect the live Shopify and Printify product lists, and record whether any product/variant pairs actually sync before creating or promoting a POD offer.
+
+**Supporting reference:** `docs/AGENT_CONTEXT_RECOVERY_20260901.md` and `/home/ubuntu/better-daze-launch/CLAUDE_AGENT_CONTEXT_APPLIED.md`.
