@@ -212,7 +212,7 @@ export default function AgentHub() {
                           </div>
                         </div>
                       </div>
-                      {agent.capabilities && Array.isArray(agent.capabilities) && (agent.capabilities as string[]).length > 0 && (
+                      {Array.isArray(agent.capabilities) && (agent.capabilities as string[]).length > 0 && (
                         <div className="flex flex-wrap gap-1 mb-2">
                           {(agent.capabilities as string[]).map((cap) => (
                             <Badge key={cap} variant="outline" className="text-[10px]">{cap}</Badge>

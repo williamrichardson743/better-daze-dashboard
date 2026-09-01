@@ -31,8 +31,7 @@ export const agentRouter = createRouter({
     .input(
       z.object({
         id: z.number(),
-        status: z.enum(["online", "offline", "busy", "idle"]),
-        currentTaskId: z.number().optional(),
+        status: z.enum(["idle", "busy", "offline", "error"]),
       })
     )
     .mutation(async ({ input }) => {
@@ -129,7 +128,6 @@ export const agentRouter = createRouter({
         // Also update agent status
         await db.update(schema.agents).set({
           status: "busy",
-          currentTaskId: input.taskId,
           lastActive: new Date(),
         }).where(eq(schema.agents.id, input.agentId));
         return { success: true };

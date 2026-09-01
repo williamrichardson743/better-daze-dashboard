@@ -101,7 +101,7 @@ export default function Checklist() {
               <Checkbox
                 checked={isCompleted}
                 onCheckedChange={(checked) => {
-                  toggleComplete.mutate({ id: item.id, completed: checked === true });
+                  toggleComplete.mutate({ id: item.id, isCompleted: checked === true });
                 }}
                 className="mt-0.5"
               />
