@@ -185,9 +185,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const token = await signSessionToken({ unionId, clientId: env.githubClientId });
     setSessionCookie(req, res, token);
     redirect(res, "/app");
-  } catch {
+  } catch (error) {
     // Deliberately omit the raw exception: database drivers can include connection details.
-    console.error("[GitHub OAuth] callback failed", { requestId, stage });
+    const databaseErrorCode =
+      error && typeof error === "object" && "code" in error
+        ? String(error.code)
+        : undefined;
+    console.error("[GitHub OAuth] callback failed", {
+      requestId,
+      stage,
+      ...(databaseErrorCode ? { databaseErrorCode } : {}),
+    });
     res.statusCode = 500;
     res.end("GitHub authentication failed");
   }

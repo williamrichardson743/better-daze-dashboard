@@ -156,4 +156,52 @@ describe("Vercel OAuth callback route", () => {
     expect(response.body).toBe("GitHub authentication is not configured");
     expect(fetchMock).not.toHaveBeenCalled();
   });
+
+  it("logs only the database error code when the user upsert fails", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({ access_token: "test-access-token" }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          id: 999,
+          login: "authorized-owner",
+          name: "Authorized Owner",
+          email: "owner@example.test",
+          avatar_url: "https://example.test/avatar.png",
+        }),
+      });
+    vi.stubGlobal("fetch", fetchMock);
+    const rawErrorDetail = "sensitive connection context";
+    mocks.upsertUser.mockRejectedValueOnce(
+      Object.assign(new Error(rawErrorDetail), { code: "ER_BAD_FIELD_ERROR" }),
+    );
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const { default: handler } = await import("./oauth-callback.js");
+    const response = createResponse();
+
+    await handler(
+      createRequest(
+        "/api/oauth/callback?code=test-code&state=fresh-state",
+        "bd_github_oauth_state=fresh-state",
+      ) as never,
+      response as never,
+    );
+
+    expect(response.statusCode).toBe(500);
+    expect(response.body).toBe("GitHub authentication failed");
+    expect(consoleError).toHaveBeenCalledWith(
+      "[GitHub OAuth] callback failed",
+      expect.objectContaining({
+        stage: "user upsert",
+        databaseErrorCode: "ER_BAD_FIELD_ERROR",
+      }),
+    );
+    expect(JSON.stringify(consoleError.mock.calls)).not.toContain(rawErrorDetail);
+  });
 });
