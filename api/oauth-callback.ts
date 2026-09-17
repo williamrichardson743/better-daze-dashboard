@@ -1,15 +1,21 @@
+import { randomUUID } from "node:crypto";
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { env } from "./lib/env.js";
-import { findUserByUnionId, upsertUser } from "./queries/users.js";
-import { signSessionToken } from "./auth/session.js";
-import { Session } from "../contracts/constants.js";
-import { readOAuthCallbackInput, statesMatch } from "./oauth-input.js";
-import { applyNodeSecurityHeaders } from "./lib/security.js";
 import * as cookie from "cookie";
+import { Session, Paths } from "../contracts/constants.js";
+import { signSessionToken } from "./auth/session.js";
+import { env, missingOAuthEnvironment } from "./lib/env.js";
+import { applyNodeSecurityHeaders } from "./lib/security.js";
+import { readOAuthCallbackInput, statesMatch } from "./oauth-input.js";
+import { upsertUser } from "./queries/users.js";
 
 const stateCookieName = "bd_github_oauth_state";
 const githubTokenUrl = "https://github.com/login/oauth/access_token";
 const githubApiUrl = "https://api.github.com";
+
+/** Allows GitHub exchange and the database write to finish on cold starts. */
+export const config = {
+  maxDuration: 60,
+};
 
 type VercelRequest = IncomingMessage & {
   query?: Record<string, string | string[] | undefined>;
@@ -24,21 +30,44 @@ type GitHubProfile = {
   avatar_url: string;
 };
 
-function appUrl(req: IncomingMessage) {
-  const configured = env.appUrl && !env.appUrl.includes("localhost") ? env.appUrl : "";
-  if (configured) return configured.replace(/\/$/, "");
-  const proto = Array.isArray(req.headers["x-forwarded-proto"])
-    ? req.headers["x-forwarded-proto"][0]
-    : req.headers["x-forwarded-proto"] || "https";
-  return `${proto}://${req.headers.host || "localhost:3000"}`;
+function oauthCallbackUrl() {
+  return new URL(Paths.oauthCallback, env.appUrl).toString();
+}
+
+function isLocalRequest(req: IncomingMessage) {
+  const host = req.headers.host || "";
+  return host.startsWith("localhost:") || host.startsWith("127.0.0.1:");
+}
+
+function appendSetCookie(res: VercelResponse, value: string) {
+  const existing = res.getHeader("Set-Cookie");
+  const cookies = Array.isArray(existing) ? existing : existing ? [String(existing)] : [];
+  res.setHeader("Set-Cookie", [...cookies, value]);
 }
 
 function clearStateCookie(req: IncomingMessage, res: VercelResponse) {
-  const host = req.headers.host || "";
-  const secure = host.startsWith("localhost:") || host.startsWith("127.0.0.1:") ? "" : " Secure;";
-  res.setHeader(
-    "Set-Cookie",
-    `${stateCookieName}=; Max-Age=0; Path=/; HttpOnly;${secure} SameSite=Lax`,
+  appendSetCookie(
+    res,
+    cookie.serialize(stateCookieName, "", {
+      httpOnly: true,
+      path: "/",
+      sameSite: "lax",
+      secure: !isLocalRequest(req),
+      maxAge: 0,
+    }),
+  );
+}
+
+function setSessionCookie(req: IncomingMessage, res: VercelResponse, token: string) {
+  appendSetCookie(
+    res,
+    cookie.serialize(Session.cookieName, token, {
+      httpOnly: true,
+      path: "/",
+      sameSite: "lax",
+      secure: !isLocalRequest(req),
+      maxAge: Session.maxAgeMs / 1000,
+    }),
   );
 }
 
@@ -88,19 +117,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return;
   }
 
-  clearStateCookie(req, res);
+  const requestId = randomUUID();
   const { error, code, state } = readOAuthCallbackInput(req);
   const cookies = cookie.parse(String(req.headers.cookie || ""));
   const expectedState = cookies[stateCookieName];
 
-  // Presence-only telemetry makes the Vercel runtime mismatch diagnosable
-  // without logging an OAuth code, cookie, token, database URL, or secret.
+  // Presence-only telemetry avoids emitting OAuth codes, tokens, cookies, or secrets.
   console.info("[GitHub OAuth] callback input", {
+    requestId,
     hasError: Boolean(error),
     hasCode: Boolean(code),
     hasState: Boolean(state),
     hasExpectedState: Boolean(expectedState),
   });
+
+  clearStateCookie(req, res);
 
   if (error === "access_denied") {
     redirect(res, "/login");
@@ -116,14 +147,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     res.end("Invalid OAuth state or missing authorization code");
     return;
   }
-  if (!env.githubClientSecret) {
+
+  const missingEnvironment = missingOAuthEnvironment("callback");
+  if (missingEnvironment.length > 0) {
+    console.error("[GitHub OAuth] callback unavailable", { requestId, missingEnvironment });
     res.statusCode = 503;
-    res.end("GITHUB_CLIENT_SECRET is not configured");
+    res.end("GitHub authentication is not configured");
     return;
   }
 
+  let stage = "callback URL validation";
   try {
-    const profile = await getProfile(await exchangeCode(code, `${appUrl(req)}/api/oauth/callback`));
+    const redirectUri = oauthCallbackUrl();
+    stage = "token exchange";
+    const accessToken = await exchangeCode(code, redirectUri);
+    stage = "profile lookup";
+    const profile = await getProfile(accessToken);
     const unionId = `github:${profile.id}`;
     const authorizedByUnionId = unionId === env.ownerUnionId;
     const authorizedByLogin = profile.login.trim().toLowerCase() === env.ownerGitHubLogin;
@@ -133,6 +172,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return;
     }
 
+    stage = "user upsert";
     await upsertUser({
       unionId,
       name: profile.name ?? profile.login,
@@ -141,16 +181,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       lastSignInAt: new Date(),
     });
 
+    stage = "session creation";
     const token = await signSessionToken({ unionId, clientId: env.githubClientId });
-    const host = req.headers.host || "";
-    const secure = host.startsWith("localhost:") || host.startsWith("127.0.0.1:") ? "" : " Secure;";
-    res.setHeader(
-      "Set-Cookie",
-      `${Session.cookieName}=${encodeURIComponent(token)}; Max-Age=${Session.maxAgeMs / 1000}; Path=/; HttpOnly;${secure} SameSite=Lax`,
-    );
+    setSessionCookie(req, res, token);
     redirect(res, "/app");
-  } catch (callbackError) {
-    console.error("[GitHub OAuth] callback failed", callbackError);
+  } catch {
+    // Deliberately omit the raw exception: database drivers can include connection details.
+    console.error("[GitHub OAuth] callback failed", { requestId, stage });
     res.statusCode = 500;
     res.end("GitHub authentication failed");
   }
