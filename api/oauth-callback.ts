@@ -107,6 +107,26 @@ async function getProfile(accessToken: string) {
   return (await response.json()) as GitHubProfile;
 }
 
+function getErrorDetails(error: unknown) {
+  const isErrorLike = (value: unknown): value is { code?: unknown; cause?: unknown; name?: unknown } =>
+    Boolean(value && typeof value === "object");
+  const nestedCause = isErrorLike(error) ? error.cause : undefined;
+  const code = isErrorLike(error) ? error.code : undefined;
+  const nestedCode = isErrorLike(nestedCause) ? nestedCause.code : undefined;
+  const name = isErrorLike(error) ? error.name : undefined;
+  const nestedName = isErrorLike(nestedCause) ? nestedCause.name : undefined;
+
+  return {
+    ...(typeof name === "string" ? { databaseErrorName: name } : {}),
+    ...(typeof nestedName === "string" ? { databaseCauseName: nestedName } : {}),
+    ...(typeof code === "string"
+      ? { databaseErrorCode: code }
+      : typeof nestedCode === "string"
+        ? { databaseErrorCode: nestedCode }
+        : {}),
+  };
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   applyNodeSecurityHeaders(res);
 
@@ -187,14 +207,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     redirect(res, "/app");
   } catch (error) {
     // Deliberately omit the raw exception: database drivers can include connection details.
-    const databaseErrorCode =
-      error && typeof error === "object" && "code" in error
-        ? String(error.code)
-        : undefined;
     console.error("[GitHub OAuth] callback failed", {
       requestId,
       stage,
-      ...(databaseErrorCode ? { databaseErrorCode } : {}),
+      ...getErrorDetails(error),
     });
     res.statusCode = 500;
     res.end("GitHub authentication failed");
