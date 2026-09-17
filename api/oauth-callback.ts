@@ -30,13 +30,10 @@ type GitHubProfile = {
   avatar_url: string;
 };
 
+const isProduction = process.env.NODE_ENV === "production";
+
 function oauthCallbackUrl() {
   return new URL(Paths.oauthCallback, env.appUrl).toString();
-}
-
-function isLocalRequest(req: IncomingMessage) {
-  const host = req.headers.host || "";
-  return host.startsWith("localhost:") || host.startsWith("127.0.0.1:");
 }
 
 function appendSetCookie(res: VercelResponse, value: string) {
@@ -45,27 +42,27 @@ function appendSetCookie(res: VercelResponse, value: string) {
   res.setHeader("Set-Cookie", [...cookies, value]);
 }
 
-function clearStateCookie(req: IncomingMessage, res: VercelResponse) {
+function clearStateCookie(_req: IncomingMessage, res: VercelResponse) {
   appendSetCookie(
     res,
     cookie.serialize(stateCookieName, "", {
       httpOnly: true,
       path: "/",
       sameSite: "lax",
-      secure: !isLocalRequest(req),
+      secure: isProduction,
       maxAge: 0,
     }),
   );
 }
 
-function setSessionCookie(req: IncomingMessage, res: VercelResponse, token: string) {
+function setSessionCookie(_req: IncomingMessage, res: VercelResponse, token: string) {
   appendSetCookie(
     res,
     cookie.serialize(Session.cookieName, token, {
       httpOnly: true,
       path: "/",
       sameSite: "lax",
-      secure: !isLocalRequest(req),
+      secure: isProduction,
       maxAge: Session.maxAgeMs / 1000,
     }),
   );
