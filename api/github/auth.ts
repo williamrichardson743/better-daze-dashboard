@@ -1,7 +1,7 @@
 import type { Context } from "hono";
 import { getCookie, setCookie } from "hono/cookie";
 import * as cookie from "cookie";
-import { env } from "../lib/env.js";
+import { env, missingOAuthEnvironment } from "../lib/env.js";
 import { getSessionCookieOptions } from "../lib/cookies.js";
 import { Session, Paths } from "../../contracts/constants.js";
 import { Errors } from "../../contracts/errors.js";
@@ -37,7 +37,7 @@ function statesMatch(actual: string, expected: string) {
   return difference === 0;
 }
 
-async function exchangeAuthCode(code: string) {
+async function exchangeAuthCode(code: string, redirectUri: string) {
   const response = await fetch(githubTokenUrl, {
     method: "POST",
     headers: {
@@ -48,7 +48,7 @@ async function exchangeAuthCode(code: string) {
       client_id: env.githubClientId,
       client_secret: env.githubClientSecret,
       code,
-      redirect_uri: callbackUrl(),
+      redirect_uri: redirectUri,
     }),
   });
 
@@ -93,6 +93,20 @@ function clearStateCookie(c: Context) {
 
 export function createGitHubStartHandler() {
   return (c: Context) => {
+    const missingEnvironment = missingOAuthEnvironment("callback");
+    if (missingEnvironment.length > 0) {
+      console.error("[GitHub OAuth] start unavailable", { missingEnvironment });
+      return c.json({ error: "GitHub authentication is not configured" }, 503);
+    }
+
+    let redirectUri: string;
+    try {
+      redirectUri = callbackUrl();
+    } catch {
+      console.error("[GitHub OAuth] start unavailable", { invalidEnvironment: "APP_URL" });
+      return c.json({ error: "GitHub authentication is not configured" }, 503);
+    }
+
     const state = crypto.randomUUID();
     setCookie(c, stateCookieName, state, {
       ...getSessionCookieOptions(c.req.raw.headers),
@@ -102,7 +116,7 @@ export function createGitHubStartHandler() {
 
     const authorizationUrl = new URL(githubAuthorizeUrl);
     authorizationUrl.searchParams.set("client_id", env.githubClientId);
-    authorizationUrl.searchParams.set("redirect_uri", callbackUrl());
+    authorizationUrl.searchParams.set("redirect_uri", redirectUri);
     authorizationUrl.searchParams.set("scope", "read:user user:email");
     authorizationUrl.searchParams.set("state", state);
 
@@ -129,8 +143,22 @@ export function createGitHubCallbackHandler() {
       return c.json({ error: "Invalid OAuth state or missing authorization code" }, 400);
     }
 
+    const missingEnvironment = missingOAuthEnvironment("callback");
+    if (missingEnvironment.length > 0) {
+      console.error("[GitHub OAuth] callback unavailable", { missingEnvironment });
+      return c.json({ error: "GitHub authentication is not configured" }, 503);
+    }
+
+    let redirectUri: string;
     try {
-      const accessToken = await exchangeAuthCode(code);
+      redirectUri = callbackUrl();
+    } catch {
+      console.error("[GitHub OAuth] callback unavailable", { invalidEnvironment: "APP_URL" });
+      return c.json({ error: "GitHub authentication is not configured" }, 503);
+    }
+
+    try {
+      const accessToken = await exchangeAuthCode(code, redirectUri);
       const profile = await getGitHubProfile(accessToken);
       const unionId = `github:${profile.id}`;
       const authorizedByUnionId = unionId === env.ownerUnionId;
@@ -160,8 +188,9 @@ export function createGitHubCallbackHandler() {
       });
 
       return c.redirect("/app", 302);
-    } catch (callbackError) {
-      console.error("[GitHub OAuth] Callback failed", callbackError);
+    } catch {
+      // Do not log raw exceptions because database drivers may include connection details.
+      console.error("[GitHub OAuth] Callback failed");
       return c.json({ error: "GitHub authentication failed" }, 500);
     }
   };

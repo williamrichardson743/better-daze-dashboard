@@ -1,24 +1,51 @@
 import "dotenv/config";
 
-function required(name: string): string {
-  const value = process.env[name];
-  if (!value && process.env.NODE_ENV === "production") {
-    throw new Error(`Missing required environment variable: ${name}`);
-  }
-  return value ?? "";
+function readEnvironmentValue(name: string): string {
+  return process.env[name]?.trim() ?? "";
 }
 
+export const oauthStartEnvironmentNames = ["APP_URL", "GITHUB_CLIENT_ID"] as const;
+export const oauthCallbackEnvironmentNames = [
+  ...oauthStartEnvironmentNames,
+  "GITHUB_CLIENT_SECRET",
+  "SESSION_SECRET",
+  "DATABASE_URL",
+  "OWNER_UNION_ID",
+  "OWNER_GITHUB_LOGIN",
+] as const;
+
+type OAuthEnvironmentStage = "start" | "callback";
+type OAuthEnvironmentName = (typeof oauthCallbackEnvironmentNames)[number];
+
 export const env = {
-  githubClientId: process.env.GITHUB_CLIENT_ID ?? "",
-  githubClientSecret: process.env.GITHUB_CLIENT_SECRET ?? "",
-  sessionSecret: process.env.SESSION_SECRET ?? process.env.APP_SECRET ?? "",
+  githubClientId: readEnvironmentValue("GITHUB_CLIENT_ID"),
+  githubClientSecret: readEnvironmentValue("GITHUB_CLIENT_SECRET"),
+  sessionSecret: readEnvironmentValue("SESSION_SECRET"),
   isProduction: process.env.NODE_ENV === "production",
-  databaseUrl: process.env.DATABASE_URL ?? "",
-  ownerUnionId: process.env.OWNER_UNION_ID ?? "github:257014198",
-  ownerGitHubLogin: (process.env.OWNER_GITHUB_LOGIN ?? "williamrichardson743").trim().toLowerCase(),
-  shopifyStoreUrl: process.env.SHOPIFY_STORE_URL ?? "",
-  shopifyAdminToken: process.env.SHOPIFY_ADMIN_TOKEN ?? "",
-  printifyApiToken: process.env.PRINTIFY_API_TOKEN ?? "",
-  printifyShopId: process.env.PRINTIFY_SHOP_ID ?? "27082819",
-  appUrl: process.env.APP_URL ?? "http://localhost:3000",
+  databaseUrl: readEnvironmentValue("DATABASE_URL"),
+  ownerUnionId: readEnvironmentValue("OWNER_UNION_ID"),
+  ownerGitHubLogin: readEnvironmentValue("OWNER_GITHUB_LOGIN").toLowerCase(),
+  shopifyStoreUrl: readEnvironmentValue("SHOPIFY_STORE_URL"),
+  shopifyAdminToken: readEnvironmentValue("SHOPIFY_ADMIN_TOKEN"),
+  printifyApiToken: readEnvironmentValue("PRINTIFY_API_TOKEN"),
+  printifyShopId: readEnvironmentValue("PRINTIFY_SHOP_ID") || "27082819",
+  appUrl: readEnvironmentValue("APP_URL"),
 };
+
+const oauthEnvironmentValues: Record<OAuthEnvironmentName, string> = {
+  APP_URL: env.appUrl,
+  GITHUB_CLIENT_ID: env.githubClientId,
+  GITHUB_CLIENT_SECRET: env.githubClientSecret,
+  SESSION_SECRET: env.sessionSecret,
+  DATABASE_URL: env.databaseUrl,
+  OWNER_UNION_ID: env.ownerUnionId,
+  OWNER_GITHUB_LOGIN: env.ownerGitHubLogin,
+};
+
+/** Returns variable names only; no environment values are exposed. */
+export function missingOAuthEnvironment(stage: OAuthEnvironmentStage): string[] {
+  const requiredNames =
+    stage === "start" ? oauthStartEnvironmentNames : oauthCallbackEnvironmentNames;
+
+  return requiredNames.filter((name) => !oauthEnvironmentValues[name]);
+}
