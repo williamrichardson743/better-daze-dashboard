@@ -10,12 +10,9 @@ export const oauthCallbackEnvironmentNames = [
   "GITHUB_CLIENT_SECRET",
   "SESSION_SECRET",
   "DATABASE_URL",
-  "OWNER_UNION_ID",
-  "OWNER_GITHUB_LOGIN",
 ] as const;
 
 type OAuthEnvironmentStage = "start" | "callback";
-type OAuthEnvironmentName = (typeof oauthCallbackEnvironmentNames)[number];
 
 export const env = {
   githubClientId: readEnvironmentValue("GITHUB_CLIENT_ID"),
@@ -32,7 +29,7 @@ export const env = {
   appUrl: readEnvironmentValue("APP_URL"),
 };
 
-const oauthEnvironmentValues: Record<OAuthEnvironmentName, string> = {
+const oauthEnvironmentValues: Record<string, string> = {
   APP_URL: env.appUrl,
   GITHUB_CLIENT_ID: env.githubClientId,
   GITHUB_CLIENT_SECRET: env.githubClientSecret,
@@ -47,5 +44,11 @@ export function missingOAuthEnvironment(stage: OAuthEnvironmentStage): string[] 
   const requiredNames =
     stage === "start" ? oauthStartEnvironmentNames : oauthCallbackEnvironmentNames;
 
-  return requiredNames.filter((name) => !oauthEnvironmentValues[name]);
+  const missingEnvironment: string[] = requiredNames.filter(
+    (name) => !oauthEnvironmentValues[name],
+  );
+  if (stage === "callback" && !env.ownerUnionId && !env.ownerGitHubLogin) {
+    missingEnvironment.push("OWNER_UNION_ID or OWNER_GITHUB_LOGIN");
+  }
+  return missingEnvironment;
 }
