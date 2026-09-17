@@ -175,11 +175,14 @@ describe("Vercel OAuth callback route", () => {
           email: "owner@example.test",
           avatar_url: "https://example.test/avatar.png",
         }),
-      });
+    });
     vi.stubGlobal("fetch", fetchMock);
     const rawErrorDetail = "sensitive connection context";
     mocks.upsertUser.mockRejectedValueOnce(
-      Object.assign(new Error(rawErrorDetail), { code: "ER_BAD_FIELD_ERROR" }),
+      Object.assign(new Error("query wrapper"), {
+        name: "DrizzleQueryError",
+        cause: Object.assign(new Error(rawErrorDetail), { code: "ER_BAD_FIELD_ERROR" }),
+      }),
     );
     const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
     const { default: handler } = await import("./oauth-callback.js");
@@ -199,6 +202,8 @@ describe("Vercel OAuth callback route", () => {
       "[GitHub OAuth] callback failed",
       expect.objectContaining({
         stage: "user upsert",
+        databaseErrorName: "DrizzleQueryError",
+        databaseCauseName: "Error",
         databaseErrorCode: "ER_BAD_FIELD_ERROR",
       }),
     );
