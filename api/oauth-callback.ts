@@ -24,6 +24,8 @@ type GitHubProfile = {
   avatar_url: string;
 };
 
+const isProduction = process.env.NODE_ENV === "production";
+
 function appUrl(req: IncomingMessage) {
   const configured = env.appUrl && !env.appUrl.includes("localhost") ? env.appUrl : "";
   if (configured) return configured.replace(/\/$/, "");
@@ -33,12 +35,16 @@ function appUrl(req: IncomingMessage) {
   return `${proto}://${req.headers.host || "localhost:3000"}`;
 }
 
-function clearStateCookie(req: IncomingMessage, res: VercelResponse) {
-  const host = req.headers.host || "";
-  const secure = host.startsWith("localhost:") || host.startsWith("127.0.0.1:") ? "" : " Secure;";
+function clearStateCookie(_req: IncomingMessage, res: VercelResponse) {
   res.setHeader(
     "Set-Cookie",
-    `${stateCookieName}=; Max-Age=0; Path=/; HttpOnly;${secure} SameSite=Lax`,
+    cookie.serialize(stateCookieName, "", {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: "lax",
+      path: "/",
+      maxAge: 0,
+    }),
   );
 }
 
@@ -142,11 +148,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
 
     const token = await signSessionToken({ unionId, clientId: env.githubClientId });
-    const host = req.headers.host || "";
-    const secure = host.startsWith("localhost:") || host.startsWith("127.0.0.1:") ? "" : " Secure;";
     res.setHeader(
       "Set-Cookie",
-      `${Session.cookieName}=${encodeURIComponent(token)}; Max-Age=${Session.maxAgeMs / 1000}; Path=/; HttpOnly;${secure} SameSite=Lax`,
+      cookie.serialize(Session.cookieName, token, {
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: "lax",
+        path: "/",
+        maxAge: Session.maxAgeMs / 1000,
+      }),
     );
     redirect(res, "/app");
   } catch (callbackError) {

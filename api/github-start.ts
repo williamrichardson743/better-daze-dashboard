@@ -1,6 +1,8 @@
 import { randomUUID } from "node:crypto";
 import type { IncomingMessage, ServerResponse } from "node:http";
+import * as cookie from "cookie";
 import { applyNodeSecurityHeaders } from "./lib/security.js";
+
 const stateCookieName = "bd_github_oauth_state";
 const publicGithubClientId = "Ov23lir7wuMbVr5DR3Ms";
 const callbackPath = "/api/oauth/callback";
@@ -16,13 +18,6 @@ function appUrl(req: IncomingMessage) {
     ? req.headers["x-forwarded-proto"][0]
     : req.headers["x-forwarded-proto"] || "https";
   return `${proto}://${req.headers.host || "localhost:3000"}`;
-}
-
-function cookieOptions(req: IncomingMessage) {
-  const host = req.headers.host || "";
-  return host.startsWith("localhost:") || host.startsWith("127.0.0.1:")
-    ? "Path=/; HttpOnly; SameSite=Lax"
-    : "Path=/; HttpOnly; Secure; SameSite=Lax";
 }
 
 export default function handler(req: VercelRequest, res: VercelResponse) {
@@ -47,7 +42,13 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader("Location", authorizationUrl.toString());
   res.setHeader(
     "Set-Cookie",
-    `${stateCookieName}=${encodeURIComponent(state)}; Max-Age=600; ${cookieOptions(req)}`,
+    cookie.serialize(stateCookieName, state, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 10,
+    }),
   );
   res.end();
 }
