@@ -131,7 +131,7 @@ export default function DesignStudio() {
       });
 
       try {
-        const response = await fetch("http://localhost:3000/api/generate-mockup", {
+        const response = await fetch("/api/generate-mockup", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ prompt: fullPrompt, productId: result.id }),

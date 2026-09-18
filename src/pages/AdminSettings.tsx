@@ -79,7 +79,19 @@ function UserManagement() {
     },
   });
 
+  const createUser = trpc.admin.users.create.useMutation({
+    onSuccess: () => {
+      utils.admin.users.list.invalidate();
+      toast.success("User added");
+      setAddOpen(false);
+      setAddForm({ name: "", email: "", role: "user" });
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
   const [search, setSearch] = useState("");
+  const [addOpen, setAddOpen] = useState(false);
+  const [addForm, setAddForm] = useState<{ name: string; email: string; role: "user" | "admin" | "viewer" }>({ name: "", email: "", role: "user" });
   const [editingUser, setEditingUser] = useState<number | null>(null);
   const [editForm, setEditForm] = useState<{ name: string; email: string; role: "user" | "admin" | "viewer"; status: "active" | "inactive" }>({ name: "", email: "", role: "user", status: "active" });
 
@@ -118,7 +130,7 @@ function UserManagement() {
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <Button size="sm" className="gap-2">
+        <Button size="sm" className="gap-2" onClick={() => setAddOpen(true)}>
           <Plus className="h-4 w-4" />
           Add User
         </Button>
@@ -260,6 +272,42 @@ function UserManagement() {
           </Table>
         </CardContent>
       </Card>
+
+      <Dialog open={addOpen} onOpenChange={setAddOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add User</DialogTitle>
+            <DialogDescription>Create a new user account.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Name</Label>
+              <Input placeholder="Full name" value={addForm.name} onChange={(e) => setAddForm({ ...addForm, name: e.target.value })} />
+            </div>
+            <div className="space-y-2">
+              <Label>Email</Label>
+              <Input type="email" placeholder="user@example.com" value={addForm.email} onChange={(e) => setAddForm({ ...addForm, email: e.target.value })} />
+            </div>
+            <div className="space-y-2">
+              <Label>Role</Label>
+              <Select value={addForm.role} onValueChange={(v) => setAddForm({ ...addForm, role: v as any })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="admin">Admin</SelectItem>
+                  <SelectItem value="user">User</SelectItem>
+                  <SelectItem value="viewer">Viewer</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAddOpen(false)}>Cancel</Button>
+            <Button disabled={!addForm.name || !addForm.email || createUser.isPending} onClick={() => createUser.mutate(addForm)}>
+              {createUser.isPending ? "Adding..." : "Add User"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -486,6 +534,7 @@ function PreferencesPanel() {
 /* ─────────────── SECURITY ─────────────── */
 function SecuritySettings() {
   const utils = trpc.useUtils();
+  const updatePrefs = trpc.admin.preferences.update.useMutation();
   const { data: sessions } = trpc.admin.security.getSessions.useQuery();
   const { data: apiKeys } = trpc.admin.security.getApiKeys.useQuery();
   const { data: loginHistory } = trpc.admin.security.getLoginHistory.useQuery();
@@ -531,8 +580,15 @@ function SecuritySettings() {
                 <p className="text-xs text-muted-foreground">Use Google Authenticator or similar</p>
               </div>
             </div>
-            <Button variant="outline" size="sm">
-              Enable
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={updatePrefs.isPending}
+              onClick={() => {
+                updatePrefs.mutate({}, { onSuccess: () => toast.info("2FA authenticator request saved. TOTP setup requires server-side integration — contact your admin to complete setup.") });
+              }}
+            >
+              Request Setup
             </Button>
           </div>
           <div className="flex items-center justify-between rounded-lg border p-4">
@@ -545,8 +601,15 @@ function SecuritySettings() {
                 <p className="text-xs text-muted-foreground">Use biometrics or security keys</p>
               </div>
             </div>
-            <Button variant="outline" size="sm">
-              Setup
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={updatePrefs.isPending}
+              onClick={() => {
+                updatePrefs.mutate({}, { onSuccess: () => toast.info("Passkey request saved. WebAuthn setup requires server-side integration — contact your admin to complete setup.") });
+              }}
+            >
+              Request Setup
             </Button>
           </div>
         </CardContent>

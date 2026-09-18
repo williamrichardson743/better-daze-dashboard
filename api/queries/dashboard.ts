@@ -30,7 +30,19 @@ export async function deleteUser(id: number) {
   await db.delete(schema.users).where(eq(schema.users.id, id));
 }
 
+export async function createUser(data: typeof schema.users.$inferInsert) {
+  const db = getDb();
+  const [result] = await db.insert(schema.users).values(data).$returningId();
+  return { id: result.id, ...data };
+}
+
 // Cycle queries
+export async function createCycle(data: typeof schema.cycles.$inferInsert) {
+  const db = getDb();
+  const [result] = await db.insert(schema.cycles).values(data).$returningId();
+  return { id: result.id, ...data };
+}
+
 export async function findAllCycles(limit?: number) {
   const db = getDb();
   const baseQuery = db.select().from(schema.cycles).orderBy(desc(schema.cycles.createdAt));
@@ -210,6 +222,28 @@ export async function upsertPermission(data: typeof schema.permissions.$inferIns
       .where(eq(schema.permissions.id, existing[0].id));
   } else {
     await db.insert(schema.permissions).values(data);
+  }
+}
+
+// Subscription queries
+export async function findSubscriptionByUserId(userId: number) {
+  const db = getDb();
+  const rows = await db.select().from(schema.subscriptions).where(eq(schema.subscriptions.userId, userId)).limit(1);
+  return rows.at(0);
+}
+
+export async function upsertSubscription(userId: number, plan: "starter" | "growth" | "enterprise") {
+  const db = getDb();
+  const existing = await findSubscriptionByUserId(userId);
+  const now = new Date();
+  const periodEnd = new Date(now);
+  periodEnd.setMonth(periodEnd.getMonth() + 1);
+  if (existing) {
+    await db.update(schema.subscriptions).set({ plan, status: "active", currentPeriodStart: now, currentPeriodEnd: periodEnd }).where(eq(schema.subscriptions.id, existing.id));
+    return { ...existing, plan, status: "active" };
+  } else {
+    const [result] = await db.insert(schema.subscriptions).values({ userId, plan, status: "active", currentPeriodStart: now, currentPeriodEnd: periodEnd }).$returningId();
+    return { id: result.id, userId, plan, status: "active" };
   }
 }
 

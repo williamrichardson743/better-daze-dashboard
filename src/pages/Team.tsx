@@ -4,7 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import {
   Users,
@@ -16,9 +20,22 @@ import {
   DollarSign,
   Activity,
 } from "lucide-react";
+import { useState } from "react";
 
 export default function Team() {
+  const utils = trpc.useUtils();
   const { data: users } = trpc.admin.users.list.useQuery();
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const [form, setForm] = useState({ name: "", email: "", role: "user" as "user" | "admin" | "viewer" });
+  const createUser = trpc.admin.users.create.useMutation({
+    onSuccess: () => {
+      utils.admin.users.list.invalidate();
+      toast.success("Member added");
+      setInviteOpen(false);
+      setForm({ name: "", email: "", role: "user" });
+    },
+    onError: (err) => toast.error(err.message),
+  });
 
   const roleConfig: Record<string, { icon: React.ReactNode; color: string; label: string }> = {
     admin: { icon: <Crown className="h-3 w-3" />, color: "bg-primary text-primary-foreground", label: "Admin" },
@@ -43,10 +60,47 @@ export default function Team() {
               Manage team members, roles, and permissions.
             </p>
           </div>
-          <Button className="gap-2" onClick={() => toast.success("Invite feature coming soon!")}>
-            <Plus className="h-4 w-4" />
-            Invite Member
-          </Button>
+          <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
+            <DialogTrigger asChild>
+              <Button className="gap-2">
+                <Plus className="h-4 w-4" />
+                Invite Member
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Add Team Member</DialogTitle>
+                <DialogDescription>Add a new member to your team.</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label>Name</Label>
+                  <Input placeholder="e.g. Jane Smith" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Email</Label>
+                  <Input type="email" placeholder="jane@example.com" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Role</Label>
+                  <Select value={form.role} onValueChange={(v) => setForm({ ...form, role: v as any })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="admin">Admin</SelectItem>
+                      <SelectItem value="user">User</SelectItem>
+                      <SelectItem value="viewer">Viewer</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setInviteOpen(false)}>Cancel</Button>
+                <Button disabled={!form.name || !form.email || createUser.isPending} onClick={() => createUser.mutate(form)}>
+                  {createUser.isPending ? "Adding..." : "Add Member"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
