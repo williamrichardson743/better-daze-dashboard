@@ -290,7 +290,7 @@ function UserManagement() {
             </div>
             <div className="space-y-2">
               <Label>Role</Label>
-              <Select value={addForm.role} onValueChange={(v) => setAddForm({ ...addForm, role: v as any })}>
+              <Select value={addForm.role} onValueChange={(v: "user" | "admin" | "viewer") => setAddForm({ ...addForm, role: v })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="admin">Admin</SelectItem>

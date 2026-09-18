@@ -83,7 +83,7 @@ export default function Team() {
                 </div>
                 <div className="space-y-2">
                   <Label>Role</Label>
-                  <Select value={form.role} onValueChange={(v) => setForm({ ...form, role: v as any })}>
+                  <Select value={form.role} onValueChange={(v: "user" | "admin" | "viewer") => setForm({ ...form, role: v })}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="admin">Admin</SelectItem>
