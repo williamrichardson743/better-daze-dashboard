@@ -58,7 +58,7 @@ export const agentHubRouter = createRouter({
           status: "pending",
           contextStack: initStack,
         })
-        .$returningId();
+        .returning({ id: schema.agentTasks.id });
 
       if (input.requiresApproval) {
         agentEE.emit("alert", {
@@ -199,7 +199,7 @@ async function runStateMachineCascades(
         ],
         outputData: null,
       })
-      .$returningId();
+      .returning({ id: schema.agentTasks.id });
 
     agentEE.emit("alert", {
       id: `alert_${result.id}`,

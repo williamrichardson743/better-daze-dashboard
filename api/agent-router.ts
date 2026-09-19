@@ -1,12 +1,12 @@
 import { z } from "zod";
 import { eq, desc, and, isNull } from "drizzle-orm";
-import { createRouter, publicQuery, authedQuery } from "./middleware.js";
+import { createRouter, authedQuery } from "./middleware.js";
 import { getDb } from "./queries/connection.js";
 import * as schema from "../db/schema.js";
 
 export const agentRouter = createRouter({
   // ─── AGENTS ───
-  list: publicQuery.query(async () => {
+  list: authedQuery.query(async () => {
     const db = getDb();
     return db.select().from(schema.agents).orderBy(desc(schema.agents.updatedAt));
   }),
@@ -23,7 +23,7 @@ export const agentRouter = createRouter({
     )
     .mutation(async ({ input }) => {
       const db = getDb();
-      const [result] = await db.insert(schema.agents).values(input).$returningId();
+      const [result] = await db.insert(schema.agents).values(input).returning({ id: schema.agents.id });
       return { id: result.id };
     }),
 
@@ -43,7 +43,7 @@ export const agentRouter = createRouter({
 
   // ─── TASKS ───
   tasks: createRouter({
-    list: publicQuery.query(async () => {
+    list: authedQuery.query(async () => {
       const db = getDb();
       return db.select().from(schema.agentTasks).orderBy(desc(schema.agentTasks.createdAt));
     }),
@@ -65,7 +65,7 @@ export const agentRouter = createRouter({
         const [result] = await db.insert(schema.agentTasks).values({
           ...input,
           createdBy: ctx.user.id,
-        }).$returningId();
+        }).returning({ id: schema.agentTasks.id });
         return { id: result.id };
       }),
 
@@ -136,7 +136,7 @@ export const agentRouter = createRouter({
 
   // ─── MESSAGES ───
   messages: createRouter({
-    list: publicQuery.query(async () => {
+    list: authedQuery.query(async () => {
       const db = getDb();
       return db.select().from(schema.agentMessages).orderBy(desc(schema.agentMessages.createdAt)).limit(100);
     }),

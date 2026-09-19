@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { eq, desc } from "drizzle-orm";
+import { TRPCError } from "@trpc/server";
+import { and, desc, eq, inArray } from "drizzle-orm";
 import { createRouter, authedQuery } from "./middleware.js";
 import { getDb } from "./queries/connection.js";
 import * as schema from "../db/schema.js";
@@ -30,7 +31,7 @@ export const campaignRouter = createRouter({
           userId: ctx.user.id,
           ...input,
           startDate: input.startDate || new Date(),
-        }).$returningId();
+        }).returning({ id: schema.campaigns.id });
         return result;
       }),
     update: authedQuery
@@ -105,7 +106,18 @@ export const campaignRouter = createRouter({
   posts: createRouter({
     list: authedQuery.query(async ({ ctx }) => {
       const db = getDb();
-      return db.select().from(schema.socialPosts).where(eq(schema.socialPosts.accountId, ctx.user.id)).orderBy(desc(schema.socialPosts.scheduledAt));
+      // Posts belong to the user's connected social accounts, not to the user
+      // row directly. The previous query compared accountId against a user id.
+      const accounts = await db
+        .select({ id: schema.socialAccounts.id })
+        .from(schema.socialAccounts)
+        .where(eq(schema.socialAccounts.userId, ctx.user.id));
+      if (accounts.length === 0) return [];
+      return db
+        .select()
+        .from(schema.socialPosts)
+        .where(inArray(schema.socialPosts.accountId, accounts.map((a) => a.id)))
+        .orderBy(desc(schema.socialPosts.scheduledAt));
     }),
     create: authedQuery
       .input(
@@ -120,9 +132,30 @@ export const campaignRouter = createRouter({
       )
       .mutation(async ({ ctx, input }) => {
         const db = getDb();
+        // accountId is a foreign key into socialAccounts. Resolve the user's
+        // connected account for this platform instead of writing their user id,
+        // which pointed at an unrelated row (or none at all).
+        const account = await db
+          .select({ id: schema.socialAccounts.id })
+          .from(schema.socialAccounts)
+          .where(
+            and(
+              eq(schema.socialAccounts.userId, ctx.user.id),
+              eq(schema.socialAccounts.platform, input.platform)
+            )
+          )
+          .limit(1);
+
+        if (!account[0]) {
+          throw new TRPCError({
+            code: "PRECONDITION_FAILED",
+            message: `No connected ${input.platform} account. Connect one before scheduling posts.`,
+          });
+        }
+
         await db.insert(schema.socialPosts).values({
-          accountId: ctx.user.id,
           ...input,
+          accountId: account[0].id,
           mediaUrls: input.mediaUrls || [],
         });
         return { success: true };

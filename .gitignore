@@ -30,7 +30,8 @@ dist-ssr
 *.db
 *.sqlite
 *.sqlite3
-db/migrations/*.sql
+# db/migrations/*.sql is intentionally NOT ignored: generated migrations are
+# reviewed in the pull request and applied by drizzle-kit in CI and at cutover.
 # TypeScript cache
 *.tsbuildinfo
 # Build outputs

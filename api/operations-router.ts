@@ -3,6 +3,7 @@ import { eq, desc } from "drizzle-orm";
 import { createRouter, authedQuery, adminQuery } from "./middleware.js";
 import { getDb } from "./queries/connection.js";
 import * as schema from "../db/schema.js";
+import { createHash } from "node:crypto";
 import { runPhase3 } from "./integrations/cycleRunner.js";
 
 export const operationsRouter = createRouter({
@@ -31,7 +32,7 @@ export const operationsRouter = createRouter({
           shopifyPhaseStatus: "pending",
           socialPhaseStatus: "pending",
           logPhaseStatus: "pending",
-        }).$returningId();
+        }).returning({ id: schema.pipelineRuns.id });
         return result;
       }),
     update: adminQuery
@@ -102,6 +103,81 @@ export const operationsRouter = createRouter({
 
         // Only execute Phase 3 when product details were supplied.
         if (input.slogan && (input.designImageUrl || input.designImageBase64)) {
+          const productType = input.productType ?? "tee";
+
+          // One durable integration run per (pipeline run, slogan, product type).
+          // A replayed request resumes this row instead of creating a second
+          // Printify product.
+          const idempotencyKey = `pipeline:${input.id}:${productType}:${createHash("sha256")
+            .update(input.slogan)
+            .digest("hex")
+            .slice(0, 32)}`;
+
+          const existing = await db
+            .select()
+            .from(schema.integrationRuns)
+            .where(eq(schema.integrationRuns.idempotencyKey, idempotencyKey))
+            .limit(1);
+
+          if (existing[0]?.status === "succeeded") {
+            // Already published. Return the stored provider IDs; do not call
+            // Printify again.
+            const mappings = await db
+              .select()
+              .from(schema.providerMappings)
+              .where(eq(schema.providerMappings.runId, existing[0].id));
+
+            return {
+              success: true,
+              replayed: true,
+              printifyProductId:
+                mappings.find((m) => m.provider === "printify")?.providerResourceId ?? null,
+              shopifyProductId:
+                mappings.find((m) => m.provider === "shopify")?.providerResourceId ?? null,
+            };
+          }
+
+          if (existing[0]?.status === "running") {
+            return {
+              success: false,
+              error: "This publish is already running. Wait for it to finish before retrying.",
+            };
+          }
+
+          const attempt = (existing[0]?.attemptCount ?? 0) + 1;
+          let integrationRunId: number;
+
+          if (existing[0]) {
+            integrationRunId = existing[0].id;
+            await db
+              .update(schema.integrationRuns)
+              .set({
+                status: "running",
+                attemptCount: attempt,
+                startedAt,
+                lockedAt: startedAt,
+                lockedBy: `pipeline-start:${input.id}`,
+                lastErrorCode: null,
+                lastErrorMessage: null,
+              })
+              .where(eq(schema.integrationRuns.id, integrationRunId));
+          } else {
+            const [created] = await db
+              .insert(schema.integrationRuns)
+              .values({
+                idempotencyKey,
+                runType: "pod_cycle",
+                status: "running",
+                pipelineRunId: input.id,
+                attemptCount: attempt,
+                startedAt,
+                lockedAt: startedAt,
+                lockedBy: `pipeline-start:${input.id}`,
+              })
+              .returning({ id: schema.integrationRuns.id });
+            integrationRunId = created.id;
+          }
+
           const result = await runPhase3({
             slogan: input.slogan,
             designImageUrl: input.designImageUrl,
@@ -110,7 +186,68 @@ export const operationsRouter = createRouter({
             productType: input.productType,
           });
 
+          const completedAt = new Date();
+
           if (result.published && !result.error) {
+            await db.insert(schema.integrationSteps).values([
+              {
+                runId: integrationRunId,
+                step: "create_printify_product",
+                attempt,
+                status: "succeeded",
+                provider: "printify",
+                providerResponseRef: result.printifyProductId,
+                startedAt,
+                completedAt,
+              },
+              {
+                runId: integrationRunId,
+                step: "publish_to_shopify",
+                attempt,
+                status: result.shopifyProductId ? "succeeded" : "pending",
+                provider: "shopify",
+                providerResponseRef: result.shopifyProductId,
+                startedAt,
+                completedAt,
+              },
+            ]);
+
+            const mappings: (typeof schema.providerMappings.$inferInsert)[] = [
+              {
+                provider: "printify",
+                resourceType: "product",
+                providerResourceId: result.printifyProductId,
+                runId: integrationRunId,
+                reconciliationStatus: "unverified",
+              },
+            ];
+            if (result.shopifyProductId) {
+              mappings.push({
+                provider: "shopify",
+                resourceType: "product",
+                providerResourceId: result.shopifyProductId,
+                runId: integrationRunId,
+                reconciliationStatus: "unverified",
+              });
+            }
+            await db
+              .insert(schema.providerMappings)
+              .values(mappings)
+              .onConflictDoNothing();
+
+            // Shopify may not have returned an external id yet, so the run is
+            // only "succeeded" once both provider records exist. Reconciliation
+            // (F-04) still has to verify them before anything is DONE.
+            await db
+              .update(schema.integrationRuns)
+              .set({
+                status: result.shopifyProductId ? "succeeded" : "needs_attention",
+                completedAt,
+                lockedAt: null,
+                lockedBy: null,
+              })
+              .where(eq(schema.integrationRuns.id, integrationRunId));
+
             // Phase 3 + Shopify publish succeeded — advance to social phase.
             await db
               .update(schema.pipelineRuns)
@@ -130,6 +267,38 @@ export const operationsRouter = createRouter({
               productType: result.productType,
             };
           } else {
+            const errorMessage = result.error ?? "runPhase3 returned published=false";
+            // A missing or rejected credential is permanent; anything else is
+            // treated as transient and stays retryable.
+            const errorClass = /401|403|unauthor|invalid token|not configured/i.test(errorMessage)
+              ? "permanent"
+              : "transient";
+
+            await db.insert(schema.integrationSteps).values({
+              runId: integrationRunId,
+              step: "create_printify_product",
+              attempt,
+              status: "failed",
+              provider: "printify",
+              errorClass,
+              errorMessage,
+              retryable: errorClass === "transient",
+              startedAt,
+              completedAt,
+            });
+
+            await db
+              .update(schema.integrationRuns)
+              .set({
+                status: "failed",
+                completedAt,
+                errorClass,
+                lastErrorMessage: errorMessage,
+                lockedAt: null,
+                lockedBy: null,
+              })
+              .where(eq(schema.integrationRuns.id, integrationRunId));
+
             // Phase 3 failed — mark the run failed with the error message.
             await db
               .update(schema.pipelineRuns)
@@ -137,14 +306,11 @@ export const operationsRouter = createRouter({
                 status: "failed",
                 currentPhase: "printify",
                 printifyPhaseStatus: "failed",
-                errorMessage: result.error ?? "runPhase3 returned published=false",
+                errorMessage,
               })
               .where(eq(schema.pipelineRuns.id, input.id));
 
-            return {
-              success: false,
-              error: result.error ?? "Phase 3 failed",
-            };
+            return { success: false, error: errorMessage };
           }
         }
 
@@ -177,7 +343,7 @@ export const operationsRouter = createRouter({
         const [result] = await db.insert(schema.actionItems).values({
           ...input,
           userId: ctx.user.id,
-        }).$returningId();
+        }).returning({ id: schema.actionItems.id });
         return { id: result.id };
       }),
     update: authedQuery

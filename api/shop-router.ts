@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { eq, and, inArray, desc } from "drizzle-orm";
-import { createRouter, publicQuery, authedQuery } from "./middleware.js";
+import { createRouter, publicQuery, authedQuery, adminQuery } from "./middleware.js";
 import { getDb } from "./queries/connection.js";
 import * as schema from "../db/schema.js";
 
@@ -153,7 +153,7 @@ export const shopRouter = createRouter({
         tax: String(input.tax),
         total: String(input.total),
         shippingAddress: input.shippingAddress as any,
-      }).$returningId();
+      }).returning({ id: schema.customerOrders.id });
 
       for (const item of input.items) {
         const product = await db
@@ -230,8 +230,15 @@ export const shopRouter = createRouter({
       return { order: orders[0], items };
     }),
 
-  // Update order payment status (Shopify Payments)
-  updatePayment: publicQuery
+  /**
+   * Update order payment status.
+   *
+   * Shopify carries billing for Better Daze, so the authoritative payment
+   * signal is a Shopify order webhook, not a browser call. Until that webhook
+   * is wired this stays admin-only: as a public mutation any caller could mark
+   * any order paid by guessing its id.
+   */
+  updatePayment: adminQuery
     .input(
       z.object({
         orderId: z.number(),

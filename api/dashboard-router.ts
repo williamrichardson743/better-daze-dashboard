@@ -1,12 +1,14 @@
 import { z } from "zod";
 import { eq } from "drizzle-orm";
-import { createRouter, publicQuery, authedQuery } from "./middleware.js";
+// Every dashboard read is authenticated: these expose revenue, order and
+// cycle data that must not be readable without a session.
+import { createRouter, authedQuery } from "./middleware.js";
 import { getDb } from "./queries/connection.js";
 import * as schema from "../db/schema.js";
 import * as dashboardQueries from "./queries/dashboard.js";
 
 export const dashboardRouter = createRouter({
-  stats: publicQuery.query(async () => {
+  stats: authedQuery.query(async () => {
     const [cycleStats, productStats, orderStats] = await Promise.all([
       dashboardQueries.getCycleStats(),
       dashboardQueries.getProductStats(),
@@ -21,7 +23,7 @@ export const dashboardRouter = createRouter({
     };
   }),
 
-  cycles: publicQuery.query(async () => {
+  cycles: authedQuery.query(async () => {
     return dashboardQueries.findAllCycles(10);
   }),
 
@@ -49,19 +51,19 @@ export const dashboardRouter = createRouter({
       });
     }),
 
-  recentOrders: publicQuery.query(async () => {
+  recentOrders: authedQuery.query(async () => {
     return dashboardQueries.findAllOrders(10);
   }),
 
-  recentLogs: publicQuery.query(async () => {
+  recentLogs: authedQuery.query(async () => {
     return dashboardQueries.findAllTransmissionLogs(10);
   }),
 
-  socialAccounts: publicQuery.query(async () => {
+  socialAccounts: authedQuery.query(async () => {
     return dashboardQueries.findAllSocialAccounts();
   }),
 
-  products: publicQuery.query(async () => {
+  products: authedQuery.query(async () => {
     return dashboardQueries.findAllProducts(20);
   }),
 
@@ -88,7 +90,7 @@ export const dashboardRouter = createRouter({
         const [result] = await db.insert(schema.products).values({
           ...input,
           sku,
-        }).$returningId();
+        }).returning({ id: schema.products.id });
         return { id: result.id, sku };
       }),
     update: authedQuery
