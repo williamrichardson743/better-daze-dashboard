@@ -1,5 +1,5 @@
 {
-  "id": "3c6b4985-f89b-4c97-ad0d-d4f6801cb4f3",
+  "id": "54755e5a-aebf-4671-a1c4-bc62e21c2bb9",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -4325,20 +4325,28 @@
           "primaryKey": false,
           "notNull": true
         },
-        "stripeCustomerId": {
-          "name": "stripeCustomerId",
+        "billingProvider": {
+          "name": "billingProvider",
+          "type": "subscriptions_provider",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'shopify'"
+        },
+        "billingCustomerRef": {
+          "name": "billingCustomerRef",
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": false
         },
-        "stripeSubscriptionId": {
-          "name": "stripeSubscriptionId",
+        "billingSubscriptionRef": {
+          "name": "billingSubscriptionRef",
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": false
         },
-        "stripePriceId": {
-          "name": "stripePriceId",
+        "billingPlanRef": {
+          "name": "billingPlanRef",
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": false
@@ -5144,6 +5152,14 @@
         "starter",
         "growth",
         "enterprise"
+      ]
+    },
+    "public.subscriptions_provider": {
+      "name": "subscriptions_provider",
+      "schema": "public",
+      "values": [
+        "shopify",
+        "manual"
       ]
     },
     "public.subscriptions_status": {

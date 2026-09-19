@@ -171,6 +171,10 @@ export const permissionsActionEnum = pgEnum("permissions_action", [
   "delete",
 ]);
 
+export const subscriptionsProviderEnum = pgEnum("subscriptions_provider", [
+  "shopify",
+  "manual",
+]);
 export const subscriptionsPlanEnum = pgEnum("subscriptions_plan", [
   "starter",
   "growth",
@@ -675,16 +679,22 @@ export const auditLogs = pgTable(
 export type AuditLog = typeof auditLogs.$inferSelect;
 export type InsertAuditLog = typeof auditLogs.$inferInsert;
 
-// Subscriptions table (Stripe billing)
+// Subscriptions table (Shopify billing)
+// Shopify carries all billing for Better Daze. There is no Stripe integration
+// and none is planned, so these columns are named for the provider-agnostic
+// references Shopify returns rather than for a processor the product does not use.
 export const subscriptions = pgTable("subscriptions", {
   id: pk(),
   userId: fk("userId")
     .notNull()
     .unique()
     .references(() => users.id, { onDelete: "cascade" }),
-  stripeCustomerId: varchar("stripeCustomerId", { length: 255 }),
-  stripeSubscriptionId: varchar("stripeSubscriptionId", { length: 255 }),
-  stripePriceId: varchar("stripePriceId", { length: 255 }),
+  billingProvider: subscriptionsProviderEnum("billingProvider")
+    .default("shopify")
+    .notNull(),
+  billingCustomerRef: varchar("billingCustomerRef", { length: 255 }),
+  billingSubscriptionRef: varchar("billingSubscriptionRef", { length: 255 }),
+  billingPlanRef: varchar("billingPlanRef", { length: 255 }),
   plan: subscriptionsPlanEnum("plan").default("starter").notNull(),
   status: subscriptionsStatusEnum("status").default("active").notNull(),
   currentPeriodStart: ts("currentPeriodStart"),

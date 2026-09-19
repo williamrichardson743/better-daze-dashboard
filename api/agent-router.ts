@@ -1,12 +1,12 @@
 import { z } from "zod";
 import { eq, desc, and, isNull } from "drizzle-orm";
-import { createRouter, publicQuery, authedQuery } from "./middleware.js";
+import { createRouter, authedQuery } from "./middleware.js";
 import { getDb } from "./queries/connection.js";
 import * as schema from "../db/schema.js";
 
 export const agentRouter = createRouter({
   // ─── AGENTS ───
-  list: publicQuery.query(async () => {
+  list: authedQuery.query(async () => {
     const db = getDb();
     return db.select().from(schema.agents).orderBy(desc(schema.agents.updatedAt));
   }),
@@ -43,7 +43,7 @@ export const agentRouter = createRouter({
 
   // ─── TASKS ───
   tasks: createRouter({
-    list: publicQuery.query(async () => {
+    list: authedQuery.query(async () => {
       const db = getDb();
       return db.select().from(schema.agentTasks).orderBy(desc(schema.agentTasks.createdAt));
     }),
@@ -136,7 +136,7 @@ export const agentRouter = createRouter({
 
   // ─── MESSAGES ───
   messages: createRouter({
-    list: publicQuery.query(async () => {
+    list: authedQuery.query(async () => {
       const db = getDb();
       return db.select().from(schema.agentMessages).orderBy(desc(schema.agentMessages.createdAt)).limit(100);
     }),

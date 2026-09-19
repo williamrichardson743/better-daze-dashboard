@@ -43,6 +43,7 @@ CREATE TYPE "public"."social_platform" AS ENUM('instagram', 'tiktok', 'twitter',
 CREATE TYPE "public"."social_posts_status" AS ENUM('scheduled', 'published', 'failed', 'draft');--> statement-breakpoint
 CREATE TYPE "public"."social_templates_platform" AS ENUM('instagram', 'tiktok', 'twitter', 'facebook', 'pinterest');--> statement-breakpoint
 CREATE TYPE "public"."subscriptions_plan" AS ENUM('starter', 'growth', 'enterprise');--> statement-breakpoint
+CREATE TYPE "public"."subscriptions_provider" AS ENUM('shopify', 'manual');--> statement-breakpoint
 CREATE TYPE "public"."subscriptions_status" AS ENUM('active', 'canceled', 'past_due', 'unpaid', 'trialing');--> statement-breakpoint
 CREATE TYPE "public"."transmission_logs_type" AS ENUM('info', 'warning', 'error', 'success', 'debug');--> statement-breakpoint
 CREATE TYPE "public"."users_role" AS ENUM('user', 'admin', 'viewer');--> statement-breakpoint
@@ -497,9 +498,10 @@ CREATE TABLE "socialTemplates" (
 CREATE TABLE "subscriptions" (
 	"id" bigserial PRIMARY KEY NOT NULL,
 	"userId" bigint NOT NULL,
-	"stripeCustomerId" varchar(255),
-	"stripeSubscriptionId" varchar(255),
-	"stripePriceId" varchar(255),
+	"billingProvider" "subscriptions_provider" DEFAULT 'shopify' NOT NULL,
+	"billingCustomerRef" varchar(255),
+	"billingSubscriptionRef" varchar(255),
+	"billingPlanRef" varchar(255),
 	"plan" "subscriptions_plan" DEFAULT 'starter' NOT NULL,
 	"status" "subscriptions_status" DEFAULT 'active' NOT NULL,
 	"currentPeriodStart" timestamp with time zone,
