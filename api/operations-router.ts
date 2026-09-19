@@ -31,7 +31,7 @@ export const operationsRouter = createRouter({
           shopifyPhaseStatus: "pending",
           socialPhaseStatus: "pending",
           logPhaseStatus: "pending",
-        }).$returningId();
+        }).returning({ id: schema.pipelineRuns.id });
         return result;
       }),
     update: adminQuery
@@ -177,7 +177,7 @@ export const operationsRouter = createRouter({
         const [result] = await db.insert(schema.actionItems).values({
           ...input,
           userId: ctx.user.id,
-        }).$returningId();
+        }).returning({ id: schema.actionItems.id });
         return { id: result.id };
       }),
     update: authedQuery

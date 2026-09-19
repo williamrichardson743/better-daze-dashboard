@@ -23,7 +23,7 @@ export const agentRouter = createRouter({
     )
     .mutation(async ({ input }) => {
       const db = getDb();
-      const [result] = await db.insert(schema.agents).values(input).$returningId();
+      const [result] = await db.insert(schema.agents).values(input).returning({ id: schema.agents.id });
       return { id: result.id };
     }),
 
@@ -65,7 +65,7 @@ export const agentRouter = createRouter({
         const [result] = await db.insert(schema.agentTasks).values({
           ...input,
           createdBy: ctx.user.id,
-        }).$returningId();
+        }).returning({ id: schema.agentTasks.id });
         return { id: result.id };
       }),
 

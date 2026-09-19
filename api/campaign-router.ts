@@ -30,7 +30,7 @@ export const campaignRouter = createRouter({
           userId: ctx.user.id,
           ...input,
           startDate: input.startDate || new Date(),
-        }).$returningId();
+        }).returning({ id: schema.campaigns.id });
         return result;
       }),
     update: authedQuery

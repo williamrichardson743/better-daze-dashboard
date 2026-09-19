@@ -88,7 +88,7 @@ export const dashboardRouter = createRouter({
         const [result] = await db.insert(schema.products).values({
           ...input,
           sku,
-        }).$returningId();
+        }).returning({ id: schema.products.id });
         return { id: result.id, sku };
       }),
     update: authedQuery

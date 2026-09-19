@@ -32,14 +32,14 @@ export async function deleteUser(id: number) {
 
 export async function createUser(data: typeof schema.users.$inferInsert) {
   const db = getDb();
-  const [result] = await db.insert(schema.users).values(data).$returningId();
+  const [result] = await db.insert(schema.users).values(data).returning({ id: schema.users.id });
   return { id: result.id, ...data };
 }
 
 // Cycle queries
 export async function createCycle(data: typeof schema.cycles.$inferInsert) {
   const db = getDb();
-  const [result] = await db.insert(schema.cycles).values(data).$returningId();
+  const [result] = await db.insert(schema.cycles).values(data).returning({ id: schema.cycles.id });
   return { id: result.id, ...data };
 }
 
@@ -242,7 +242,7 @@ export async function upsertSubscription(userId: number, plan: "starter" | "grow
     await db.update(schema.subscriptions).set({ plan, status: "active", currentPeriodStart: now, currentPeriodEnd: periodEnd }).where(eq(schema.subscriptions.id, existing.id));
     return { ...existing, plan, status: "active" };
   } else {
-    const [result] = await db.insert(schema.subscriptions).values({ userId, plan, status: "active", currentPeriodStart: now, currentPeriodEnd: periodEnd }).$returningId();
+    const [result] = await db.insert(schema.subscriptions).values({ userId, plan, status: "active", currentPeriodStart: now, currentPeriodEnd: periodEnd }).returning({ id: schema.subscriptions.id });
     return { id: result.id, userId, plan, status: "active" };
   }
 }

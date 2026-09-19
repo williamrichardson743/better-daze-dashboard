@@ -153,7 +153,7 @@ export const shopRouter = createRouter({
         tax: String(input.tax),
         total: String(input.total),
         shippingAddress: input.shippingAddress as any,
-      }).$returningId();
+      }).returning({ id: schema.customerOrders.id });
 
       for (const item of input.items) {
         const product = await db
