@@ -90,14 +90,15 @@ export default function HealthPanel() {
     upsertCredential.mutate({
       serviceName: newService,
       displayName: newDisplayName,
+      userId: 1,
       status: newStatus,
     });
     setNewDisplayName("");
     setShowForm(false);
   };
 
-  const handleQuickStatus = (id: number, status: "active" | "expiring" | "expired" | "needs_rotation" | "error") => {
-    updateStatus.mutate({ id, status });
+  const handleQuickStatus = (serviceName: string, status: "active" | "expiring" | "expired" | "needs_rotation" | "error") => {
+    updateStatus.mutate({ serviceName, status });
   };
 
   return (
@@ -289,7 +290,7 @@ export default function HealthPanel() {
                           variant="ghost"
                           size="sm"
                           className="h-7 text-[10px]"
-                          onClick={() => handleQuickStatus(cred.id, "active")}
+                          onClick={() => handleQuickStatus(cred.serviceName, "active")}
                           disabled={updateStatus.isPending}
                         >
                           <CheckCircle2 className="h-3 w-3 mr-1 text-green-500" />
@@ -299,7 +300,7 @@ export default function HealthPanel() {
                           variant="ghost"
                           size="sm"
                           className="h-7 text-[10px]"
-                          onClick={() => handleQuickStatus(cred.id, "needs_rotation")}
+                          onClick={() => handleQuickStatus(cred.serviceName, "needs_rotation")}
                           disabled={updateStatus.isPending}
                         >
                           <AlertTriangle className="h-3 w-3 mr-1 text-amber-500" />
@@ -309,7 +310,7 @@ export default function HealthPanel() {
                           variant="ghost"
                           size="icon"
                           className="h-7 w-7"
-                          onClick={() => deleteCredential.mutate({ id: cred.id })}
+                          onClick={() => deleteCredential.mutate({ serviceName: cred.serviceName })}
                           disabled={deleteCredential.isPending}
                         >
                           <Trash2 className="h-3.5 w-3.5 text-red-500" />

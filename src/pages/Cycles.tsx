@@ -54,8 +54,20 @@ const statusConfig: Record<string, { variant: "default" | "secondary" | "outline
 };
 
 export default function Cycles() {
+  const utils = trpc.useUtils();
   const { data: cycles } = trpc.dashboard.cycles.useQuery();
   const [createOpen, setCreateOpen] = useState(false);
+  const [form, setForm] = useState({ name: "", slogan: "", targetRevenue: "", frequency: "weekly" });
+  const createCycle = trpc.dashboard.createCycle.useMutation({
+    onSuccess: () => {
+      utils.dashboard.cycles.invalidate();
+      utils.dashboard.stats.invalidate();
+      toast.success("Cycle created");
+      setCreateOpen(false);
+      setForm({ name: "", slogan: "", targetRevenue: "", frequency: "weekly" });
+    },
+    onError: (err) => toast.error(err.message),
+  });
 
   const formatCurrency = (val: string | null) =>
     new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(parseFloat(val || "0"));
@@ -85,20 +97,20 @@ export default function Cycles() {
               <div className="space-y-4 py-4">
                 <div className="space-y-2">
                   <Label>Cycle Name</Label>
-                  <Input placeholder="e.g. Summer Collection 2026" />
+                  <Input placeholder="e.g. Summer Collection 2026" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
                 </div>
                 <div className="space-y-2">
                   <Label>Slogan</Label>
-                  <Input placeholder="e.g. Chase the sun, wear the daze" />
+                  <Input placeholder="e.g. Chase the sun, wear the daze" value={form.slogan} onChange={(e) => setForm({ ...form, slogan: e.target.value })} />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Target Revenue</Label>
-                    <Input type="number" placeholder="5000" />
+                    <Input type="number" placeholder="5000" value={form.targetRevenue} onChange={(e) => setForm({ ...form, targetRevenue: e.target.value })} />
                   </div>
                   <div className="space-y-2">
                     <Label>Frequency</Label>
-                    <Select defaultValue="weekly">
+                    <Select value={form.frequency} onValueChange={(v) => setForm({ ...form, frequency: v })}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -113,8 +125,16 @@ export default function Cycles() {
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setCreateOpen(false)}>Cancel</Button>
-                <Button onClick={() => { toast.success("Cycle created!"); setCreateOpen(false); }}>
-                  Create Cycle
+                <Button
+                  disabled={!form.name || createCycle.isPending}
+                  onClick={() => createCycle.mutate({
+                    name: form.name,
+                    slogan: form.slogan || undefined,
+                    targetRevenue: form.targetRevenue || undefined,
+                    theme: form.frequency,
+                  })}
+                >
+                  {createCycle.isPending ? "Creating..." : "Create Cycle"}
                 </Button>
               </DialogFooter>
             </DialogContent>

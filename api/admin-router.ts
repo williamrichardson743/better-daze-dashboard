@@ -36,6 +36,25 @@ export const adminRouter = createRouter({
       await dashboardQueries.deleteUser(input.id);
       return { success: true };
     }),
+
+    create: adminQuery
+      .input(
+        z.object({
+          name: z.string().min(1),
+          email: z.string().email(),
+          role: z.enum(["user", "admin", "viewer"]).default("user"),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const unionId = `manual_${Date.now().toString(36)}`;
+        return dashboardQueries.createUser({
+          unionId,
+          name: input.name,
+          email: input.email,
+          role: input.role,
+          status: "active",
+        });
+      }),
   }),
 
   // Preferences
@@ -197,6 +216,19 @@ export const adminRouter = createRouter({
           });
         }
         return { success: true };
+      }),
+  }),
+
+  // Billing / Subscriptions
+  subscription: createRouter({
+    get: authedQuery.query(async ({ ctx }) => {
+      return dashboardQueries.findSubscriptionByUserId(ctx.user.id);
+    }),
+
+    selectPlan: authedQuery
+      .input(z.object({ plan: z.enum(["starter", "growth", "enterprise"]) }))
+      .mutation(async ({ ctx, input }) => {
+        return dashboardQueries.upsertSubscription(ctx.user.id, input.plan);
       }),
   }),
 

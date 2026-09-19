@@ -1,3 +1,4 @@
+import { trpc } from "@/providers/trpc";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -64,6 +65,18 @@ const plans = [
 ];
 
 export default function Billing() {
+  const utils = trpc.useUtils();
+  const { data: stats } = trpc.dashboard.stats.useQuery();
+  const { data: subscription } = trpc.admin.subscription.get.useQuery();
+  const selectPlan = trpc.admin.subscription.selectPlan.useMutation({
+    onSuccess: (data) => {
+      utils.admin.subscription.get.invalidate();
+      toast.success(`Subscribed to ${data.plan} plan`);
+    },
+    onError: (err) => toast.error(err.message),
+  });
+  const currentPlan = subscription?.plan || null;
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -109,7 +122,7 @@ export default function Billing() {
                 <ShoppingBag className="h-4 w-4 text-primary" />
                 <span className="text-sm text-muted-foreground">Store</span>
               </div>
-              <p className="text-2xl font-bold">4</p>
+              <p className="text-2xl font-bold">{stats?.products.live ?? 0}</p>
               <p className="text-xs text-muted-foreground">Products live</p>
             </CardContent>
           </Card>
@@ -119,8 +132,8 @@ export default function Billing() {
                 <TrendingUp className="h-4 w-4 text-green-500" />
                 <span className="text-sm text-muted-foreground">Revenue</span>
               </div>
-              <p className="text-2xl font-bold">$0</p>
-              <p className="text-xs text-muted-foreground">This month</p>
+              <p className="text-2xl font-bold">${(stats?.totalRevenue ?? 0).toLocaleString()}</p>
+              <p className="text-xs text-muted-foreground">Total revenue</p>
             </CardContent>
           </Card>
           <Card>
@@ -172,12 +185,11 @@ export default function Billing() {
                 <Button
                   className="w-full"
                   variant={plan.id === "growth" ? "default" : "outline"}
-                  onClick={() => {
-                    toast.info("Contact Will to upgrade your plan");
-                  }}
+                  disabled={currentPlan === plan.id || selectPlan.isPending}
+                  onClick={() => selectPlan.mutate({ plan: plan.id as "starter" | "growth" | "enterprise" })}
                 >
                   <Crown className="mr-2 h-4 w-4" />
-                  Subscribe
+                  {currentPlan === plan.id ? "Current Plan" : selectPlan.isPending ? "Saving..." : "Subscribe"}
                 </Button>
               </CardContent>
             </Card>

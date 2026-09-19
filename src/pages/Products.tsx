@@ -35,8 +35,20 @@ import {
 import { useState } from "react";
 
 export default function Products() {
+  const utils = trpc.useUtils();
   const { data: products } = trpc.dashboard.products.useQuery();
   const [createOpen, setCreateOpen] = useState(false);
+  const [form, setForm] = useState({ name: "", price: "", cost: "" });
+  const createProduct = trpc.dashboard.product.create.useMutation({
+    onSuccess: () => {
+      utils.dashboard.products.invalidate();
+      utils.dashboard.stats.invalidate();
+      toast.success("Product added");
+      setCreateOpen(false);
+      setForm({ name: "", price: "", cost: "" });
+    },
+    onError: (err) => toast.error(err.message),
+  });
 
   const formatCurrency = (val: string | null) =>
     new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(parseFloat(val || "0"));
@@ -80,23 +92,30 @@ export default function Products() {
               <div className="space-y-4 py-4">
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Product Name</label>
-                  <Input placeholder="e.g. Sunset Dreams Tee" />
+                  <Input placeholder="e.g. Sunset Dreams Tee" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Price</label>
-                    <Input type="number" placeholder="34.99" />
+                    <Input type="number" placeholder="34.99" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} />
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Cost</label>
-                    <Input type="number" placeholder="12.50" />
+                    <Input type="number" placeholder="12.50" value={form.cost} onChange={(e) => setForm({ ...form, cost: e.target.value })} />
                   </div>
                 </div>
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setCreateOpen(false)}>Cancel</Button>
-                <Button onClick={() => { toast.success("Product added!"); setCreateOpen(false); }}>
-                  Add Product
+                <Button
+                  disabled={!form.name || createProduct.isPending}
+                  onClick={() => createProduct.mutate({
+                    name: form.name,
+                    price: form.price || "24.99",
+                    cost: form.cost || undefined,
+                  })}
+                >
+                  {createProduct.isPending ? "Adding..." : "Add Product"}
                 </Button>
               </DialogFooter>
             </DialogContent>

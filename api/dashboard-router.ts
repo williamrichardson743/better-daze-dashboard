@@ -25,6 +25,30 @@ export const dashboardRouter = createRouter({
     return dashboardQueries.findAllCycles(10);
   }),
 
+  createCycle: authedQuery
+    .input(
+      z.object({
+        name: z.string().min(1),
+        slogan: z.string().optional(),
+        targetRevenue: z.string().optional(),
+        theme: z.string().optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const allCycles = await dashboardQueries.findAllCycles();
+      const cycleNumber = allCycles.length + 1;
+      return dashboardQueries.createCycle({
+        userId: ctx.user.id,
+        cycleNumber,
+        name: input.name,
+        slogan: input.slogan,
+        targetRevenue: input.targetRevenue,
+        theme: input.theme,
+        status: "draft",
+        currentPhase: "ideation",
+      });
+    }),
+
   recentOrders: publicQuery.query(async () => {
     return dashboardQueries.findAllOrders(10);
   }),

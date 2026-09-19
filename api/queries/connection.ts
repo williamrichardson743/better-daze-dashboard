@@ -1,12 +1,14 @@
 import { drizzle } from "drizzle-orm/mysql2";
-import { createPool } from "mysql2/promise";
+import mysql from "mysql2/promise";
 import { env } from "../lib/env.js";
 import * as schema from "../../db/schema.js";
 import * as relations from "../../db/relations.js";
 
 const fullSchema = { ...schema, ...relations };
 
-let instance: ReturnType<typeof drizzle<typeof fullSchema>>;
+type DbInstance = ReturnType<typeof drizzle<typeof fullSchema>>;
+
+let instance: DbInstance;
 
 function isTiDbCloudUrl(connectionString: string) {
   try {
@@ -23,7 +25,7 @@ export function getDb() {
 
   if (!instance) {
     if (isTiDbCloudUrl(env.databaseUrl)) {
-      const pool = createPool({
+      const pool = mysql.createPool({
         uri: env.databaseUrl,
         ssl: { minVersion: "TLSv1.2" },
         enableKeepAlive: true,
@@ -31,7 +33,7 @@ export function getDb() {
       instance = drizzle(pool, {
         mode: "planetscale",
         schema: fullSchema,
-      });
+      }) as unknown as DbInstance;
     } else {
       instance = drizzle(env.databaseUrl, {
         mode: "planetscale",

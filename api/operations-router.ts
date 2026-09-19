@@ -205,7 +205,7 @@ export const operationsRouter = createRouter({
         await db
           .update(schema.actionItems)
           .set({
-            isCompleted: input.isCompleted,
+            status: input.isCompleted ? "completed" : "open",
             completedAt: input.isCompleted ? new Date() : null,
           })
           .where(eq(schema.actionItems.id, input.id));
@@ -227,10 +227,11 @@ export const operationsRouter = createRouter({
     upsert: adminQuery
       .input(
         z.object({
-          service: z.string().min(1),
-          label: z.string().optional(),
-          status: z.enum(["active", "inactive", "error", "unknown"]).default("unknown"),
-          lastChecked: z.date().optional(),
+          serviceName: z.string().min(1),
+          displayName: z.string().min(1),
+          userId: z.number(),
+          status: z.enum(["active", "expiring", "expired", "needs_rotation", "error", "unknown"]).default("unknown"),
+          lastVerifiedAt: z.date().optional(),
           metadata: z.record(z.string(), z.any()).optional(),
         })
       )
@@ -239,14 +240,14 @@ export const operationsRouter = createRouter({
         const existing = await db
           .select()
           .from(schema.apiCredentials)
-          .where(eq(schema.apiCredentials.service, input.service))
+          .where(eq(schema.apiCredentials.serviceName, input.serviceName))
           .limit(1);
 
         if (existing.length > 0) {
           await db
             .update(schema.apiCredentials)
             .set({ ...input, updatedAt: new Date() })
-            .where(eq(schema.apiCredentials.service, input.service));
+            .where(eq(schema.apiCredentials.serviceName, input.serviceName));
         } else {
           await db.insert(schema.apiCredentials).values(input);
         }
@@ -255,23 +256,23 @@ export const operationsRouter = createRouter({
     updateStatus: adminQuery
       .input(
         z.object({
-          service: z.string().min(1),
-          status: z.enum(["active", "inactive", "error", "unknown"]),
+          serviceName: z.string().min(1),
+          status: z.enum(["active", "expiring", "expired", "needs_rotation", "error", "unknown"]),
         })
       )
       .mutation(async ({ input }) => {
         const db = getDb();
         await db
           .update(schema.apiCredentials)
-          .set({ status: input.status, lastChecked: new Date(), updatedAt: new Date() })
-          .where(eq(schema.apiCredentials.service, input.service));
+          .set({ status: input.status, lastVerifiedAt: new Date(), updatedAt: new Date() })
+          .where(eq(schema.apiCredentials.serviceName, input.serviceName));
         return { success: true };
       }),
-    delete: adminQuery.input(z.object({ service: z.string() })).mutation(async ({ input }) => {
+    delete: adminQuery.input(z.object({ serviceName: z.string() })).mutation(async ({ input }) => {
       const db = getDb();
       await db
         .delete(schema.apiCredentials)
-        .where(eq(schema.apiCredentials.service, input.service));
+        .where(eq(schema.apiCredentials.serviceName, input.serviceName));
       return { success: true };
     }),
   }),

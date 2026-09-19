@@ -29,7 +29,7 @@ export const agentHubRouter = createRouter({
         title: z.string().min(1),
         description: z.string().optional(),
         priority: z.enum(["low", "medium", "high", "urgent"]).default("medium"),
-        category: z.string().default("01_content_creation"),
+        category: z.enum(["immediate", "short_term", "deferred", "01_content_creation", "02_platform_presence", "03_email_dm_outreach"]).default("01_content_creation"),
         requiresApproval: z.boolean().default(false),
         metadata: z.record(z.string(), z.any()).optional(),
       })

@@ -6,7 +6,7 @@ function makeRequest(url: string, query?: Record<string, string | string[] | und
     url,
     query,
     headers: { host: "ops.better-daze-sf.com", "x-forwarded-proto": "https" },
-  } as Parameters<typeof readOAuthCallbackInput>[0];
+  } as unknown as Parameters<typeof readOAuthCallbackInput>[0];
 }
 
 describe("readOAuthCallbackInput", () => {
