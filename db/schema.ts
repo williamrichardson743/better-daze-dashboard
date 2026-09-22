@@ -702,6 +702,44 @@ export const actionItems = mysqlTable("actionItems", {
 export type ActionItem = typeof actionItems.$inferSelect;
 export type InsertActionItem = typeof actionItems.$inferInsert;
 
+// Agents registry
+export const agents = mysqlTable("agents", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  type: mysqlEnum("type", ["ai_agent", "human", "system"]).default("ai_agent").notNull(),
+  status: mysqlEnum("status", ["online", "offline", "busy", "idle"]).default("offline").notNull(),
+  capabilities: json("capabilities"), // string[]
+  webhookUrl: varchar("webhookUrl", { length: 500 }),
+  apiKey: varchar("apiKey", { length: 255 }),
+  currentTaskId: bigint("currentTaskId", { mode: "number", unsigned: true }),
+  lastActive: timestamp("lastActive"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().notNull().$onUpdate(() => new Date()),
+});
+
+export type Agent = typeof agents.$inferSelect;
+export type InsertAgent = typeof agents.$inferInsert;
+
+// API credentials health tracking
+export const apiCredentials = mysqlTable("apiCredentials", {
+  id: serial("id").primaryKey(),
+  userId: bigint("userId", { mode: "number", unsigned: true }).notNull(),
+  serviceName: varchar("serviceName", { length: 100 }).notNull(),
+  displayName: varchar("displayName", { length: 255 }).notNull(),
+  status: mysqlEnum("status", ["active", "expiring", "expired", "needs_rotation", "error", "unknown"])
+    .default("unknown")
+    .notNull(),
+  lastVerifiedAt: timestamp("lastVerifiedAt"),
+  expiresAt: timestamp("expiresAt"),
+  scope: varchar("scope", { length: 500 }),
+  metadata: json("metadata"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().notNull().$onUpdate(() => new Date()),
+});
+
+export type ApiCredential = typeof apiCredentials.$inferSelect;
+export type InsertApiCredential = typeof apiCredentials.$inferInsert;
+
 // Agent Hub tasks
 export const agentTasks = mysqlTable("agentTasks", {
   id: serial("id").primaryKey(),
@@ -712,11 +750,14 @@ export const agentTasks = mysqlTable("agentTasks", {
   status: mysqlEnum("status", ["pending", "in_progress", "completed", "failed", "blocked"]).default("pending").notNull(),
   priority: mysqlEnum("priority", ["low", "medium", "high", "urgent"]).default("medium").notNull(),
   dueDate: timestamp("dueDate"),
-  category: mysqlEnum("category", ["immediate", "short_term", "deferred"]).default("short_term").notNull(),
+  category: varchar("category", { length: 100 }).default("short_term").notNull(),
   requiresApproval: boolean("requiresApproval").default(false),
   approvedBy: bigint("approvedBy", { mode: "number", unsigned: true }),
   approvedAt: timestamp("approvedAt"),
   result: json("result"),
+  outputData: json("outputData"),
+  contextStack: json("contextStack"), // ContextEntry[]
+  metadata: json("metadata"),
   errorMessage: text("errorMessage"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().notNull().$onUpdate(() => new Date()),

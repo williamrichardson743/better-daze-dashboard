@@ -6,6 +6,7 @@ import { appRouter } from "./router";
 import { createContext } from "./context";
 import { env } from "./lib/env";
 import { createOAuthCallbackHandler } from "./kimi/auth";
+import { webhookRouter } from "./webhook-router";
 import { Paths } from "@contracts/constants";
 
 const app = new Hono<{ Bindings: HttpBindings }>();
@@ -20,6 +21,7 @@ app.use("/api/trpc/*", async (c) => {
     createContext,
   });
 });
+app.route("/api/webhooks", webhookRouter);
 app.all("/api/*", (c) => c.json({ error: "Not Found" }, 404));
 
 export default app;

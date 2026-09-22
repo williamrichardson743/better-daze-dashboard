@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router'
+import { Routes, Route, Navigate } from 'react-router'
 import LandingPage from './pages/LandingPage'
 import Home from './pages/Home'
 import Cycles from './pages/Cycles'
@@ -29,7 +29,7 @@ export default function App() {
   return (
     <Routes>
       {/* Public landing + store */}
-      <Route path="/" element={<LandingPage />} />
+      <Route path="/" element={<Navigate to="/app" replace />} />
       <Route path="/login" element={<Login />} />
 
       {/* Store */}

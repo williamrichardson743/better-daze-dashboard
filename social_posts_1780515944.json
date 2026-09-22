@@ -1,0 +1,68 @@
+[
+  {
+    "slogan": "OBEY THE ALGORITHM",
+    "design_path": "/home/ubuntu/pod_designs/design_obey_the_algorithm.png",
+    "product_id": "6a2083fedaaf9158170f1ca6",
+    "published": true,
+    "social": {
+      "caption": "They don't want you wearing this. 'OBEY THE ALGORITHM' \u2014 New transmission from the Official Narrative Division. Link in bio. Limited batch.",
+      "hook_type": "curiosity",
+      "hashtags": [
+        "#streetwear",
+        "#dystopian",
+        "#betterdaze",
+        "#officialnarrativediv",
+        "#surveillance",
+        "#dataprivacy",
+        "#graphicdesign",
+        "#alternativefashion",
+        "#undergroundfashion",
+        "#limiteddrop"
+      ]
+    }
+  },
+  {
+    "slogan": "FREEDOM REQUIRES A PERMIT",
+    "design_path": "/home/ubuntu/pod_designs/design_freedom_requires_a_permit.png",
+    "product_id": "6a208428780a2a317206c96f",
+    "published": true,
+    "social": {
+      "caption": "CLASSIFIED: New standard issue drop. 'FREEDOM REQUIRES A PERMIT' \u2014 This wasn't supposed to go public. Link in bio before it's pulled.",
+      "hook_type": "urgency",
+      "hashtags": [
+        "#streetwear",
+        "#dystopian",
+        "#betterdaze",
+        "#officialnarrativediv",
+        "#surveillance",
+        "#dataprivacy",
+        "#graphicdesign",
+        "#alternativefashion",
+        "#undergroundfashion",
+        "#limiteddrop"
+      ]
+    }
+  },
+  {
+    "slogan": "MONITORED FOR YOUR SAFETY",
+    "design_path": "/home/ubuntu/pod_designs/design_monitored_for_your_safety.png",
+    "product_id": "6a20844f9e4293a59201cc5c",
+    "published": true,
+    "social": {
+      "caption": "CLASSIFIED: New standard issue drop. 'MONITORED FOR YOUR SAFETY' \u2014 This wasn't supposed to go public. Link in bio before it's pulled.",
+      "hook_type": "urgency",
+      "hashtags": [
+        "#streetwear",
+        "#dystopian",
+        "#betterdaze",
+        "#officialnarrativediv",
+        "#surveillance",
+        "#dataprivacy",
+        "#graphicdesign",
+        "#alternativefashion",
+        "#undergroundfashion",
+        "#limiteddrop"
+      ]
+    }
+  }
+]
