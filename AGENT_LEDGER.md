@@ -183,3 +183,22 @@ No POD item is `[DONE]` or customer-facing until the Printify provider record, S
 **Action:** Re-clone the current canonical repository, inspect the live Shopify and Printify product lists, and record whether any product/variant pairs actually sync before creating or promoting a POD offer.
 
 **Supporting reference:** `docs/AGENT_CONTEXT_RECOVERY_20260901.md` and `/home/ubuntu/better-daze-launch/CLAUDE_AGENT_CONTEXT_APPLIED.md`.
+
+## Session Log — 2026-09-24 (Claude)
+
+### [VERIFIED] Shopify store offline — revenue blocker
+- `curl https://shop.better-daze-sf.com/` → **402 "Store unavailable"**; same for `xe1y5t-hx.myshopify.com` product pages and `/products.json`. Checked 2026-09-24.
+- Owner: Will (billing/plan). Every other revenue task waits on this.
+
+### [DONE] AGENT_COMMUNICATION.md reset
+- Old hub (last edited 2026-06-17, "87 Sketches" push) moved to `docs/archive/AGENT_COMMUNICATION_2026-06.md`.
+- New hub = status board + next-actions table + pointer to `DEPLOYMENT_TRUTH.md`. Branch `claude/agent-comms-reset`.
+
+### [DECLINED] 2026-09-22 continuous orchestrator daemon
+- Proposed 30s polling loop targeted nonexistent `/api/pipeline/*` endpoints (they return SPA HTML), auto-started cycles without limit, and auto-published without approval. Replaced by the "guarded runner" plan in AGENT_COMMUNICATION.md.
+
+### [DRAFT] Cycle 1788893755475 designs
+- official-narrative-div branch `claude/design-drafts-cycle-1788893755475`: 2 SVGs + campaign copy. Not published.
+
+### Next Single Action
+**Owner:** Will — restore the Shopify store's billing/plan, then post the monthly subscription list in AGENT_COMMUNICATION.md.
