@@ -1,138 +1,169 @@
 {
-  "version": "5",
-  "dialect": "mysql",
-  "id": "e4831e53-101b-4ba6-b31e-f08f81942c25",
+  "id": "54755e5a-aebf-4671-a1c4-bc62e21c2bb9",
   "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "7",
+  "dialect": "postgresql",
   "tables": {
-    "actionItems": {
+    "public.actionItems": {
       "name": "actionItems",
+      "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "serial",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": true
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
         },
         "userId": {
           "name": "userId",
-          "type": "bigint unsigned",
+          "type": "bigint",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "title": {
           "name": "title",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "description": {
           "name": "description",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "section": {
           "name": "section",
-          "type": "enum('immediate','short_term','deferred')",
+          "type": "action_items_section",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
           "default": "'immediate'"
         },
         "priority": {
           "name": "priority",
-          "type": "enum('low','medium','high','critical')",
+          "type": "action_items_priority",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
           "default": "'medium'"
         },
         "status": {
           "name": "status",
-          "type": "enum('open','in_progress','completed','cancelled')",
+          "type": "action_items_status",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
           "default": "'open'"
         },
         "dueDate": {
           "name": "dueDate",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "completedAt": {
           "name": "completedAt",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "tags": {
           "name": "tags",
-          "type": "json",
+          "type": "jsonb",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "createdAt": {
           "name": "createdAt",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
+          "default": "now()"
         },
         "updatedAt": {
           "name": "updatedAt",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
+          "default": "now()"
         }
       },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "actionItems_id": {
-          "name": "actionItems_id",
+      "indexes": {
+        "actionItems_userId_idx": {
+          "name": "actionItems_userId_idx",
           "columns": [
-            "id"
-          ]
+            {
+              "expression": "userId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "actionItems_status_idx": {
+          "name": "actionItems_status_idx",
+          "columns": [
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
+      "foreignKeys": {
+        "actionItems_userId_users_id_fk": {
+          "name": "actionItems_userId_users_id_fk",
+          "tableFrom": "actionItems",
+          "tableTo": "users",
+          "columnsFrom": [
+            "userId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "checkConstraint": {}
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
-    "adminSettings": {
+    "public.adminSettings": {
       "name": "adminSettings",
+      "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "serial",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": true
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
         },
         "userId": {
           "name": "userId",
-          "type": "bigint unsigned",
+          "type": "bigint",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "theme": {
           "name": "theme",
-          "type": "enum('light','dark','auto')",
+          "type": "admin_settings_theme",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
           "default": "'auto'"
         },
         "emailNotifications": {
@@ -140,7 +171,6 @@
           "type": "boolean",
           "primaryKey": false,
           "notNull": false,
-          "autoincrement": false,
           "default": true
         },
         "inAppNotifications": {
@@ -148,31 +178,29 @@
           "type": "boolean",
           "primaryKey": false,
           "notNull": false,
-          "autoincrement": false,
           "default": true
         },
         "notificationFrequency": {
           "name": "notificationFrequency",
-          "type": "enum('instant','daily','weekly')",
+          "type": "admin_settings_notification_frequency",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
           "default": "'daily'"
         },
         "itemsPerPage": {
           "name": "itemsPerPage",
-          "type": "int",
+          "type": "integer",
           "primaryKey": false,
           "notNull": false,
-          "autoincrement": false,
           "default": 20
         },
         "defaultView": {
           "name": "defaultView",
-          "type": "enum('grid','list')",
+          "type": "admin_settings_default_view",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
           "default": "'grid'"
         },
         "autoPublish": {
@@ -180,15 +208,14 @@
           "type": "boolean",
           "primaryKey": false,
           "notNull": false,
-          "autoincrement": false,
           "default": false
         },
         "cycleFrequency": {
           "name": "cycleFrequency",
-          "type": "enum('daily','weekly','monthly')",
+          "type": "admin_settings_cycle_frequency",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
           "default": "'weekly'"
         },
         "companyName": {
@@ -196,271 +223,393 @@
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": false,
-          "autoincrement": false,
           "default": "'Better Daze'"
         },
         "logoUrl": {
           "name": "logoUrl",
           "type": "varchar(500)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "primaryColor": {
           "name": "primaryColor",
           "type": "varchar(7)",
           "primaryKey": false,
           "notNull": false,
-          "autoincrement": false,
           "default": "'#6366f1'"
         },
         "createdAt": {
           "name": "createdAt",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
+          "default": "now()"
         },
         "updatedAt": {
           "name": "updatedAt",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
+          "default": "now()"
         }
       },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "adminSettings_id": {
-          "name": "adminSettings_id",
+      "indexes": {
+        "adminSettings_userId_key": {
+          "name": "adminSettings_userId_key",
           "columns": [
-            "id"
-          ]
+            {
+              "expression": "userId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
+      "foreignKeys": {
+        "adminSettings_userId_users_id_fk": {
+          "name": "adminSettings_userId_users_id_fk",
+          "tableFrom": "adminSettings",
+          "tableTo": "users",
+          "columnsFrom": [
+            "userId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "checkConstraint": {}
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
-    "agentAssignments": {
+    "public.agentAssignments": {
       "name": "agentAssignments",
+      "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "serial",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": true
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
         },
         "agentId": {
           "name": "agentId",
-          "type": "bigint unsigned",
+          "type": "bigint",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "taskId": {
           "name": "taskId",
-          "type": "bigint unsigned",
+          "type": "bigint",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "assignedAt": {
           "name": "assignedAt",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
+          "default": "now()"
         },
         "startedAt": {
           "name": "startedAt",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "completedAt": {
           "name": "completedAt",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "result": {
           "name": "result",
-          "type": "json",
+          "type": "jsonb",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "status": {
           "name": "status",
-          "type": "enum('assigned','started','completed','failed')",
+          "type": "agent_assignments_status",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
           "default": "'assigned'"
         }
       },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "agentAssignments_id": {
-          "name": "agentAssignments_id",
+      "indexes": {
+        "agentAssignments_agentId_idx": {
+          "name": "agentAssignments_agentId_idx",
           "columns": [
-            "id"
-          ]
+            {
+              "expression": "agentId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "agentAssignments_taskId_idx": {
+          "name": "agentAssignments_taskId_idx",
+          "columns": [
+            {
+              "expression": "taskId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
+      "foreignKeys": {
+        "agentAssignments_agentId_agents_id_fk": {
+          "name": "agentAssignments_agentId_agents_id_fk",
+          "tableFrom": "agentAssignments",
+          "tableTo": "agents",
+          "columnsFrom": [
+            "agentId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "agentAssignments_taskId_agentTasks_id_fk": {
+          "name": "agentAssignments_taskId_agentTasks_id_fk",
+          "tableFrom": "agentAssignments",
+          "tableTo": "agentTasks",
+          "columnsFrom": [
+            "taskId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "checkConstraint": {}
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
-    "agentMessages": {
+    "public.agentMessages": {
       "name": "agentMessages",
+      "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "serial",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": true
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
         },
         "fromAgentId": {
           "name": "fromAgentId",
-          "type": "bigint unsigned",
+          "type": "bigint",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "toAgentId": {
           "name": "toAgentId",
-          "type": "bigint unsigned",
+          "type": "bigint",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "taskId": {
           "name": "taskId",
-          "type": "bigint unsigned",
+          "type": "bigint",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "messageType": {
           "name": "messageType",
-          "type": "enum('status_update','question','result','error','broadcast','handoff')",
+          "type": "agent_messages_type",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
           "default": "'status_update'"
         },
         "content": {
           "name": "content",
           "type": "text",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "metadata": {
           "name": "metadata",
-          "type": "json",
+          "type": "jsonb",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "createdAt": {
           "name": "createdAt",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
+          "default": "now()"
         }
       },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "agentMessages_id": {
-          "name": "agentMessages_id",
+      "indexes": {
+        "agentMessages_fromAgentId_idx": {
+          "name": "agentMessages_fromAgentId_idx",
           "columns": [
-            "id"
-          ]
+            {
+              "expression": "fromAgentId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "agentMessages_taskId_idx": {
+          "name": "agentMessages_taskId_idx",
+          "columns": [
+            {
+              "expression": "taskId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
+      "foreignKeys": {
+        "agentMessages_fromAgentId_agents_id_fk": {
+          "name": "agentMessages_fromAgentId_agents_id_fk",
+          "tableFrom": "agentMessages",
+          "tableTo": "agents",
+          "columnsFrom": [
+            "fromAgentId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "agentMessages_toAgentId_agents_id_fk": {
+          "name": "agentMessages_toAgentId_agents_id_fk",
+          "tableFrom": "agentMessages",
+          "tableTo": "agents",
+          "columnsFrom": [
+            "toAgentId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "agentMessages_taskId_agentTasks_id_fk": {
+          "name": "agentMessages_taskId_agentTasks_id_fk",
+          "tableFrom": "agentMessages",
+          "tableTo": "agentTasks",
+          "columnsFrom": [
+            "taskId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "checkConstraint": {}
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
-    "agentTasks": {
+    "public.agentTasks": {
       "name": "agentTasks",
+      "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "serial",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": true
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
         },
         "title": {
           "name": "title",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "description": {
           "name": "description",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "assignedAgentId": {
           "name": "assignedAgentId",
-          "type": "bigint unsigned",
+          "type": "bigint",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "createdBy": {
           "name": "createdBy",
-          "type": "bigint unsigned",
+          "type": "bigint",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "status": {
           "name": "status",
-          "type": "enum('pending','in_progress','completed','failed','blocked')",
+          "type": "agent_tasks_status",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
           "default": "'pending'"
         },
         "priority": {
           "name": "priority",
-          "type": "enum('low','medium','high','urgent')",
+          "type": "agent_tasks_priority",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
           "default": "'medium'"
         },
         "dueDate": {
           "name": "dueDate",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "category": {
           "name": "category",
-          "type": "enum('immediate','short_term','deferred')",
+          "type": "agent_tasks_category",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
           "default": "'short_term'"
         },
         "requiresApproval": {
@@ -468,468 +617,628 @@
           "type": "boolean",
           "primaryKey": false,
           "notNull": false,
-          "autoincrement": false,
           "default": false
         },
         "approvedBy": {
           "name": "approvedBy",
-          "type": "bigint unsigned",
+          "type": "bigint",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "approvedAt": {
           "name": "approvedAt",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "result": {
           "name": "result",
-          "type": "json",
+          "type": "jsonb",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "errorMessage": {
           "name": "errorMessage",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
+        },
+        "metadata": {
+          "name": "metadata",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "contextStack": {
+          "name": "contextStack",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "outputData": {
+          "name": "outputData",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
         },
         "createdAt": {
           "name": "createdAt",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
+          "default": "now()"
         },
         "updatedAt": {
           "name": "updatedAt",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
+          "default": "now()"
         },
         "completedAt": {
           "name": "completedAt",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         }
       },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "agentTasks_id": {
-          "name": "agentTasks_id",
+      "indexes": {
+        "agentTasks_createdBy_idx": {
+          "name": "agentTasks_createdBy_idx",
           "columns": [
-            "id"
-          ]
+            {
+              "expression": "createdBy",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "agentTasks_assignedAgentId_idx": {
+          "name": "agentTasks_assignedAgentId_idx",
+          "columns": [
+            {
+              "expression": "assignedAgentId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "agentTasks_status_idx": {
+          "name": "agentTasks_status_idx",
+          "columns": [
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
+      "foreignKeys": {
+        "agentTasks_assignedAgentId_agents_id_fk": {
+          "name": "agentTasks_assignedAgentId_agents_id_fk",
+          "tableFrom": "agentTasks",
+          "tableTo": "agents",
+          "columnsFrom": [
+            "assignedAgentId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "agentTasks_createdBy_users_id_fk": {
+          "name": "agentTasks_createdBy_users_id_fk",
+          "tableFrom": "agentTasks",
+          "tableTo": "users",
+          "columnsFrom": [
+            "createdBy"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "agentTasks_approvedBy_users_id_fk": {
+          "name": "agentTasks_approvedBy_users_id_fk",
+          "tableFrom": "agentTasks",
+          "tableTo": "users",
+          "columnsFrom": [
+            "approvedBy"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "checkConstraint": {}
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
-    "agents": {
+    "public.agents": {
       "name": "agents",
+      "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "serial",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": true
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
         },
         "name": {
           "name": "name",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "type": {
           "name": "type",
           "type": "varchar(100)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "status": {
           "name": "status",
-          "type": "enum('idle','busy','offline','error')",
+          "type": "agents_status",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
           "default": "'idle'"
         },
         "lastActive": {
           "name": "lastActive",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "capabilities": {
           "name": "capabilities",
-          "type": "json",
+          "type": "jsonb",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "metadata": {
           "name": "metadata",
-          "type": "json",
+          "type": "jsonb",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "createdAt": {
           "name": "createdAt",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
+          "default": "now()"
         },
         "updatedAt": {
           "name": "updatedAt",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
+          "default": "now()"
         }
       },
       "indexes": {},
       "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "agents_id": {
-          "name": "agents_id",
-          "columns": [
-            "id"
-          ]
-        }
-      },
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "checkConstraint": {}
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
-    "apiCredentials": {
+    "public.apiCredentials": {
       "name": "apiCredentials",
+      "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "serial",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": true
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
         },
         "userId": {
           "name": "userId",
-          "type": "bigint unsigned",
+          "type": "bigint",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "serviceName": {
           "name": "serviceName",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "displayName": {
           "name": "displayName",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "status": {
           "name": "status",
-          "type": "enum('active','expiring','expired','needs_rotation','error','unknown')",
+          "type": "api_credentials_status",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
           "default": "'unknown'"
         },
         "lastVerifiedAt": {
           "name": "lastVerifiedAt",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "expiresAt": {
           "name": "expiresAt",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "scope": {
           "name": "scope",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "metadata": {
           "name": "metadata",
-          "type": "json",
+          "type": "jsonb",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "createdAt": {
           "name": "createdAt",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
+          "default": "now()"
         },
         "updatedAt": {
           "name": "updatedAt",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
+          "default": "now()"
         }
       },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "apiCredentials_id": {
-          "name": "apiCredentials_id",
+      "indexes": {
+        "apiCredentials_userId_serviceName_key": {
+          "name": "apiCredentials_userId_serviceName_key",
           "columns": [
-            "id"
-          ]
+            {
+              "expression": "userId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "serviceName",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
+      "foreignKeys": {
+        "apiCredentials_userId_users_id_fk": {
+          "name": "apiCredentials_userId_users_id_fk",
+          "tableFrom": "apiCredentials",
+          "tableTo": "users",
+          "columnsFrom": [
+            "userId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "checkConstraint": {}
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
-    "apiKeys": {
+    "public.apiKeys": {
       "name": "apiKeys",
+      "schema": "",
       "columns": {
         "id": {
           "name": "id",
           "type": "varchar(64)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "primaryKey": true,
+          "notNull": true
         },
         "userId": {
           "name": "userId",
-          "type": "bigint unsigned",
+          "type": "bigint",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "name": {
           "name": "name",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "keyHash": {
           "name": "keyHash",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "permissions": {
           "name": "permissions",
-          "type": "json",
+          "type": "jsonb",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "createdAt": {
           "name": "createdAt",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
+          "default": "now()"
         },
         "lastUsed": {
           "name": "lastUsed",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "expiresAt": {
           "name": "expiresAt",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         }
       },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "apiKeys_id": {
-          "name": "apiKeys_id",
+      "indexes": {
+        "apiKeys_userId_idx": {
+          "name": "apiKeys_userId_idx",
           "columns": [
-            "id"
-          ]
+            {
+              "expression": "userId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "apiKeys_keyHash_key": {
+          "name": "apiKeys_keyHash_key",
+          "columns": [
+            {
+              "expression": "keyHash",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
+      "foreignKeys": {
+        "apiKeys_userId_users_id_fk": {
+          "name": "apiKeys_userId_users_id_fk",
+          "tableFrom": "apiKeys",
+          "tableTo": "users",
+          "columnsFrom": [
+            "userId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "checkConstraint": {}
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
-    "auditLogs": {
+    "public.auditLogs": {
       "name": "auditLogs",
+      "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "serial",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": true
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
         },
         "userId": {
           "name": "userId",
-          "type": "bigint unsigned",
+          "type": "bigint",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "action": {
           "name": "action",
           "type": "varchar(100)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "resource": {
           "name": "resource",
           "type": "varchar(50)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "details": {
           "name": "details",
-          "type": "json",
+          "type": "jsonb",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "ipAddress": {
           "name": "ipAddress",
           "type": "varchar(45)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "timestamp": {
           "name": "timestamp",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
+          "default": "now()"
         }
       },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "auditLogs_id": {
-          "name": "auditLogs_id",
+      "indexes": {
+        "auditLogs_userId_idx": {
+          "name": "auditLogs_userId_idx",
           "columns": [
-            "id"
-          ]
+            {
+              "expression": "userId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "auditLogs_timestamp_idx": {
+          "name": "auditLogs_timestamp_idx",
+          "columns": [
+            {
+              "expression": "timestamp",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
+      "foreignKeys": {
+        "auditLogs_userId_users_id_fk": {
+          "name": "auditLogs_userId_users_id_fk",
+          "tableFrom": "auditLogs",
+          "tableTo": "users",
+          "columnsFrom": [
+            "userId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "checkConstraint": {}
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
-    "campaigns": {
+    "public.campaigns": {
       "name": "campaigns",
+      "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "serial",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": true
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
         },
         "userId": {
           "name": "userId",
-          "type": "bigint unsigned",
+          "type": "bigint",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "name": {
           "name": "name",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "description": {
           "name": "description",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "cycleId": {
           "name": "cycleId",
-          "type": "bigint unsigned",
+          "type": "bigint",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "status": {
           "name": "status",
-          "type": "enum('draft','scheduled','active','paused','completed')",
+          "type": "campaigns_status",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
           "default": "'draft'"
         },
         "startDate": {
           "name": "startDate",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "endDate": {
           "name": "endDate",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "platforms": {
           "name": "platforms",
-          "type": "json",
+          "type": "jsonb",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "autoPublishProducts": {
           "name": "autoPublishProducts",
           "type": "boolean",
           "primaryKey": false,
           "notNull": false,
-          "autoincrement": false,
           "default": false
         },
         "autoGenerateSocial": {
@@ -937,2004 +1246,3970 @@
           "type": "boolean",
           "primaryKey": false,
           "notNull": false,
-          "autoincrement": false,
           "default": false
         },
         "postFrequency": {
           "name": "postFrequency",
-          "type": "enum('hourly','daily','weekly')",
+          "type": "campaigns_post_frequency",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": false,
-          "autoincrement": false,
           "default": "'daily'"
         },
         "createdAt": {
           "name": "createdAt",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
+          "default": "now()"
         },
         "updatedAt": {
           "name": "updatedAt",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
+          "default": "now()"
         }
       },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "campaigns_id": {
-          "name": "campaigns_id",
+      "indexes": {
+        "campaigns_userId_idx": {
+          "name": "campaigns_userId_idx",
           "columns": [
-            "id"
-          ]
+            {
+              "expression": "userId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "campaigns_cycleId_idx": {
+          "name": "campaigns_cycleId_idx",
+          "columns": [
+            {
+              "expression": "cycleId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
+      "foreignKeys": {
+        "campaigns_userId_users_id_fk": {
+          "name": "campaigns_userId_users_id_fk",
+          "tableFrom": "campaigns",
+          "tableTo": "users",
+          "columnsFrom": [
+            "userId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "campaigns_cycleId_cycles_id_fk": {
+          "name": "campaigns_cycleId_cycles_id_fk",
+          "tableFrom": "campaigns",
+          "tableTo": "cycles",
+          "columnsFrom": [
+            "cycleId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "checkConstraint": {}
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
-    "collections": {
+    "public.collections": {
       "name": "collections",
+      "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "serial",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": true
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
         },
         "name": {
           "name": "name",
           "type": "varchar(100)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "slug": {
           "name": "slug",
           "type": "varchar(100)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "description": {
           "name": "description",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "imageUrl": {
           "name": "imageUrl",
           "type": "varchar(500)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "isActive": {
           "name": "isActive",
           "type": "boolean",
           "primaryKey": false,
           "notNull": false,
-          "autoincrement": false,
           "default": true
         },
         "sortOrder": {
           "name": "sortOrder",
-          "type": "int",
+          "type": "integer",
           "primaryKey": false,
           "notNull": false,
-          "autoincrement": false,
           "default": 0
         },
         "createdAt": {
           "name": "createdAt",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
+          "default": "now()"
         }
       },
       "indexes": {},
       "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "collections_id": {
-          "name": "collections_id",
-          "columns": [
-            "id"
-          ]
-        }
-      },
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "collections_slug_unique": {
           "name": "collections_slug_unique",
+          "nullsNotDistinct": false,
           "columns": [
             "slug"
           ]
         }
       },
-      "checkConstraint": {}
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
-    "customerOrders": {
+    "public.customerOrders": {
       "name": "customerOrders",
+      "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "serial",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": true
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
         },
         "orderNumber": {
           "name": "orderNumber",
           "type": "varchar(50)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "email": {
           "name": "email",
           "type": "varchar(320)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "customerName": {
           "name": "customerName",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "phone": {
           "name": "phone",
           "type": "varchar(30)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "status": {
           "name": "status",
-          "type": "enum('pending','paid','processing','shipped','delivered','cancelled','refunded')",
+          "type": "customer_orders_status",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
           "default": "'pending'"
         },
         "fulfillmentStatus": {
           "name": "fulfillmentStatus",
-          "type": "enum('unfulfilled','pending','fulfilled','partial','returned')",
+          "type": "customer_orders_fulfillment_status",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
           "default": "'unfulfilled'"
         },
         "paymentStatus": {
           "name": "paymentStatus",
-          "type": "enum('pending','paid','failed','refunded')",
+          "type": "customer_orders_payment_status",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
           "default": "'pending'"
         },
         "subtotal": {
           "name": "subtotal",
-          "type": "decimal(10,2)",
+          "type": "numeric(10, 2)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "shipping": {
           "name": "shipping",
-          "type": "decimal(10,2)",
+          "type": "numeric(10, 2)",
           "primaryKey": false,
           "notNull": false,
-          "autoincrement": false,
           "default": "'0.00'"
         },
         "tax": {
           "name": "tax",
-          "type": "decimal(10,2)",
+          "type": "numeric(10, 2)",
           "primaryKey": false,
           "notNull": false,
-          "autoincrement": false,
           "default": "'0.00'"
         },
         "total": {
           "name": "total",
-          "type": "decimal(10,2)",
+          "type": "numeric(10, 2)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "currency": {
           "name": "currency",
           "type": "varchar(3)",
           "primaryKey": false,
           "notNull": false,
-          "autoincrement": false,
           "default": "'USD'"
         },
         "shippingAddress": {
           "name": "shippingAddress",
-          "type": "json",
+          "type": "jsonb",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "billingAddress": {
           "name": "billingAddress",
-          "type": "json",
+          "type": "jsonb",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "paymentReference": {
           "name": "paymentReference",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "trackingNumber": {
           "name": "trackingNumber",
           "type": "varchar(100)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "trackingUrl": {
           "name": "trackingUrl",
           "type": "varchar(500)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "notes": {
           "name": "notes",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "createdAt": {
           "name": "createdAt",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
+          "default": "now()"
         },
         "updatedAt": {
           "name": "updatedAt",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
+          "default": "now()"
         }
       },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "customerOrders_id": {
-          "name": "customerOrders_id",
+      "indexes": {
+        "customerOrders_email_idx": {
+          "name": "customerOrders_email_idx",
           "columns": [
-            "id"
-          ]
+            {
+              "expression": "email",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "customerOrders_status_idx": {
+          "name": "customerOrders_status_idx",
+          "columns": [
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "customerOrders_createdAt_idx": {
+          "name": "customerOrders_createdAt_idx",
+          "columns": [
+            {
+              "expression": "createdAt",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "customerOrders_orderNumber_unique": {
           "name": "customerOrders_orderNumber_unique",
+          "nullsNotDistinct": false,
           "columns": [
             "orderNumber"
           ]
         }
       },
-      "checkConstraint": {}
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
-    "cycles": {
+    "public.cycles": {
       "name": "cycles",
+      "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "serial",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": true
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
         },
         "userId": {
           "name": "userId",
-          "type": "bigint unsigned",
+          "type": "bigint",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "cycleNumber": {
           "name": "cycleNumber",
-          "type": "int",
+          "type": "integer",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "name": {
           "name": "name",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "status": {
           "name": "status",
-          "type": "enum('draft','active','paused','completed','archived')",
+          "type": "cycles_status",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
           "default": "'draft'"
         },
         "currentPhase": {
           "name": "currentPhase",
-          "type": "enum('ideation','design','review','production','marketing','complete')",
+          "type": "cycle_phase",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
           "default": "'ideation'"
         },
         "startDate": {
           "name": "startDate",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "endDate": {
           "name": "endDate",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "targetRevenue": {
           "name": "targetRevenue",
-          "type": "decimal(10,2)",
+          "type": "numeric(10, 2)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "actualRevenue": {
           "name": "actualRevenue",
-          "type": "decimal(10,2)",
+          "type": "numeric(10, 2)",
           "primaryKey": false,
           "notNull": false,
-          "autoincrement": false,
           "default": "'0.00'"
         },
         "slogan": {
           "name": "slogan",
           "type": "varchar(500)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "theme": {
           "name": "theme",
           "type": "varchar(100)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "createdAt": {
           "name": "createdAt",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
+          "default": "now()"
         },
         "updatedAt": {
           "name": "updatedAt",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
+          "default": "now()"
         }
       },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "cycles_id": {
-          "name": "cycles_id",
+      "indexes": {
+        "cycles_userId_idx": {
+          "name": "cycles_userId_idx",
           "columns": [
-            "id"
-          ]
+            {
+              "expression": "userId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "cycles_status_idx": {
+          "name": "cycles_status_idx",
+          "columns": [
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "cycles_userId_cycleNumber_key": {
+          "name": "cycles_userId_cycleNumber_key",
+          "columns": [
+            {
+              "expression": "userId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "cycleNumber",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
+      "foreignKeys": {
+        "cycles_userId_users_id_fk": {
+          "name": "cycles_userId_users_id_fk",
+          "tableFrom": "cycles",
+          "tableTo": "users",
+          "columnsFrom": [
+            "userId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "checkConstraint": {}
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
-    "loginHistory": {
-      "name": "loginHistory",
+    "public.integrationRuns": {
+      "name": "integrationRuns",
+      "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "serial",
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "idempotencyKey": {
+          "name": "idempotencyKey",
+          "type": "varchar(191)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "runType": {
+          "name": "runType",
+          "type": "integration_run_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "integration_run_status",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": true
+          "default": "'pending'"
+        },
+        "cycleId": {
+          "name": "cycleId",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "productId": {
+          "name": "productId",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pipelineRunId": {
+          "name": "pipelineRunId",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "attemptCount": {
+          "name": "attemptCount",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "maxAttempts": {
+          "name": "maxAttempts",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 3
+        },
+        "lockedAt": {
+          "name": "lockedAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "lockedBy": {
+          "name": "lockedBy",
+          "type": "varchar(191)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "startedAt": {
+          "name": "startedAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "completedAt": {
+          "name": "completedAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nextRetryAt": {
+          "name": "nextRetryAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "errorClass": {
+          "name": "errorClass",
+          "type": "integration_error_class",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "lastErrorCode": {
+          "name": "lastErrorCode",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "lastErrorMessage": {
+          "name": "lastErrorMessage",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reconciliationStatus": {
+          "name": "reconciliationStatus",
+          "type": "reconciliation_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'unverified'"
+        },
+        "metadata": {
+          "name": "metadata",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "integrationRuns_idempotencyKey_key": {
+          "name": "integrationRuns_idempotencyKey_key",
+          "columns": [
+            {
+              "expression": "idempotencyKey",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "integrationRuns_status_idx": {
+          "name": "integrationRuns_status_idx",
+          "columns": [
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "integrationRuns_productId_idx": {
+          "name": "integrationRuns_productId_idx",
+          "columns": [
+            {
+              "expression": "productId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "integrationRuns_nextRetryAt_idx": {
+          "name": "integrationRuns_nextRetryAt_idx",
+          "columns": [
+            {
+              "expression": "nextRetryAt",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "integrationRuns_cycleId_cycles_id_fk": {
+          "name": "integrationRuns_cycleId_cycles_id_fk",
+          "tableFrom": "integrationRuns",
+          "tableTo": "cycles",
+          "columnsFrom": [
+            "cycleId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "integrationRuns_productId_products_id_fk": {
+          "name": "integrationRuns_productId_products_id_fk",
+          "tableFrom": "integrationRuns",
+          "tableTo": "products",
+          "columnsFrom": [
+            "productId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "integrationRuns_pipelineRunId_pipelineRuns_id_fk": {
+          "name": "integrationRuns_pipelineRunId_pipelineRuns_id_fk",
+          "tableFrom": "integrationRuns",
+          "tableTo": "pipelineRuns",
+          "columnsFrom": [
+            "pipelineRunId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.integrationSteps": {
+      "name": "integrationSteps",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "runId": {
+          "name": "runId",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "step": {
+          "name": "step",
+          "type": "integration_step",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "attempt": {
+          "name": "attempt",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1
+        },
+        "status": {
+          "name": "status",
+          "type": "integration_step_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'pending'"
+        },
+        "provider": {
+          "name": "provider",
+          "type": "integration_provider",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "providerRequestRef": {
+          "name": "providerRequestRef",
+          "type": "varchar(191)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "providerResponseRef": {
+          "name": "providerResponseRef",
+          "type": "varchar(191)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "httpStatus": {
+          "name": "httpStatus",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "errorClass": {
+          "name": "errorClass",
+          "type": "integration_error_class",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "errorCode": {
+          "name": "errorCode",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "errorMessage": {
+          "name": "errorMessage",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "retryable": {
+          "name": "retryable",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "startedAt": {
+          "name": "startedAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "completedAt": {
+          "name": "completedAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "correlationId": {
+          "name": "correlationId",
+          "type": "varchar(191)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "payload": {
+          "name": "payload",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "integrationSteps_runId_step_attempt_key": {
+          "name": "integrationSteps_runId_step_attempt_key",
+          "columns": [
+            {
+              "expression": "runId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "step",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "attempt",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "integrationSteps_runId_idx": {
+          "name": "integrationSteps_runId_idx",
+          "columns": [
+            {
+              "expression": "runId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "integrationSteps_status_idx": {
+          "name": "integrationSteps_status_idx",
+          "columns": [
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "integrationSteps_correlationId_idx": {
+          "name": "integrationSteps_correlationId_idx",
+          "columns": [
+            {
+              "expression": "correlationId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "integrationSteps_runId_integrationRuns_id_fk": {
+          "name": "integrationSteps_runId_integrationRuns_id_fk",
+          "tableFrom": "integrationSteps",
+          "tableTo": "integrationRuns",
+          "columnsFrom": [
+            "runId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.loginHistory": {
+      "name": "loginHistory",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
         },
         "userId": {
           "name": "userId",
-          "type": "bigint unsigned",
+          "type": "bigint",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "timestamp": {
           "name": "timestamp",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
+          "default": "now()"
         },
         "ipAddress": {
           "name": "ipAddress",
           "type": "varchar(45)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "userAgent": {
           "name": "userAgent",
           "type": "varchar(500)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "status": {
           "name": "status",
-          "type": "enum('success','failed')",
+          "type": "login_history_status",
+          "typeSchema": "public",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "failureReason": {
           "name": "failureReason",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         }
       },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "loginHistory_id": {
-          "name": "loginHistory_id",
+      "indexes": {
+        "loginHistory_userId_idx": {
+          "name": "loginHistory_userId_idx",
           "columns": [
-            "id"
-          ]
+            {
+              "expression": "userId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "loginHistory_timestamp_idx": {
+          "name": "loginHistory_timestamp_idx",
+          "columns": [
+            {
+              "expression": "timestamp",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
+      "foreignKeys": {
+        "loginHistory_userId_users_id_fk": {
+          "name": "loginHistory_userId_users_id_fk",
+          "tableFrom": "loginHistory",
+          "tableTo": "users",
+          "columnsFrom": [
+            "userId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "checkConstraint": {}
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
-    "orderItems": {
+    "public.orderItems": {
       "name": "orderItems",
+      "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "serial",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": true
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
         },
         "orderId": {
           "name": "orderId",
-          "type": "bigint unsigned",
+          "type": "bigint",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "productId": {
           "name": "productId",
-          "type": "bigint unsigned",
+          "type": "bigint",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "variantId": {
           "name": "variantId",
-          "type": "bigint unsigned",
+          "type": "bigint",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "productName": {
           "name": "productName",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "variantName": {
           "name": "variantName",
           "type": "varchar(100)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "sku": {
           "name": "sku",
           "type": "varchar(100)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "quantity": {
           "name": "quantity",
-          "type": "int",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
           "default": 1
         },
         "unitPrice": {
           "name": "unitPrice",
-          "type": "decimal(10,2)",
+          "type": "numeric(10, 2)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "totalPrice": {
           "name": "totalPrice",
-          "type": "decimal(10,2)",
+          "type": "numeric(10, 2)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "imageUrl": {
           "name": "imageUrl",
           "type": "varchar(500)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "createdAt": {
           "name": "createdAt",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
+          "default": "now()"
         }
       },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "orderItems_id": {
-          "name": "orderItems_id",
+      "indexes": {
+        "orderItems_orderId_idx": {
+          "name": "orderItems_orderId_idx",
           "columns": [
-            "id"
-          ]
+            {
+              "expression": "orderId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "orderItems_productId_idx": {
+          "name": "orderItems_productId_idx",
+          "columns": [
+            {
+              "expression": "productId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
+      "foreignKeys": {
+        "orderItems_orderId_customerOrders_id_fk": {
+          "name": "orderItems_orderId_customerOrders_id_fk",
+          "tableFrom": "orderItems",
+          "tableTo": "customerOrders",
+          "columnsFrom": [
+            "orderId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "orderItems_productId_products_id_fk": {
+          "name": "orderItems_productId_products_id_fk",
+          "tableFrom": "orderItems",
+          "tableTo": "products",
+          "columnsFrom": [
+            "productId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "orderItems_variantId_productVariants_id_fk": {
+          "name": "orderItems_variantId_productVariants_id_fk",
+          "tableFrom": "orderItems",
+          "tableTo": "productVariants",
+          "columnsFrom": [
+            "variantId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "checkConstraint": {}
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
-    "orders": {
+    "public.orders": {
       "name": "orders",
+      "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "serial",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": true
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
         },
         "productId": {
           "name": "productId",
-          "type": "bigint unsigned",
+          "type": "bigint",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "shopifyOrderId": {
           "name": "shopifyOrderId",
           "type": "varchar(100)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "customerName": {
           "name": "customerName",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "customerEmail": {
           "name": "customerEmail",
           "type": "varchar(320)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "quantity": {
           "name": "quantity",
-          "type": "int",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
           "default": 1
         },
         "unitPrice": {
           "name": "unitPrice",
-          "type": "decimal(10,2)",
+          "type": "numeric(10, 2)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "totalRevenue": {
           "name": "totalRevenue",
-          "type": "decimal(10,2)",
+          "type": "numeric(10, 2)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "status": {
           "name": "status",
-          "type": "enum('pending','processing','shipped','delivered','cancelled','refunded')",
+          "type": "orders_status",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
           "default": "'pending'"
         },
         "shippingAddress": {
           "name": "shippingAddress",
-          "type": "json",
+          "type": "jsonb",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "trackingNumber": {
           "name": "trackingNumber",
           "type": "varchar(100)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "createdAt": {
           "name": "createdAt",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
+          "default": "now()"
         },
         "updatedAt": {
           "name": "updatedAt",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
+          "default": "now()"
         }
       },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "orders_id": {
-          "name": "orders_id",
+      "indexes": {
+        "orders_productId_idx": {
+          "name": "orders_productId_idx",
           "columns": [
-            "id"
-          ]
+            {
+              "expression": "productId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "orders_createdAt_idx": {
+          "name": "orders_createdAt_idx",
+          "columns": [
+            {
+              "expression": "createdAt",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "orders_shopifyOrderId_key": {
+          "name": "orders_shopifyOrderId_key",
+          "columns": [
+            {
+              "expression": "shopifyOrderId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
+      "foreignKeys": {
+        "orders_productId_products_id_fk": {
+          "name": "orders_productId_products_id_fk",
+          "tableFrom": "orders",
+          "tableTo": "products",
+          "columnsFrom": [
+            "productId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "checkConstraint": {}
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
-    "permissions": {
+    "public.permissions": {
       "name": "permissions",
+      "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "serial",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": true
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
         },
         "roleId": {
           "name": "roleId",
-          "type": "bigint unsigned",
+          "type": "bigint",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "resource": {
           "name": "resource",
-          "type": "enum('products','orders','cycles','users','settings','analytics','social')",
+          "type": "permissions_resource",
+          "typeSchema": "public",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "action": {
           "name": "action",
-          "type": "enum('create','read','update','delete')",
+          "type": "permissions_action",
+          "typeSchema": "public",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "granted": {
           "name": "granted",
           "type": "boolean",
           "primaryKey": false,
           "notNull": false,
-          "autoincrement": false,
           "default": false
         }
       },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "permissions_id": {
-          "name": "permissions_id",
+      "indexes": {
+        "permissions_roleId_resource_action_key": {
+          "name": "permissions_roleId_resource_action_key",
           "columns": [
-            "id"
-          ]
+            {
+              "expression": "roleId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "resource",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "action",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
+      "foreignKeys": {
+        "permissions_roleId_roles_id_fk": {
+          "name": "permissions_roleId_roles_id_fk",
+          "tableFrom": "permissions",
+          "tableTo": "roles",
+          "columnsFrom": [
+            "roleId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "checkConstraint": {}
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
-    "pipelineRuns": {
+    "public.pipelineRuns": {
       "name": "pipelineRuns",
+      "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "serial",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": true
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
         },
         "cycleId": {
           "name": "cycleId",
-          "type": "bigint unsigned",
+          "type": "bigint",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "name": {
           "name": "name",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "status": {
           "name": "status",
-          "type": "enum('pending','in_progress','completed','failed','cancelled')",
+          "type": "pipeline_runs_status",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
           "default": "'pending'"
         },
         "currentPhase": {
           "name": "currentPhase",
-          "type": "enum('trend','design','printify','shopify','social','log','complete')",
+          "type": "pipeline_runs_phase",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
           "default": "'trend'"
         },
         "trendPhaseStatus": {
           "name": "trendPhaseStatus",
-          "type": "enum('pending','in_progress','completed','failed')",
+          "type": "pipeline_phase_status",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": false,
-          "autoincrement": false,
           "default": "'pending'"
         },
         "designPhaseStatus": {
           "name": "designPhaseStatus",
-          "type": "enum('pending','in_progress','completed','failed')",
+          "type": "pipeline_phase_status",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": false,
-          "autoincrement": false,
           "default": "'pending'"
         },
         "printifyPhaseStatus": {
           "name": "printifyPhaseStatus",
-          "type": "enum('pending','in_progress','completed','failed')",
+          "type": "pipeline_phase_status",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": false,
-          "autoincrement": false,
           "default": "'pending'"
         },
         "shopifyPhaseStatus": {
           "name": "shopifyPhaseStatus",
-          "type": "enum('pending','in_progress','completed','failed')",
+          "type": "pipeline_phase_status",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": false,
-          "autoincrement": false,
           "default": "'pending'"
         },
         "socialPhaseStatus": {
           "name": "socialPhaseStatus",
-          "type": "enum('pending','in_progress','completed','failed')",
+          "type": "pipeline_phase_status",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": false,
-          "autoincrement": false,
           "default": "'pending'"
         },
         "logPhaseStatus": {
           "name": "logPhaseStatus",
-          "type": "enum('pending','in_progress','completed','failed')",
+          "type": "pipeline_phase_status",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": false,
-          "autoincrement": false,
           "default": "'pending'"
         },
         "startedAt": {
           "name": "startedAt",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false,
-          "autoincrement": false,
-          "default": "(now())"
+          "default": "now()"
         },
         "completedAt": {
           "name": "completedAt",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "duration": {
           "name": "duration",
-          "type": "int",
+          "type": "integer",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "result": {
           "name": "result",
-          "type": "json",
+          "type": "jsonb",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "errorMessage": {
           "name": "errorMessage",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "createdAt": {
           "name": "createdAt",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
+          "default": "now()"
         },
         "updatedAt": {
           "name": "updatedAt",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
+          "default": "now()"
         }
       },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "pipelineRuns_id": {
-          "name": "pipelineRuns_id",
+      "indexes": {
+        "pipelineRuns_cycleId_idx": {
+          "name": "pipelineRuns_cycleId_idx",
           "columns": [
-            "id"
-          ]
+            {
+              "expression": "cycleId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "pipelineRuns_status_idx": {
+          "name": "pipelineRuns_status_idx",
+          "columns": [
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
+      "foreignKeys": {
+        "pipelineRuns_cycleId_cycles_id_fk": {
+          "name": "pipelineRuns_cycleId_cycles_id_fk",
+          "tableFrom": "pipelineRuns",
+          "tableTo": "cycles",
+          "columnsFrom": [
+            "cycleId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "checkConstraint": {}
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
-    "productCollections": {
+    "public.productCollections": {
       "name": "productCollections",
+      "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "serial",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": true
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
         },
         "productId": {
           "name": "productId",
-          "type": "bigint unsigned",
+          "type": "bigint",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "collectionId": {
           "name": "collectionId",
-          "type": "bigint unsigned",
+          "type": "bigint",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         }
       },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "productCollections_id": {
-          "name": "productCollections_id",
+      "indexes": {
+        "productCollections_productId_collectionId_key": {
+          "name": "productCollections_productId_collectionId_key",
           "columns": [
-            "id"
-          ]
+            {
+              "expression": "productId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "collectionId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "productCollections_collectionId_idx": {
+          "name": "productCollections_collectionId_idx",
+          "columns": [
+            {
+              "expression": "collectionId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
+      "foreignKeys": {
+        "productCollections_productId_products_id_fk": {
+          "name": "productCollections_productId_products_id_fk",
+          "tableFrom": "productCollections",
+          "tableTo": "products",
+          "columnsFrom": [
+            "productId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "productCollections_collectionId_collections_id_fk": {
+          "name": "productCollections_collectionId_collections_id_fk",
+          "tableFrom": "productCollections",
+          "tableTo": "collections",
+          "columnsFrom": [
+            "collectionId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "checkConstraint": {}
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
-    "productImages": {
+    "public.productImages": {
       "name": "productImages",
+      "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "serial",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": true
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
         },
         "productId": {
           "name": "productId",
-          "type": "bigint unsigned",
+          "type": "bigint",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "variantId": {
           "name": "variantId",
-          "type": "bigint unsigned",
+          "type": "bigint",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "url": {
           "name": "url",
           "type": "varchar(500)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "alt": {
           "name": "alt",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "isPrimary": {
           "name": "isPrimary",
           "type": "boolean",
           "primaryKey": false,
           "notNull": false,
-          "autoincrement": false,
           "default": false
         },
         "sortOrder": {
           "name": "sortOrder",
-          "type": "int",
+          "type": "integer",
           "primaryKey": false,
           "notNull": false,
-          "autoincrement": false,
           "default": 0
         },
         "createdAt": {
           "name": "createdAt",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
+          "default": "now()"
         }
       },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "productImages_id": {
-          "name": "productImages_id",
+      "indexes": {
+        "productImages_productId_idx": {
+          "name": "productImages_productId_idx",
           "columns": [
-            "id"
-          ]
+            {
+              "expression": "productId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "productImages_variantId_idx": {
+          "name": "productImages_variantId_idx",
+          "columns": [
+            {
+              "expression": "variantId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
+      "foreignKeys": {
+        "productImages_productId_products_id_fk": {
+          "name": "productImages_productId_products_id_fk",
+          "tableFrom": "productImages",
+          "tableTo": "products",
+          "columnsFrom": [
+            "productId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "productImages_variantId_productVariants_id_fk": {
+          "name": "productImages_variantId_productVariants_id_fk",
+          "tableFrom": "productImages",
+          "tableTo": "productVariants",
+          "columnsFrom": [
+            "variantId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "checkConstraint": {}
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
-    "productVariants": {
+    "public.productVariants": {
       "name": "productVariants",
+      "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "serial",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": true
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
         },
         "productId": {
           "name": "productId",
-          "type": "bigint unsigned",
+          "type": "bigint",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "sku": {
           "name": "sku",
           "type": "varchar(100)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "size": {
           "name": "size",
           "type": "varchar(20)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "color": {
           "name": "color",
           "type": "varchar(50)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "colorHex": {
           "name": "colorHex",
           "type": "varchar(7)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "price": {
           "name": "price",
-          "type": "decimal(10,2)",
+          "type": "numeric(10, 2)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "inventory": {
           "name": "inventory",
-          "type": "int",
+          "type": "integer",
           "primaryKey": false,
           "notNull": false,
-          "autoincrement": false,
           "default": 0
         },
         "createdAt": {
           "name": "createdAt",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
+          "default": "now()"
         }
       },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "productVariants_id": {
-          "name": "productVariants_id",
+      "indexes": {
+        "productVariants_productId_idx": {
+          "name": "productVariants_productId_idx",
           "columns": [
-            "id"
-          ]
+            {
+              "expression": "productId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "productVariants_sku_key": {
+          "name": "productVariants_sku_key",
+          "columns": [
+            {
+              "expression": "sku",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
+      "foreignKeys": {
+        "productVariants_productId_products_id_fk": {
+          "name": "productVariants_productId_products_id_fk",
+          "tableFrom": "productVariants",
+          "tableTo": "products",
+          "columnsFrom": [
+            "productId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "checkConstraint": {}
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
-    "products": {
+    "public.products": {
       "name": "products",
+      "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "serial",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": true
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
         },
         "cycleId": {
           "name": "cycleId",
-          "type": "bigint unsigned",
+          "type": "bigint",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "name": {
           "name": "name",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "sku": {
           "name": "sku",
           "type": "varchar(100)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "description": {
           "name": "description",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "slogan": {
           "name": "slogan",
           "type": "varchar(500)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "designUrl": {
           "name": "designUrl",
           "type": "varchar(500)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "mockupUrl": {
           "name": "mockupUrl",
           "type": "varchar(500)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "productType": {
           "name": "productType",
-          "type": "enum('tshirt','hoodie','mug','poster','sticker','hat','tote','other')",
+          "type": "products_type",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
           "default": "'tshirt'"
         },
         "price": {
           "name": "price",
-          "type": "decimal(10,2)",
+          "type": "numeric(10, 2)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "cost": {
           "name": "cost",
-          "type": "decimal(10,2)",
+          "type": "numeric(10, 2)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "status": {
           "name": "status",
-          "type": "enum('draft','pending','approved','live','sold_out','discontinued')",
+          "type": "products_status",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
           "default": "'draft'"
         },
         "inventory": {
           "name": "inventory",
-          "type": "int",
+          "type": "integer",
           "primaryKey": false,
           "notNull": false,
-          "autoincrement": false,
           "default": 0
         },
         "salesCount": {
           "name": "salesCount",
-          "type": "int",
+          "type": "integer",
           "primaryKey": false,
           "notNull": false,
-          "autoincrement": false,
           "default": 0
         },
         "createdAt": {
           "name": "createdAt",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
+          "default": "now()"
         },
         "updatedAt": {
           "name": "updatedAt",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
+          "default": "now()"
         }
       },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "products_id": {
-          "name": "products_id",
+      "indexes": {
+        "products_cycleId_idx": {
+          "name": "products_cycleId_idx",
           "columns": [
-            "id"
-          ]
+            {
+              "expression": "cycleId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "products_status_idx": {
+          "name": "products_status_idx",
+          "columns": [
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "products_sku_key": {
+          "name": "products_sku_key",
+          "columns": [
+            {
+              "expression": "sku",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
+      "foreignKeys": {
+        "products_cycleId_cycles_id_fk": {
+          "name": "products_cycleId_cycles_id_fk",
+          "tableFrom": "products",
+          "tableTo": "cycles",
+          "columnsFrom": [
+            "cycleId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "checkConstraint": {}
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
-    "roles": {
-      "name": "roles",
+    "public.providerMappings": {
+      "name": "providerMappings",
+      "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "serial",
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "provider": {
+          "name": "provider",
+          "type": "integration_provider",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "resourceType": {
+          "name": "resourceType",
+          "type": "provider_resource_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "providerResourceId": {
+          "name": "providerResourceId",
+          "type": "varchar(191)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "productId": {
+          "name": "productId",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "variantId": {
+          "name": "variantId",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "runId": {
+          "name": "runId",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reconciliationStatus": {
+          "name": "reconciliationStatus",
+          "type": "reconciliation_status",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": true
+          "default": "'unverified'"
+        },
+        "lastVerifiedAt": {
+          "name": "lastVerifiedAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "details": {
+          "name": "details",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "providerMappings_provider_resource_key": {
+          "name": "providerMappings_provider_resource_key",
+          "columns": [
+            {
+              "expression": "provider",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "resourceType",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "providerResourceId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "providerMappings_productId_idx": {
+          "name": "providerMappings_productId_idx",
+          "columns": [
+            {
+              "expression": "productId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "providerMappings_variantId_idx": {
+          "name": "providerMappings_variantId_idx",
+          "columns": [
+            {
+              "expression": "variantId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "providerMappings_reconciliationStatus_idx": {
+          "name": "providerMappings_reconciliationStatus_idx",
+          "columns": [
+            {
+              "expression": "reconciliationStatus",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "providerMappings_productId_products_id_fk": {
+          "name": "providerMappings_productId_products_id_fk",
+          "tableFrom": "providerMappings",
+          "tableTo": "products",
+          "columnsFrom": [
+            "productId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "providerMappings_variantId_productVariants_id_fk": {
+          "name": "providerMappings_variantId_productVariants_id_fk",
+          "tableFrom": "providerMappings",
+          "tableTo": "productVariants",
+          "columnsFrom": [
+            "variantId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "providerMappings_runId_integrationRuns_id_fk": {
+          "name": "providerMappings_runId_integrationRuns_id_fk",
+          "tableFrom": "providerMappings",
+          "tableTo": "integrationRuns",
+          "columnsFrom": [
+            "runId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.reconciliationChecks": {
+      "name": "reconciliationChecks",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "productId": {
+          "name": "productId",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "runId": {
+          "name": "runId",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "check": {
+          "name": "check",
+          "type": "reconciliation_check",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "reconciliation_check_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'pending'"
+        },
+        "detail": {
+          "name": "detail",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "failureReason": {
+          "name": "failureReason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "checkedAt": {
+          "name": "checkedAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "reconciliationChecks_productId_check_key": {
+          "name": "reconciliationChecks_productId_check_key",
+          "columns": [
+            {
+              "expression": "productId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "check",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "reconciliationChecks_status_idx": {
+          "name": "reconciliationChecks_status_idx",
+          "columns": [
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "reconciliationChecks_productId_products_id_fk": {
+          "name": "reconciliationChecks_productId_products_id_fk",
+          "tableFrom": "reconciliationChecks",
+          "tableTo": "products",
+          "columnsFrom": [
+            "productId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "reconciliationChecks_runId_integrationRuns_id_fk": {
+          "name": "reconciliationChecks_runId_integrationRuns_id_fk",
+          "tableFrom": "reconciliationChecks",
+          "tableTo": "integrationRuns",
+          "columnsFrom": [
+            "runId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.roles": {
+      "name": "roles",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
         },
         "name": {
           "name": "name",
           "type": "varchar(50)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "description": {
           "name": "description",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "isCustom": {
           "name": "isCustom",
           "type": "boolean",
           "primaryKey": false,
           "notNull": false,
-          "autoincrement": false,
           "default": false
         },
         "createdAt": {
           "name": "createdAt",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
+          "default": "now()"
         },
         "updatedAt": {
           "name": "updatedAt",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
+          "default": "now()"
         }
       },
       "indexes": {},
       "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "roles_id": {
-          "name": "roles_id",
-          "columns": [
-            "id"
-          ]
-        }
-      },
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "roles_name_unique": {
           "name": "roles_name_unique",
+          "nullsNotDistinct": false,
           "columns": [
             "name"
           ]
         }
       },
-      "checkConstraint": {}
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
-    "sessions": {
+    "public.sessions": {
       "name": "sessions",
+      "schema": "",
       "columns": {
         "id": {
           "name": "id",
           "type": "varchar(64)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "primaryKey": true,
+          "notNull": true
         },
         "userId": {
           "name": "userId",
-          "type": "bigint unsigned",
+          "type": "bigint",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "userAgent": {
           "name": "userAgent",
           "type": "varchar(500)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "ipAddress": {
           "name": "ipAddress",
           "type": "varchar(45)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "createdAt": {
           "name": "createdAt",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
+          "default": "now()"
         },
         "lastActivity": {
           "name": "lastActivity",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
+          "default": "now()"
         }
       },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "sessions_id": {
-          "name": "sessions_id",
+      "indexes": {
+        "sessions_userId_idx": {
+          "name": "sessions_userId_idx",
           "columns": [
-            "id"
-          ]
+            {
+              "expression": "userId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
+      "foreignKeys": {
+        "sessions_userId_users_id_fk": {
+          "name": "sessions_userId_users_id_fk",
+          "tableFrom": "sessions",
+          "tableTo": "users",
+          "columnsFrom": [
+            "userId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "checkConstraint": {}
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
-    "socialAccounts": {
+    "public.socialAccounts": {
       "name": "socialAccounts",
+      "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "serial",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": true
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
         },
         "userId": {
           "name": "userId",
-          "type": "bigint unsigned",
+          "type": "bigint",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "platform": {
           "name": "platform",
-          "type": "enum('instagram','tiktok','twitter','facebook','pinterest','youtube','other')",
+          "type": "social_platform",
+          "typeSchema": "public",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "accountHandle": {
           "name": "accountHandle",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "accountId": {
           "name": "accountId",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "accessToken": {
           "name": "accessToken",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "refreshToken": {
           "name": "refreshToken",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "followerCount": {
           "name": "followerCount",
-          "type": "int",
+          "type": "integer",
           "primaryKey": false,
           "notNull": false,
-          "autoincrement": false,
           "default": 0
         },
         "status": {
           "name": "status",
-          "type": "enum('active','expired','disconnected','error')",
+          "type": "social_accounts_status",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
           "default": "'active'"
         },
         "lastSyncAt": {
           "name": "lastSyncAt",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "createdAt": {
           "name": "createdAt",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
+          "default": "now()"
         }
       },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "socialAccounts_id": {
-          "name": "socialAccounts_id",
+      "indexes": {
+        "socialAccounts_userId_idx": {
+          "name": "socialAccounts_userId_idx",
           "columns": [
-            "id"
-          ]
+            {
+              "expression": "userId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
+      "foreignKeys": {
+        "socialAccounts_userId_users_id_fk": {
+          "name": "socialAccounts_userId_users_id_fk",
+          "tableFrom": "socialAccounts",
+          "tableTo": "users",
+          "columnsFrom": [
+            "userId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "checkConstraint": {}
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
-    "socialPosts": {
+    "public.socialPosts": {
       "name": "socialPosts",
+      "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "serial",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": true
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
         },
         "cycleId": {
           "name": "cycleId",
-          "type": "bigint unsigned",
+          "type": "bigint",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "accountId": {
           "name": "accountId",
-          "type": "bigint unsigned",
+          "type": "bigint",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "platform": {
           "name": "platform",
-          "type": "enum('instagram','tiktok','twitter','facebook','pinterest','youtube','other')",
+          "type": "social_platform",
+          "typeSchema": "public",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "postId": {
           "name": "postId",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "content": {
           "name": "content",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "mediaUrls": {
           "name": "mediaUrls",
-          "type": "json",
+          "type": "jsonb",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "status": {
           "name": "status",
-          "type": "enum('scheduled','published','failed','draft')",
+          "type": "social_posts_status",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
           "default": "'draft'"
         },
         "scheduledAt": {
           "name": "scheduledAt",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "publishedAt": {
           "name": "publishedAt",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "metrics": {
           "name": "metrics",
-          "type": "json",
+          "type": "jsonb",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "createdAt": {
           "name": "createdAt",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
+          "default": "now()"
         }
       },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "socialPosts_id": {
-          "name": "socialPosts_id",
+      "indexes": {
+        "socialPosts_cycleId_idx": {
+          "name": "socialPosts_cycleId_idx",
           "columns": [
-            "id"
-          ]
+            {
+              "expression": "cycleId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "socialPosts_accountId_idx": {
+          "name": "socialPosts_accountId_idx",
+          "columns": [
+            {
+              "expression": "accountId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "socialPosts_status_idx": {
+          "name": "socialPosts_status_idx",
+          "columns": [
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
+      "foreignKeys": {
+        "socialPosts_cycleId_cycles_id_fk": {
+          "name": "socialPosts_cycleId_cycles_id_fk",
+          "tableFrom": "socialPosts",
+          "tableTo": "cycles",
+          "columnsFrom": [
+            "cycleId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "socialPosts_accountId_socialAccounts_id_fk": {
+          "name": "socialPosts_accountId_socialAccounts_id_fk",
+          "tableFrom": "socialPosts",
+          "tableTo": "socialAccounts",
+          "columnsFrom": [
+            "accountId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "checkConstraint": {}
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
-    "socialTemplates": {
+    "public.socialTemplates": {
       "name": "socialTemplates",
+      "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "serial",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": true
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
         },
         "userId": {
           "name": "userId",
-          "type": "bigint unsigned",
+          "type": "bigint",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "name": {
           "name": "name",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "platform": {
           "name": "platform",
-          "type": "enum('instagram','tiktok','twitter','facebook','pinterest')",
+          "type": "social_templates_platform",
+          "typeSchema": "public",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "captionTemplate": {
           "name": "captionTemplate",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "hashtagSet": {
           "name": "hashtagSet",
-          "type": "json",
+          "type": "jsonb",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "imagePrompt": {
           "name": "imagePrompt",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "isDefault": {
           "name": "isDefault",
           "type": "boolean",
           "primaryKey": false,
           "notNull": false,
-          "autoincrement": false,
           "default": false
         },
         "createdAt": {
           "name": "createdAt",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
+          "default": "now()"
         }
       },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "socialTemplates_id": {
-          "name": "socialTemplates_id",
+      "indexes": {
+        "socialTemplates_userId_idx": {
+          "name": "socialTemplates_userId_idx",
           "columns": [
-            "id"
-          ]
+            {
+              "expression": "userId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
+      "foreignKeys": {
+        "socialTemplates_userId_users_id_fk": {
+          "name": "socialTemplates_userId_users_id_fk",
+          "tableFrom": "socialTemplates",
+          "tableTo": "users",
+          "columnsFrom": [
+            "userId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "checkConstraint": {}
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
-    "subscriptions": {
+    "public.subscriptions": {
       "name": "subscriptions",
+      "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "serial",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": true
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
         },
         "userId": {
           "name": "userId",
-          "type": "bigint unsigned",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "billingProvider": {
+          "name": "billingProvider",
+          "type": "subscriptions_provider",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false
+          "default": "'shopify'"
         },
-        "stripeCustomerId": {
-          "name": "stripeCustomerId",
+        "billingCustomerRef": {
+          "name": "billingCustomerRef",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
-        "stripeSubscriptionId": {
-          "name": "stripeSubscriptionId",
+        "billingSubscriptionRef": {
+          "name": "billingSubscriptionRef",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
-        "stripePriceId": {
-          "name": "stripePriceId",
+        "billingPlanRef": {
+          "name": "billingPlanRef",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "plan": {
           "name": "plan",
-          "type": "enum('starter','growth','enterprise')",
+          "type": "subscriptions_plan",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
           "default": "'starter'"
         },
         "status": {
           "name": "status",
-          "type": "enum('active','canceled','past_due','unpaid','trialing')",
+          "type": "subscriptions_status",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
           "default": "'active'"
         },
         "currentPeriodStart": {
           "name": "currentPeriodStart",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "currentPeriodEnd": {
           "name": "currentPeriodEnd",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "cancelAtPeriodEnd": {
           "name": "cancelAtPeriodEnd",
           "type": "boolean",
           "primaryKey": false,
           "notNull": false,
-          "autoincrement": false,
           "default": false
         },
         "createdAt": {
           "name": "createdAt",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
+          "default": "now()"
         },
         "updatedAt": {
           "name": "updatedAt",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
+          "default": "now()"
         }
       },
       "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "subscriptions_id": {
-          "name": "subscriptions_id",
-          "columns": [
+      "foreignKeys": {
+        "subscriptions_userId_users_id_fk": {
+          "name": "subscriptions_userId_users_id_fk",
+          "tableFrom": "subscriptions",
+          "tableTo": "users",
+          "columnsFrom": [
+            "userId"
+          ],
+          "columnsTo": [
             "id"
-          ]
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
         }
       },
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "subscriptions_userId_unique": {
           "name": "subscriptions_userId_unique",
+          "nullsNotDistinct": false,
           "columns": [
             "userId"
           ]
         }
       },
-      "checkConstraint": {}
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
-    "transmissionLogs": {
+    "public.transmissionLogs": {
       "name": "transmissionLogs",
+      "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "serial",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": true
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
         },
         "cycleId": {
           "name": "cycleId",
-          "type": "bigint unsigned",
+          "type": "bigint",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "message": {
           "name": "message",
           "type": "text",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "logType": {
           "name": "logType",
-          "type": "enum('info','warning','error','success','debug')",
+          "type": "transmission_logs_type",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
           "default": "'info'"
         },
         "phase": {
           "name": "phase",
-          "type": "enum('ideation','design','review','production','marketing','complete')",
+          "type": "cycle_phase",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
           "default": "'ideation'"
         },
         "metadata": {
           "name": "metadata",
-          "type": "json",
+          "type": "jsonb",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "createdAt": {
           "name": "createdAt",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
+          "default": "now()"
         }
       },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "transmissionLogs_id": {
-          "name": "transmissionLogs_id",
+      "indexes": {
+        "transmissionLogs_cycleId_idx": {
+          "name": "transmissionLogs_cycleId_idx",
           "columns": [
-            "id"
-          ]
+            {
+              "expression": "cycleId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "transmissionLogs_createdAt_idx": {
+          "name": "transmissionLogs_createdAt_idx",
+          "columns": [
+            {
+              "expression": "createdAt",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
+      "foreignKeys": {
+        "transmissionLogs_cycleId_cycles_id_fk": {
+          "name": "transmissionLogs_cycleId_cycles_id_fk",
+          "tableFrom": "transmissionLogs",
+          "tableTo": "cycles",
+          "columnsFrom": [
+            "cycleId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "checkConstraint": {}
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
-    "users": {
+    "public.users": {
       "name": "users",
+      "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "serial",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": true
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
         },
         "unionId": {
           "name": "unionId",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "name": {
           "name": "name",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "email": {
           "name": "email",
           "type": "varchar(320)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "avatar": {
           "name": "avatar",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "role": {
           "name": "role",
-          "type": "enum('user','admin','viewer')",
+          "type": "users_role",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
           "default": "'user'"
         },
         "status": {
           "name": "status",
-          "type": "enum('active','inactive')",
+          "type": "users_status",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
           "default": "'active'"
         },
         "createdAt": {
           "name": "createdAt",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
+          "default": "now()"
         },
         "updatedAt": {
           "name": "updatedAt",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
+          "default": "now()"
         },
         "lastSignInAt": {
           "name": "lastSignInAt",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
+          "default": "now()"
         }
       },
       "indexes": {},
       "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "users_id": {
-          "name": "users_id",
-          "columns": [
-            "id"
-          ]
-        }
-      },
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "users_unionId_unique": {
           "name": "users_unionId_unique",
+          "nullsNotDistinct": false,
           "columns": [
             "unionId"
           ]
         }
       },
-      "checkConstraint": {}
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
-    "waitlistSignups": {
+    "public.waitlistSignups": {
       "name": "waitlistSignups",
+      "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "serial",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": true
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
         },
         "email": {
           "name": "email",
           "type": "varchar(320)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "source": {
           "name": "source",
           "type": "varchar(100)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "createdAt": {
           "name": "createdAt",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
+          "default": "now()"
         }
       },
       "indexes": {},
       "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "waitlistSignups_id": {
-          "name": "waitlistSignups_id",
-          "columns": [
-            "id"
-          ]
-        }
-      },
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "waitlistSignups_email_unique": {
           "name": "waitlistSignups_email_unique",
+          "nullsNotDistinct": false,
           "columns": [
             "email"
           ]
         }
       },
-      "checkConstraint": {}
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     }
   },
+  "enums": {
+    "public.action_items_priority": {
+      "name": "action_items_priority",
+      "schema": "public",
+      "values": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ]
+    },
+    "public.action_items_section": {
+      "name": "action_items_section",
+      "schema": "public",
+      "values": [
+        "immediate",
+        "short_term",
+        "deferred"
+      ]
+    },
+    "public.action_items_status": {
+      "name": "action_items_status",
+      "schema": "public",
+      "values": [
+        "open",
+        "in_progress",
+        "completed",
+        "cancelled"
+      ]
+    },
+    "public.admin_settings_cycle_frequency": {
+      "name": "admin_settings_cycle_frequency",
+      "schema": "public",
+      "values": [
+        "daily",
+        "weekly",
+        "monthly"
+      ]
+    },
+    "public.admin_settings_default_view": {
+      "name": "admin_settings_default_view",
+      "schema": "public",
+      "values": [
+        "grid",
+        "list"
+      ]
+    },
+    "public.admin_settings_notification_frequency": {
+      "name": "admin_settings_notification_frequency",
+      "schema": "public",
+      "values": [
+        "instant",
+        "daily",
+        "weekly"
+      ]
+    },
+    "public.admin_settings_theme": {
+      "name": "admin_settings_theme",
+      "schema": "public",
+      "values": [
+        "light",
+        "dark",
+        "auto"
+      ]
+    },
+    "public.agent_assignments_status": {
+      "name": "agent_assignments_status",
+      "schema": "public",
+      "values": [
+        "assigned",
+        "started",
+        "completed",
+        "failed"
+      ]
+    },
+    "public.agent_messages_type": {
+      "name": "agent_messages_type",
+      "schema": "public",
+      "values": [
+        "status_update",
+        "question",
+        "result",
+        "error",
+        "broadcast",
+        "handoff"
+      ]
+    },
+    "public.agent_tasks_category": {
+      "name": "agent_tasks_category",
+      "schema": "public",
+      "values": [
+        "immediate",
+        "short_term",
+        "deferred",
+        "01_content_creation",
+        "02_platform_presence",
+        "03_email_dm_outreach"
+      ]
+    },
+    "public.agent_tasks_priority": {
+      "name": "agent_tasks_priority",
+      "schema": "public",
+      "values": [
+        "low",
+        "medium",
+        "high",
+        "urgent"
+      ]
+    },
+    "public.agent_tasks_status": {
+      "name": "agent_tasks_status",
+      "schema": "public",
+      "values": [
+        "pending",
+        "in_progress",
+        "completed",
+        "failed",
+        "blocked"
+      ]
+    },
+    "public.agents_status": {
+      "name": "agents_status",
+      "schema": "public",
+      "values": [
+        "idle",
+        "busy",
+        "offline",
+        "error"
+      ]
+    },
+    "public.api_credentials_status": {
+      "name": "api_credentials_status",
+      "schema": "public",
+      "values": [
+        "active",
+        "expiring",
+        "expired",
+        "needs_rotation",
+        "error",
+        "unknown"
+      ]
+    },
+    "public.campaigns_post_frequency": {
+      "name": "campaigns_post_frequency",
+      "schema": "public",
+      "values": [
+        "hourly",
+        "daily",
+        "weekly"
+      ]
+    },
+    "public.campaigns_status": {
+      "name": "campaigns_status",
+      "schema": "public",
+      "values": [
+        "draft",
+        "scheduled",
+        "active",
+        "paused",
+        "completed"
+      ]
+    },
+    "public.customer_orders_fulfillment_status": {
+      "name": "customer_orders_fulfillment_status",
+      "schema": "public",
+      "values": [
+        "unfulfilled",
+        "pending",
+        "fulfilled",
+        "partial",
+        "returned"
+      ]
+    },
+    "public.customer_orders_payment_status": {
+      "name": "customer_orders_payment_status",
+      "schema": "public",
+      "values": [
+        "pending",
+        "paid",
+        "failed",
+        "refunded"
+      ]
+    },
+    "public.customer_orders_status": {
+      "name": "customer_orders_status",
+      "schema": "public",
+      "values": [
+        "pending",
+        "paid",
+        "processing",
+        "shipped",
+        "delivered",
+        "cancelled",
+        "refunded"
+      ]
+    },
+    "public.cycle_phase": {
+      "name": "cycle_phase",
+      "schema": "public",
+      "values": [
+        "ideation",
+        "design",
+        "review",
+        "production",
+        "marketing",
+        "complete"
+      ]
+    },
+    "public.cycles_status": {
+      "name": "cycles_status",
+      "schema": "public",
+      "values": [
+        "draft",
+        "active",
+        "paused",
+        "completed",
+        "archived"
+      ]
+    },
+    "public.integration_error_class": {
+      "name": "integration_error_class",
+      "schema": "public",
+      "values": [
+        "transient",
+        "permanent",
+        "unknown"
+      ]
+    },
+    "public.integration_provider": {
+      "name": "integration_provider",
+      "schema": "public",
+      "values": [
+        "printify",
+        "shopify"
+      ]
+    },
+    "public.integration_run_status": {
+      "name": "integration_run_status",
+      "schema": "public",
+      "values": [
+        "pending",
+        "running",
+        "succeeded",
+        "failed",
+        "cancelled",
+        "needs_attention"
+      ]
+    },
+    "public.integration_run_type": {
+      "name": "integration_run_type",
+      "schema": "public",
+      "values": [
+        "pod_cycle",
+        "product_publish",
+        "reconciliation",
+        "webhook",
+        "manual"
+      ]
+    },
+    "public.integration_step": {
+      "name": "integration_step",
+      "schema": "public",
+      "values": [
+        "upload_image",
+        "create_printify_product",
+        "publish_to_shopify",
+        "verify_shopify_product",
+        "reconcile",
+        "complete"
+      ]
+    },
+    "public.integration_step_status": {
+      "name": "integration_step_status",
+      "schema": "public",
+      "values": [
+        "pending",
+        "running",
+        "succeeded",
+        "failed",
+        "skipped"
+      ]
+    },
+    "public.login_history_status": {
+      "name": "login_history_status",
+      "schema": "public",
+      "values": [
+        "success",
+        "failed"
+      ]
+    },
+    "public.orders_status": {
+      "name": "orders_status",
+      "schema": "public",
+      "values": [
+        "pending",
+        "processing",
+        "shipped",
+        "delivered",
+        "cancelled",
+        "refunded"
+      ]
+    },
+    "public.permissions_action": {
+      "name": "permissions_action",
+      "schema": "public",
+      "values": [
+        "create",
+        "read",
+        "update",
+        "delete"
+      ]
+    },
+    "public.permissions_resource": {
+      "name": "permissions_resource",
+      "schema": "public",
+      "values": [
+        "products",
+        "orders",
+        "cycles",
+        "users",
+        "settings",
+        "analytics",
+        "social"
+      ]
+    },
+    "public.pipeline_phase_status": {
+      "name": "pipeline_phase_status",
+      "schema": "public",
+      "values": [
+        "pending",
+        "in_progress",
+        "completed",
+        "failed"
+      ]
+    },
+    "public.pipeline_runs_phase": {
+      "name": "pipeline_runs_phase",
+      "schema": "public",
+      "values": [
+        "trend",
+        "design",
+        "printify",
+        "shopify",
+        "social",
+        "log",
+        "complete"
+      ]
+    },
+    "public.pipeline_runs_status": {
+      "name": "pipeline_runs_status",
+      "schema": "public",
+      "values": [
+        "pending",
+        "in_progress",
+        "completed",
+        "failed",
+        "cancelled"
+      ]
+    },
+    "public.products_status": {
+      "name": "products_status",
+      "schema": "public",
+      "values": [
+        "draft",
+        "pending",
+        "approved",
+        "live",
+        "sold_out",
+        "discontinued"
+      ]
+    },
+    "public.products_type": {
+      "name": "products_type",
+      "schema": "public",
+      "values": [
+        "tshirt",
+        "hoodie",
+        "mug",
+        "poster",
+        "sticker",
+        "hat",
+        "tote",
+        "other"
+      ]
+    },
+    "public.provider_resource_type": {
+      "name": "provider_resource_type",
+      "schema": "public",
+      "values": [
+        "product",
+        "variant",
+        "image",
+        "order"
+      ]
+    },
+    "public.reconciliation_check": {
+      "name": "reconciliation_check",
+      "schema": "public",
+      "values": [
+        "provider_mapping",
+        "shopify_product",
+        "shopify_variants",
+        "media",
+        "price",
+        "shipping",
+        "storefront_availability",
+        "checkout_handoff",
+        "fulfillment_routing"
+      ]
+    },
+    "public.reconciliation_check_status": {
+      "name": "reconciliation_check_status",
+      "schema": "public",
+      "values": [
+        "pending",
+        "passed",
+        "failed",
+        "skipped"
+      ]
+    },
+    "public.reconciliation_status": {
+      "name": "reconciliation_status",
+      "schema": "public",
+      "values": [
+        "unverified",
+        "verified",
+        "mismatched",
+        "missing"
+      ]
+    },
+    "public.social_accounts_status": {
+      "name": "social_accounts_status",
+      "schema": "public",
+      "values": [
+        "active",
+        "expired",
+        "disconnected",
+        "error"
+      ]
+    },
+    "public.social_platform": {
+      "name": "social_platform",
+      "schema": "public",
+      "values": [
+        "instagram",
+        "tiktok",
+        "twitter",
+        "facebook",
+        "pinterest",
+        "youtube",
+        "other"
+      ]
+    },
+    "public.social_posts_status": {
+      "name": "social_posts_status",
+      "schema": "public",
+      "values": [
+        "scheduled",
+        "published",
+        "failed",
+        "draft"
+      ]
+    },
+    "public.social_templates_platform": {
+      "name": "social_templates_platform",
+      "schema": "public",
+      "values": [
+        "instagram",
+        "tiktok",
+        "twitter",
+        "facebook",
+        "pinterest"
+      ]
+    },
+    "public.subscriptions_plan": {
+      "name": "subscriptions_plan",
+      "schema": "public",
+      "values": [
+        "starter",
+        "growth",
+        "enterprise"
+      ]
+    },
+    "public.subscriptions_provider": {
+      "name": "subscriptions_provider",
+      "schema": "public",
+      "values": [
+        "shopify",
+        "manual"
+      ]
+    },
+    "public.subscriptions_status": {
+      "name": "subscriptions_status",
+      "schema": "public",
+      "values": [
+        "active",
+        "canceled",
+        "past_due",
+        "unpaid",
+        "trialing"
+      ]
+    },
+    "public.transmission_logs_type": {
+      "name": "transmission_logs_type",
+      "schema": "public",
+      "values": [
+        "info",
+        "warning",
+        "error",
+        "success",
+        "debug"
+      ]
+    },
+    "public.users_role": {
+      "name": "users_role",
+      "schema": "public",
+      "values": [
+        "user",
+        "admin",
+        "viewer"
+      ]
+    },
+    "public.users_status": {
+      "name": "users_status",
+      "schema": "public",
+      "values": [
+        "active",
+        "inactive"
+      ]
+    }
+  },
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
   "views": {},
   "_meta": {
+    "columns": {},
     "schemas": {},
-    "tables": {},
-    "columns": {}
-  },
-  "internal": {
-    "tables": {},
-    "indexes": {}
+    "tables": {}
   }
 }

@@ -1,9 +1,20 @@
+import { useState } from "react";
 import { trpc } from "@/providers/trpc";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
 import {
   GitBranch,
@@ -76,12 +87,58 @@ export default function Pipeline() {
       toast.success("New pipeline cycle created!");
     },
   });
+  // Designs available to publish: products that already carry an image.
+  const { data: products } = trpc.dashboard.products.useQuery();
+  const publishableProducts = (products || []).filter((p) => p.designUrl || p.mockupUrl);
+
+  const [startTarget, setStartTarget] = useState<number | null>(null);
+  const [slogan, setSlogan] = useState("");
+  const [designImageUrl, setDesignImageUrl] = useState("");
+  const [productType, setProductType] = useState<"tee" | "mug" | "poster" | "hoodie">("tee");
+
   const startRun = trpc.operations.pipeline.start.useMutation({
-    onSuccess: () => {
+    onSuccess: (result) => {
       utils.operations.pipeline.list.invalidate();
-      toast.success("Pipeline started!");
+      if (!result.success) {
+        toast.error(result.error ?? "Publish failed.");
+        return;
+      }
+      if (result.replayed) {
+        toast.info("Already published — returned the existing Printify/Shopify product.");
+      } else {
+        toast.success(
+          result.shopifyProductId
+            ? `Published. Printify ${result.printifyProductId} → Shopify ${result.shopifyProductId}`
+            : `Created on Printify (${result.printifyProductId}). Shopify id still pending.`
+        );
+      }
+      closeStartDialog();
     },
+    onError: (error) => toast.error(error.message),
   });
+
+  const closeStartDialog = () => {
+    setStartTarget(null);
+    setSlogan("");
+    setDesignImageUrl("");
+    setProductType("tee");
+  };
+
+  const handleStart = () => {
+    if (startTarget === null) return;
+    // Without a slogan and an image the server cannot run Phase 3 — it would
+    // only flip the run to in_progress and publish nothing.
+    if (!slogan.trim() || !designImageUrl.trim()) {
+      toast.error("A slogan and a design image URL are both required to publish.");
+      return;
+    }
+    startRun.mutate({
+      id: startTarget,
+      slogan: slogan.trim(),
+      designImageUrl: designImageUrl.trim(),
+      productType,
+    });
+  };
 
   const activeRuns = (runs || []).filter((r) => r.status === "in_progress");
   const completedRuns = (runs || []).filter((r) => r.status === "completed");
@@ -222,7 +279,7 @@ export default function Pipeline() {
                       <div className="flex items-center gap-2">
                         {statusBadge(run.status)}
                         {run.status === "pending" && (
-                          <Button size="sm" onClick={() => startRun.mutate({ id: run.id })} disabled={startRun.isPending}>
+                          <Button size="sm" onClick={() => setStartTarget(run.id)} disabled={startRun.isPending}>
                             <Play className="mr-1 h-3 w-3" />
                             Start
                           </Button>
@@ -281,6 +338,103 @@ export default function Pipeline() {
           )}
         </div>
       </div>
+
+      <Dialog open={startTarget !== null} onOpenChange={(open) => !open && closeStartDialog()}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Publish to Printify and Shopify</DialogTitle>
+            <DialogDescription>
+              This uploads the design to Printify, creates the product, and publishes it to the
+              connected Shopify store. Running it twice with the same slogan and product type
+              returns the existing product instead of creating a duplicate.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="pipeline-slogan">Slogan</Label>
+              <Input
+                id="pipeline-slogan"
+                value={slogan}
+                onChange={(e) => setSlogan(e.target.value)}
+                placeholder="Better Daze Ahead"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="pipeline-product-type">Product type</Label>
+              <select
+                id="pipeline-product-type"
+                value={productType}
+                onChange={(e) =>
+                  setProductType(e.target.value as "tee" | "mug" | "poster" | "hoodie")
+                }
+                className="w-full h-9 rounded-md border border-input bg-background px-2 text-sm"
+              >
+                <option value="tee">T-shirt</option>
+                <option value="hoodie">Hoodie</option>
+                <option value="mug">Mug</option>
+                <option value="poster">Poster</option>
+              </select>
+            </div>
+
+            {publishableProducts.length > 0 && (
+              <div>
+                <Label htmlFor="pipeline-existing-design">Use an existing design</Label>
+                <select
+                  id="pipeline-existing-design"
+                  className="w-full h-9 rounded-md border border-input bg-background px-2 text-sm"
+                  onChange={(e) => {
+                    const chosen = publishableProducts.find(
+                      (p) => String(p.id) === e.target.value
+                    );
+                    if (!chosen) return;
+                    setDesignImageUrl(chosen.designUrl || chosen.mockupUrl || "");
+                    if (!slogan) setSlogan(chosen.slogan || chosen.name);
+                  }}
+                  defaultValue=""
+                >
+                  <option value="" disabled>
+                    Select a design from Design Studio
+                  </option>
+                  {publishableProducts.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            <div>
+              <Label htmlFor="pipeline-design-url">Design image URL</Label>
+              <Input
+                id="pipeline-design-url"
+                value={designImageUrl}
+                onChange={(e) => setDesignImageUrl(e.target.value)}
+                placeholder="https://..."
+              />
+              <p className="mt-1 text-xs text-muted-foreground">
+                Printify downloads this image, so it has to be publicly reachable.
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={closeStartDialog}>
+              Cancel
+            </Button>
+            <Button onClick={handleStart} disabled={startRun.isPending}>
+              {startRun.isPending ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Play className="mr-2 h-4 w-4" />
+              )}
+              Publish
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 }

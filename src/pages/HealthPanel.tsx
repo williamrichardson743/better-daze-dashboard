@@ -30,7 +30,7 @@ const serviceConfig: Record<string, { icon: React.ReactNode; color: string; cate
   printify: { icon: <Printer className="h-5 w-5" />, color: "text-blue-600 bg-blue-50", category: "Print-on-Demand" },
   ayrshare: { icon: <Share2 className="h-5 w-5" />, color: "text-purple-600 bg-purple-50", category: "Social Media" },
   openai: { icon: <Bot className="h-5 w-5" />, color: "text-teal-600 bg-teal-50", category: "AI / LLM" },
-  stripe: { icon: <CreditCard className="h-5 w-5" />, color: "text-indigo-600 bg-indigo-50", category: "Payments" },
+  shopify_payments: { icon: <CreditCard className="h-5 w-5" />, color: "text-indigo-600 bg-indigo-50", category: "Payments" },
   unsplash: { icon: <Image className="h-5 w-5" />, color: "text-pink-600 bg-pink-50", category: "Assets" },
 };
 
@@ -186,7 +186,7 @@ export default function HealthPanel() {
                     <option value="printify">Printify</option>
                     <option value="ayrshare">Ayrshare</option>
                     <option value="openai">OpenAI</option>
-                    <option value="stripe">Stripe</option>
+                    <option value="shopify_payments">Shopify Payments</option>
                     <option value="unsplash">Unsplash</option>
                   </select>
                 </div>

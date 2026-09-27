@@ -46,6 +46,53 @@ jobs:
       - name: Production build
         run: pnpm build
 
+  postgres-schema-gate:
+    name: Postgres migration and schema verification
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: better_daze_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      # Throwaway CI database. Never point this at a Supabase project.
+      DATABASE_URL: postgresql://postgres:ci@127.0.0.1:5432/better_daze_ci?sslmode=disable
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Enable Corepack
+        run: corepack enable
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Apply migrations to an empty database
+        run: pnpm run db:migrate
+      - name: Check migration history for collisions
+        run: pnpm run db:check
+      - name: Fail on schema drift between db/schema.ts and db/migrations
+        run: |
+          pnpm exec drizzle-kit generate --name drift_probe
+          if [ -n "$(git status --porcelain db/migrations)" ]; then
+            echo "db/schema.ts has changes that are not captured in db/migrations."
+            echo "Run 'pnpm run db:generate' and commit the generated SQL."
+            git status --porcelain db/migrations
+            exit 1
+          fi
+      - name: Verify representative reads and writes
+        run: pnpm run db:verify
+
   preview-deploy:
     name: Provision Vercel preview for route gates
     needs: static-gates

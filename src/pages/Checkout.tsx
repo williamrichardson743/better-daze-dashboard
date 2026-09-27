@@ -172,7 +172,8 @@ export default function Checkout() {
               <div className="flex items-center gap-3 text-muted-foreground">
                 <CreditCard className="h-5 w-5" />
                 <span className="text-sm">
-                  Payment will be processed securely via Stripe after order placement.
+                  Checkout is completed on Shopify. This step records the order; payment is
+                  collected and confirmed by Shopify.
                 </span>
               </div>
             </Card>

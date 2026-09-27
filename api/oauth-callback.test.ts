@@ -59,7 +59,8 @@ describe("Vercel OAuth callback route", () => {
     process.env.GITHUB_CLIENT_ID = "test-client-id";
     process.env.GITHUB_CLIENT_SECRET = "test-client-secret";
     process.env.SESSION_SECRET = "test-session-secret";
-    process.env.DATABASE_URL = "mysql://user:password@localhost:3306/dashboard";
+    process.env.DATABASE_URL =
+      "postgresql://user:password@localhost:5432/dashboard?sslmode=disable";
     process.env.OWNER_UNION_ID = "github:999";
     process.env.OWNER_GITHUB_LOGIN = "authorized-owner";
     mocks.signSessionToken.mockClear();

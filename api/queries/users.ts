@@ -29,8 +29,11 @@ export async function upsertUser(data: InsertUser) {
     updateSet.role = "admin";
   }
 
+  // Postgres upsert on the unique GitHub identity column. MySQL's
+  // onDuplicateKeyUpdate matched any unique key; unionId is named explicitly
+  // here so a shared email can never overwrite a different GitHub account.
   await getDb()
     .insert(schema.users)
     .values(values)
-    .onDuplicateKeyUpdate({ set: updateSet });
+    .onConflictDoUpdate({ target: schema.users.unionId, set: updateSet });
 }

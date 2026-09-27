@@ -21,8 +21,11 @@ export const waitlistRouter = createRouter({
           source: input.source,
         });
       } catch (err) {
+        // Postgres reports a unique violation as SQLSTATE 23505. The message
+        // text differs from MySQL's "Duplicate entry", so match on the code.
+        const code = (err as { code?: string })?.code;
         const message = err instanceof Error ? err.message : "";
-        if (message.includes("Duplicate entry")) {
+        if (code === "23505" || /duplicate key value/i.test(message)) {
           throw new TRPCError({
             code: "CONFLICT",
             message: "This email is already on the list.",

@@ -9,8 +9,12 @@ if (!connectionString) {
 export default defineConfig({
   schema: "./db/schema.ts",
   out: "./db/migrations",
-  dialect: "mysql",
+  dialect: "postgresql",
   dbCredentials: {
     url: connectionString,
   },
+  // Supabase manages these schemas; drizzle must never diff or drop them.
+  schemaFilter: ["public"],
+  verbose: true,
+  strict: true,
 });
