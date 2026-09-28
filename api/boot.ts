@@ -27,11 +27,13 @@ app.get("/api/health/db", async (c) => {
     return c.json({ status: "ok", database: "postgres" }, 200);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    const category = /postgres|database_url|connection|connect|authentication|password|schema|relation|does not exist/i.test(
-      message
-    )
-      ? "database_unavailable_or_mismatched"
-      : "database_check_failed";
+    const category = /must use PostgreSQL/i.test(message)
+      ? "database_url_wrong_dialect"
+      : /postgres|database_url|connection|connect|authentication|password|schema|relation|does not exist/i.test(
+          message
+        )
+        ? "database_unavailable_or_mismatched"
+        : "database_check_failed";
     console.error("[Health] database readiness failed", { category });
     return c.json(
       { status: "error", database: "unavailable", category },
