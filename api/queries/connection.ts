@@ -46,6 +46,12 @@ export function getDb() {
     throw new Error("DATABASE_URL is not configured");
   }
 
+  if (!/^postgres(?:ql)?:\/\//i.test(env.databaseUrl)) {
+    throw new Error(
+      "DATABASE_URL must use PostgreSQL; the deployed schema is Supabase/Postgres"
+    );
+  }
+
   if (!instance) {
     const pooled = isTransactionPooler(env.databaseUrl);
 

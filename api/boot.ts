@@ -10,6 +10,8 @@ import {
 } from "./github/auth.js";
 import { Paths } from "../contracts/constants.js";
 import { applyHonoSecurityHeaders } from "./lib/security.js";
+import { sql } from "drizzle-orm";
+import { getDb } from "./queries/connection.js";
 
 const app = new Hono<{ Bindings: HttpBindings }>();
 
@@ -19,6 +21,24 @@ app.use("/api/*", async (c, next) => {
 });
 
 app.get("/api/health", (c) => c.json({ status: "ok" }, 200));
+app.get("/api/health/db", async (c) => {
+  try {
+    await getDb().execute(sql`select 1`);
+    return c.json({ status: "ok", database: "postgres" }, 200);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    const category = /postgres|database_url|connection|connect|authentication|password|schema|relation|does not exist/i.test(
+      message
+    )
+      ? "database_unavailable_or_mismatched"
+      : "database_check_failed";
+    console.error("[Health] database readiness failed", { category });
+    return c.json(
+      { status: "error", database: "unavailable", category },
+      503
+    );
+  }
+});
 app.get("/api/auth/github/start", createGitHubStartHandler());
 app.get(Paths.oauthCallback, createGitHubCallbackHandler());
 app.use("/api/trpc/*", async (c) => {
